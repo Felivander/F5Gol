@@ -1,0 +1,31 @@
+<h1>Clubes</h1>
+
+@if (cargando()) {
+  <p>Cargando...</p>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else {
+  <ul class="tarjetas">
+    @for (club of clubes(); track club.id) {
+      <li>
+        <a [routerLink]="['/clubes', club.id]">
+          <h2>{{ club.nombre }}</h2>
+          <p>{{ club.direccion }}</p>
+          @if (club.telefono) {
+            <p>Tel: {{ club.telefono }}</p>
+          }
+        </a>
+      </li>
+    } @empty {
+      <li>No hay clubes cargados.</li>
+    }
+  </ul>
+
+  @if (ultimaPagina() > 1) {
+    <nav class="paginado">
+      <button [disabled]="pagina() === 1" (click)="cargar(pagina() - 1)">Anterior</button>
+      <span>Página {{ pagina() }} de {{ ultimaPagina() }}</span>
+      <button [disabled]="pagina() === ultimaPagina()" (click)="cargar(pagina() + 1)">Siguiente</button>
+    </nav>
+  }
+}

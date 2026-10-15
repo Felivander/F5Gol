@@ -1,0 +1,16 @@
+main {
+  max-width: 640px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, sans-serif;
+}
+
+section {
+  margin-top: 1.5rem;
+}
+
+button,
+input {
+  margin: 0.25rem;
+  padding: 0.4rem 0.8rem;
+}

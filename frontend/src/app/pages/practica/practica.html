@@ -1,0 +1,33 @@
+<main>
+  <!-- Prueba 1: mostrar una variable (interpolación) -->
+  <h1>Hola {{ nombre }}</h1>
+  <p>Estoy aprendiendo Angular 22.</p>
+
+  <!-- Pruebas 2 y 3: botón con evento click que envía un valor al método -->
+  <section>
+    <button (click)="cambiarNombre('Juan')">Juan</button>
+    <button (click)="cambiarNombre('María')">María</button>
+  </section>
+
+  <!-- Prueba 4: input y ngModel -->
+  <section>
+    <label for="nombre">Nombre:</label>
+    <input id="nombre" type="text" [(ngModel)]="nombre">
+    <button (click)="saludar()">
+      Saludar
+    </button>
+
+    <!-- Prueba 5: @if -->
+    @if (nombre) {
+      <p>Hola {{ nombre }}</p>
+    }
+  </section>
+
+  <!-- Prueba 6: listas con @for -->
+  <section>
+    <h2>Alumnos</h2>
+    @for (alumno of alumnos; track alumno) {
+      <p>{{ alumno }}</p>
+    }
+  </section>
+</main>
