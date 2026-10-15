@@ -1,7 +1,18 @@
-<h1>Clubes</h1>
+<section class="hero-banner">
+  <span class="hero-tag">Fútbol 5 & Matchmaking</span>
+  <h1>Encontrá tu cancha y jugá hoy</h1>
+  <p>Elegí tu complejo deportivo, mirá la disponibilidad en tiempo real y reservá tu partido en segundos.</p>
+</section>
+
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+  <h2>Complejos y Clubes</h2>
+  <span style="font-size: 0.88rem; color: var(--text-muted);">Disponibilidad en vivo</span>
+</div>
 
 @if (cargando()) {
-  <p>Cargando...</p>
+  <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+    <p style="font-size: 1.1rem; font-weight: 600;">⚽ Cargando clubes...</p>
+  </div>
 } @else if (error()) {
   <p class="error">{{ error() }}</p>
 } @else {
@@ -9,23 +20,41 @@
     @for (club of clubes(); track club.id) {
       <li>
         <a [routerLink]="['/clubes', club.id]">
-          <h2>{{ club.nombre }}</h2>
-          <p>{{ club.direccion }}</p>
-          @if (club.telefono) {
-            <p>Tel: {{ club.telefono }}</p>
-          }
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+              <span class="badge badge-tipo">🏟️ Complejo</span>
+            </div>
+            <h2>{{ club.nombre }}</h2>
+            <p class="tarjeta-meta">
+              <span>📍</span>
+              <span>{{ club.direccion }}</span>
+            </p>
+            @if (club.telefono) {
+              <p class="tarjeta-meta">
+                <span>📞</span>
+                <span>{{ club.telefono }}</span>
+              </p>
+            }
+          </div>
+
+          <div class="tarjeta-footer-action">
+            <span>Ver canchas y horarios</span>
+            <span class="flecha">→</span>
+          </div>
         </a>
       </li>
     } @empty {
-      <li>No hay clubes cargados.</li>
+      <li style="grid-column: 1 / -1; background: #ffffff; padding: 2rem; border-radius: var(--radius-md); text-align: center; border: 1px dashed var(--border-color); color: var(--text-muted);">
+        No hay clubes cargados en este momento.
+      </li>
     }
   </ul>
 
   @if (ultimaPagina() > 1) {
     <nav class="paginado">
-      <button [disabled]="pagina() === 1" (click)="cargar(pagina() - 1)">Anterior</button>
+      <button [disabled]="pagina() === 1" (click)="cargar(pagina() - 1)">← Anterior</button>
       <span>Página {{ pagina() }} de {{ ultimaPagina() }}</span>
-      <button [disabled]="pagina() === ultimaPagina()" (click)="cargar(pagina() + 1)">Siguiente</button>
+      <button [disabled]="pagina() === ultimaPagina()" (click)="cargar(pagina() + 1)">Siguiente →</button>
     </nav>
   }
 }

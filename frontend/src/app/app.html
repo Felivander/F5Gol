@@ -1,14 +1,22 @@
 <header>
-  <a class="marca" routerLink="/clubes">F5Gol</a>
-  <nav>
-    <a routerLink="/clubes" routerLinkActive="activo">Clubes</a>
-    @if (auth.logueado()) {
-      <span>{{ auth.usuario()?.name }}</span>
-      <button (click)="salir()">Salir</button>
-    } @else {
-      <a routerLink="/login" routerLinkActive="activo">Ingresar</a>
-    }
-  </nav>
+  <div class="header-container">
+    <a class="marca" routerLink="/clubes">
+      <span class="icono-pelota">⚽</span>
+      <span class="texto-marca">F5<span class="marca-destacada">GOL</span></span>
+    </a>
+    <nav>
+      <a class="nav-link" routerLink="/clubes" routerLinkActive="activo">Clubes</a>
+      @if (auth.logueado()) {
+        <div class="usuario-badge">
+          <span class="usuario-avatar">{{ auth.usuario()?.name?.charAt(0) || 'U' }}</span>
+          <span class="usuario-nombre">{{ auth.usuario()?.name }}</span>
+        </div>
+        <button class="btn-salir" (click)="salir()">Salir</button>
+      } @else {
+        <a class="btn-login-nav" routerLink="/login" routerLinkActive="activo">Ingresar</a>
+      }
+    </nav>
+  </div>
 </header>
 
 <main>

@@ -1,43 +1,72 @@
 @if (cancha(); as cancha) {
-  <a [routerLink]="['/clubes', cancha.club_id]">← Volver a {{ cancha.club?.nombre }}</a>
-  <h1>{{ cancha.nombre }}</h1>
+  <a class="volver-link" [routerLink]="['/clubes', cancha.club_id]">← Volver a {{ cancha.club?.nombre }}</a>
+  <div class="club-hero" style="margin-bottom: 1.5rem;">
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+      <span class="badge badge-tipo">⚽ {{ cancha.tipo }}</span>
+      <span class="badge badge-jugadores">👥 Capacidad: {{ cancha.capacidad_jugadores }} jugadores</span>
+    </div>
+    <h1>{{ cancha.nombre }}</h1>
+    @if (cancha.descripcion) {
+      <p style="color: var(--text-muted); margin: 0.25rem 0 0 0;">{{ cancha.descripcion }}</p>
+    }
+  </div>
 }
 
 @if (error()) {
   <p class="error">{{ error() }}</p>
 }
 
-<section>
-  <label for="fecha">Fecha:</label>
+<section class="filtro-turnos">
+  <label for="fecha">📅 Filtrar por fecha:</label>
   <input id="fecha" type="date" [(ngModel)]="fecha" (change)="buscarTurnos()">
   @if (fecha) {
-    <button (click)="fecha = ''; buscarTurnos()">Ver todas</button>
+    <button class="btn-reset" (click)="fecha = ''; buscarTurnos()">Ver todas las fechas</button>
   }
 </section>
 
-<table>
-  <thead>
-    <tr>
-      <th>Fecha</th>
-      <th>Horario</th>
-      <th>Estado</th>
-      <th>Cupo</th>
-    </tr>
-  </thead>
-  <tbody>
-    @if (cargando()) {
-      <tr><td colspan="4">Cargando turnos...</td></tr>
-    } @else {
-      @for (turno of turnos(); track turno.id) {
+<div class="tabla-contenedor">
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Horario</th>
+        <th>Estado</th>
+        <th>Cupo de jugadores</th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (cargando()) {
         <tr>
-          <td>{{ turno.fecha }}</td>
-          <td>{{ turno.hora_inicio.slice(0, 5) }} – {{ turno.hora_fin.slice(0, 5) }}</td>
-          <td><span class="estado" [class]="turno.estado">{{ turno.estado }}</span></td>
-          <td>{{ turno.cupo_actual }} / {{ turno.cupo_maximo }}</td>
+          <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+            ⚽ Buscando turnos disponibles...
+          </td>
         </tr>
-      } @empty {
-        <tr><td colspan="4">No hay turnos para esta fecha.</td></tr>
+      } @else {
+        @for (turno of turnos(); track turno.id) {
+          <tr>
+            <td style="font-weight: 600;">{{ turno.fecha }}</td>
+            <td>
+              <span style="font-weight: 700; color: var(--dark-navy);">
+                ⏰ {{ turno.hora_inicio.slice(0, 5) }} – {{ turno.hora_fin.slice(0, 5) }}
+              </span>
+            </td>
+            <td>
+              <span class="estado" [class]="turno.estado">{{ turno.estado }}</span>
+            </td>
+            <td>
+              <span class="cupo-badge">
+                👥 {{ turno.cupo_actual }} / {{ turno.cupo_maximo }}
+              </span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+              No hay turnos disponibles para la fecha seleccionada.
+            </td>
+          </tr>
+        }
       }
-    }
-  </tbody>
-</table>
+    </tbody>
+  </table>
+</div>

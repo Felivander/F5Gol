@@ -1,26 +1,62 @@
-<a routerLink="/clubes">← Volver a clubes</a>
+<a class="volver-link" routerLink="/clubes">← Volver a clubes</a>
 
 @if (error()) {
   <p class="error">{{ error() }}</p>
 } @else if (club(); as club) {
-  <h1>{{ club.nombre }}</h1>
-  <p>{{ club.direccion }} @if (club.telefono) { · Tel: {{ club.telefono }} }</p>
+  <div class="club-hero">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+      <span class="badge badge-tipo">🏟️ Complejo Deportivo</span>
+    </div>
+    <h1>{{ club.nombre }}</h1>
+    <div class="club-hero-info">
+      <span>📍 {{ club.direccion }}</span>
+      @if (club.telefono) {
+        <span>📞 {{ club.telefono }}</span>
+      }
+    </div>
+  </div>
 
-  <h2>Canchas</h2>
+  <h2>Canchas en este complejo</h2>
+
   <ul class="tarjetas">
     @for (cancha of club.canchas; track cancha.id) {
       <li>
         <a [routerLink]="['/canchas', cancha.id]">
-          <h3>{{ cancha.nombre }}</h3>
-          <p>{{ cancha.tipo }} · {{ cancha.capacidad_jugadores }} jugadores · {{ cancha.estado }}</p>
-          <p>{{ cancha.descripcion }}</p>
-          <p class="precio">{{ +cancha.tarifa | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</p>
+          <div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+              <span class="badge badge-tipo">⚽ {{ cancha.tipo }}</span>
+              <span class="badge badge-jugadores">👥 {{ cancha.capacidad_jugadores }} jug.</span>
+              <span class="estado" [class]="cancha.estado">{{ cancha.estado }}</span>
+            </div>
+
+            <h3>{{ cancha.nombre }}</h3>
+
+            @if (cancha.descripcion) {
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                {{ cancha.descripcion }}
+              </p>
+            }
+
+            <div class="precio">
+              {{ +cancha.tarifa | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}
+              <span class="precio-sub">/ turno</span>
+            </div>
+          </div>
+
+          <div class="tarjeta-footer-action">
+            <span>Ver disponibilidad de turnos</span>
+            <span class="flecha">→</span>
+          </div>
         </a>
       </li>
     } @empty {
-      <li>Este club no tiene canchas.</li>
+      <li style="grid-column: 1 / -1; background: #ffffff; padding: 2rem; border-radius: var(--radius-md); text-align: center; border: 1px dashed var(--border-color); color: var(--text-muted);">
+        Este club todavía no tiene canchas registradas.
+      </li>
     }
   </ul>
 } @else {
-  <p>Cargando...</p>
+  <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+    <p style="font-size: 1.1rem; font-weight: 600;">⚽ Cargando información del club...</p>
+  </div>
 }
