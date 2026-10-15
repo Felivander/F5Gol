@@ -5,9 +5,51 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use OpenApi\Attributes as OA;
 
+// GET /api/user se define como closure en routes/api.php; se documenta acá.
+#[OA\Get(
+    path: '/api/user',
+    summary: 'Obtener usuario autenticado',
+    tags: ['Autenticación'],
+    security: [['sanctum' => []]],
+    responses: [
+        new OA\Response(response: 200, description: 'Usuario autenticado correctamente.'),
+        new OA\Response(response: 401, description: 'No autenticado.'),
+    ]
+)]
 class AuthController extends Controller
 {
+    #[OA\Post(
+        path: '/api/login',
+        summary: 'Iniciar sesión',
+        description: 'Devuelve un access_token de Sanctum para usar con el botón Authorize.',
+        tags: ['Autenticación'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['email', 'password'],
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'admin1@f5gol.com'),
+                    new OA\Property(property: 'password', type: 'string', format: 'password', example: 'password'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Login exitoso.',
+                content: new OA\JsonContent(properties: [
+                    new OA\Property(property: 'message', type: 'string', example: 'Login exitoso'),
+                    new OA\Property(property: 'access_token', type: 'string', example: '1|xxxxxxxxxxxxxxxxxxxxxxxx'),
+                    new OA\Property(property: 'token_type', type: 'string', example: 'Bearer'),
+                    new OA\Property(property: 'user', type: 'object'),
+                ])
+            ),
+            new OA\Response(response: 401, description: 'Credenciales incorrectas.'),
+            new OA\Response(response: 422, description: 'Datos inválidos.'),
+        ]
+    )]
     public function login(Request $request)
     {
         $request->validate([

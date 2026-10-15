@@ -1,0 +1,1136 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API F5Gol",
+        "description": "API de reservas de canchas de fútbol 5: clubes, canchas, turnos, reservas y jugadores anotados.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Servidor local"
+        }
+    ],
+    "paths": {
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Obtener usuario autenticado",
+                "operationId": "8c54ca3658df94ef8cc501710f83be5e",
+                "responses": {
+                    "200": {
+                        "description": "Usuario autenticado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Iniciar sesión",
+                "description": "Devuelve un access_token de Sanctum para usar con el botón Authorize.",
+                "operationId": "a3b306d14572d1f4bd6c064b3233e7b8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@f5gol.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login exitoso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login exitoso"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|xxxxxxxxxxxxxxxxxxxxxxxx"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales incorrectas."
+                    },
+                    "422": {
+                        "description": "Datos inválidos."
+                    }
+                }
+            }
+        },
+        "/api/canchas": {
+            "get": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Listar canchas",
+                "description": "Display a listing of the resource.",
+                "operationId": "ab431f4216d056fcce795a866718cc43",
+                "parameters": [
+                    {
+                        "name": "club_id",
+                        "in": "query",
+                        "description": "Filtrar por club",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado paginado (10 por página)."
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Crear cancha",
+                "description": "Store a newly created resource in storage.",
+                "operationId": "a4151093dfe1f731b8a2a227d5aa05f1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CanchaInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/canchas/{id}": {
+            "get": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Obtener cancha",
+                "description": "Display the specified resource.",
+                "operationId": "0a7f5f2697a5f159e7a415b8198d5e51",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operación exitosa."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Actualizar cancha",
+                "description": "Update the specified resource in storage.",
+                "operationId": "955c0d273da373d6d4283ae02156e9a8",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CanchaInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Eliminar cancha",
+                "description": "Remove the specified resource from storage.",
+                "operationId": "76978b29f4675746814cc9a5889f12dd",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mensaje"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/clubs": {
+            "get": {
+                "tags": [
+                    "Clubes"
+                ],
+                "summary": "Listar clubs",
+                "description": "Display a listing of the resource.",
+                "operationId": "c44731a8866e74bcd14a6b4f0f1f82b6",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado paginado (10 por página)."
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Clubes"
+                ],
+                "summary": "Crear club",
+                "description": "Store a newly created resource in storage.",
+                "operationId": "4e37feabfe957444c16ab299c31af0a7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClubInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/clubs/{id}": {
+            "get": {
+                "tags": [
+                    "Clubes"
+                ],
+                "summary": "Obtener club",
+                "description": "Display the specified resource.",
+                "operationId": "b5900ff997f9d991c3a388875d8971f8",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operación exitosa."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Clubes"
+                ],
+                "summary": "Actualizar club",
+                "description": "Update the specified resource in storage.",
+                "operationId": "9a7201b06d26cfc6aa54fe93f98774d2",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClubInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Clubes"
+                ],
+                "summary": "Eliminar club",
+                "description": "Remove the specified resource from storage.",
+                "operationId": "7ae9561f331895c99ba0d047eb68ba96",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mensaje"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/jugador-anotados": {
+            "get": {
+                "tags": [
+                    "Jugadores anotados"
+                ],
+                "summary": "Listar jugador-anotados",
+                "description": "Display a listing of the resource.",
+                "operationId": "0691e70b05fcd3d8fd31f75342bfa4da",
+                "parameters": [
+                    {
+                        "name": "reserva_id",
+                        "in": "query",
+                        "description": "Filtrar por reserva",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado obtenido correctamente."
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Jugadores anotados"
+                ],
+                "summary": "Crear jugador anotado",
+                "description": "Store a newly created resource in storage.",
+                "operationId": "41e9a71a070c537069036d0916fb3001",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/JugadorAnotadoInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/jugador-anotados/{id}": {
+            "get": {
+                "tags": [
+                    "Jugadores anotados"
+                ],
+                "summary": "Obtener jugador anotado",
+                "description": "Display the specified resource.",
+                "operationId": "a4edeea6d2343edf1140d719db951720",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operación exitosa."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Jugadores anotados"
+                ],
+                "summary": "Actualizar jugador anotado",
+                "description": "Update the specified resource in storage.",
+                "operationId": "08ac4ac9a787686bbbf6596086e80595",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/JugadorAnotadoInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Jugadores anotados"
+                ],
+                "summary": "Eliminar jugador anotado",
+                "description": "Remove the specified resource from storage.",
+                "operationId": "b5b9e187ed5e5634d80ec2b1a7f15bc7",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mensaje"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/reservas": {
+            "get": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Listar reservas",
+                "description": "Display a listing of the resource.\n\n\"Mis reservas\": /api/reservas?usuario_id=1",
+                "operationId": "8536ca90a9f5ba3709643c0493395478",
+                "parameters": [
+                    {
+                        "name": "usuario_id",
+                        "in": "query",
+                        "description": "Filtrar por usuario (\"mis reservas\")",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "turno_id",
+                        "in": "query",
+                        "description": "Filtrar por turno",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado paginado (10 por página)."
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Crear reserva",
+                "description": "Store a newly created resource in storage.\n\nReserva completa: ocupa el turno entero.\nReserva individual (matchmaking): suma jugadores al cupo del turno\ny solo lo marca \"ocupado\" cuando se completa el cupo_maximo.",
+                "operationId": "3b0d25aeb18200cc0887c6cb9d929934",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReservaInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "Turno no encontrado."
+                    },
+                    "409": {
+                        "description": "Turno no disponible o sin cupo suficiente."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/reservas/{id}": {
+            "get": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Obtener reserva",
+                "description": "Display the specified resource.",
+                "operationId": "12b2a5f422f7abede6bff94de0d990f6",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operación exitosa."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Actualizar reserva",
+                "description": "Update the specified resource in storage.",
+                "operationId": "91fe86a4a06c23ace3ffc53de226b866",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReservaInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Eliminar reserva",
+                "description": "Remove the specified resource from storage.\n\nCancelar una reserva libera el turno automáticamente.",
+                "operationId": "992ae788935b42ab455ff366e9887ab7",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mensaje"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/turnos": {
+            "get": {
+                "tags": [
+                    "Turnos"
+                ],
+                "summary": "Listar turnos",
+                "description": "Display a listing of the resource.\n\nGrilla de disponibilidad: /api/turnos?cancha_id=1&fecha=2026-09-10",
+                "operationId": "6adc8ab3972fa2e0a40a9ddec9b865b9",
+                "parameters": [
+                    {
+                        "name": "cancha_id",
+                        "in": "query",
+                        "description": "Filtrar por cancha",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "fecha",
+                        "in": "query",
+                        "description": "Filtrar por fecha (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado obtenido correctamente."
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Turnos"
+                ],
+                "summary": "Crear turno",
+                "description": "Store a newly created resource in storage.",
+                "operationId": "99bc216a5722c88def2faab3dfae2a13",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TurnoInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/turnos/{id}": {
+            "get": {
+                "tags": [
+                    "Turnos"
+                ],
+                "summary": "Obtener turno",
+                "description": "Display the specified resource.",
+                "operationId": "a226444e58c216d77952b74a0a1dddd0",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operación exitosa."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Turnos"
+                ],
+                "summary": "Actualizar turno",
+                "description": "Update the specified resource in storage.",
+                "operationId": "b09db997e2dac70bb0fbe205c2038b60",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TurnoInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Turnos"
+                ],
+                "summary": "Eliminar turno",
+                "description": "Remove the specified resource from storage.",
+                "operationId": "90a5cffdb27234b86eb4ab2e09bd9c44",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mensaje"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ClubInput": {
+                "properties": {
+                    "administrador_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Club Atlético Norte",
+                        "maxLength": 150
+                    },
+                    "direccion": {
+                        "type": "string",
+                        "example": "Av. Siempre Viva 742",
+                        "nullable": true,
+                        "maxLength": 255
+                    },
+                    "telefono": {
+                        "type": "string",
+                        "example": "1144556677",
+                        "nullable": true,
+                        "maxLength": 30
+                    }
+                },
+                "type": "object"
+            },
+            "CanchaInput": {
+                "properties": {
+                    "club_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Cancha 1",
+                        "maxLength": 100
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "example": "futbol5",
+                        "maxLength": 20
+                    },
+                    "capacidad_jugadores": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Césped sintético, techada",
+                        "nullable": true
+                    },
+                    "tarifa": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 25000
+                    },
+                    "estado": {
+                        "type": "string",
+                        "example": "activa",
+                        "maxLength": 20
+                    }
+                },
+                "type": "object"
+            },
+            "TurnoInput": {
+                "properties": {
+                    "cancha_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "fecha": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-09-10"
+                    },
+                    "hora_inicio": {
+                        "type": "string",
+                        "example": "20:00"
+                    },
+                    "hora_fin": {
+                        "type": "string",
+                        "example": "21:00"
+                    },
+                    "estado": {
+                        "type": "string",
+                        "example": "disponible",
+                        "enum": [
+                            "disponible",
+                            "ocupado",
+                            "bloqueado"
+                        ]
+                    },
+                    "cupo_maximo": {
+                        "type": "integer",
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            },
+            "ReservaInput": {
+                "properties": {
+                    "turno_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "usuario_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "example": "completa",
+                        "enum": [
+                            "completa",
+                            "individual"
+                        ]
+                    },
+                    "cantidad_jugadores": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "estado": {
+                        "type": "string",
+                        "example": "confirmada"
+                    },
+                    "estado_pago": {
+                        "type": "string",
+                        "example": "pendiente"
+                    }
+                },
+                "type": "object"
+            },
+            "JugadorAnotadoInput": {
+                "properties": {
+                    "reserva_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "usuario_id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "fecha_inscripcion": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-05 18:30:00"
+                    }
+                },
+                "type": "object"
+            },
+            "Mensaje": {
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Operación realizada correctamente"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "parameters": {
+            "id": {
+                "name": "id",
+                "in": "path",
+                "description": "ID del recurso",
+                "required": true,
+                "schema": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "example": 1
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Token de autenticación generado por Laravel Sanctum (POST /api/login).",
+                "bearerFormat": "Token Sanctum",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Autenticación",
+            "description": "Autenticación"
+        },
+        {
+            "name": "Canchas",
+            "description": "Canchas"
+        },
+        {
+            "name": "Clubes",
+            "description": "Clubes"
+        },
+        {
+            "name": "Jugadores anotados",
+            "description": "Jugadores anotados"
+        },
+        {
+            "name": "Reservas",
+            "description": "Reservas"
+        },
+        {
+            "name": "Turnos",
+            "description": "Turnos"
+        }
+    ]
+}
