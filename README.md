@@ -22,7 +22,9 @@ En desarrollo, el front redirige todo lo que va a `/api` hacia el back (ver `fro
 
 ## Primera vez (después de clonar)
 
-Back:
+Doble clic en **`instalar-dependencias.bat`**: corre `composer install` en el back, `npm install` en el front, crea `backend/.env` si no existe e instala Angular CLI 22 si falta. Después falta la base de datos (ver abajo, desde "En `backend/.env`...").
+
+O a mano. Back:
 
 ```bash
 cd backend
