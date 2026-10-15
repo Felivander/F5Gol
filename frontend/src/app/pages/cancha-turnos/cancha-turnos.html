@@ -1,0 +1,43 @@
+@if (cancha(); as cancha) {
+  <a [routerLink]="['/clubes', cancha.club_id]">← Volver a {{ cancha.club?.nombre }}</a>
+  <h1>{{ cancha.nombre }}</h1>
+}
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+<section>
+  <label for="fecha">Fecha:</label>
+  <input id="fecha" type="date" [(ngModel)]="fecha" (change)="buscarTurnos()">
+  @if (fecha) {
+    <button (click)="fecha = ''; buscarTurnos()">Ver todas</button>
+  }
+</section>
+
+<table>
+  <thead>
+    <tr>
+      <th>Fecha</th>
+      <th>Horario</th>
+      <th>Estado</th>
+      <th>Cupo</th>
+    </tr>
+  </thead>
+  <tbody>
+    @if (cargando()) {
+      <tr><td colspan="4">Cargando turnos...</td></tr>
+    } @else {
+      @for (turno of turnos(); track turno.id) {
+        <tr>
+          <td>{{ turno.fecha }}</td>
+          <td>{{ turno.hora_inicio.slice(0, 5) }} – {{ turno.hora_fin.slice(0, 5) }}</td>
+          <td><span class="estado" [class]="turno.estado">{{ turno.estado }}</span></td>
+          <td>{{ turno.cupo_actual }} / {{ turno.cupo_maximo }}</td>
+        </tr>
+      } @empty {
+        <tr><td colspan="4">No hay turnos para esta fecha.</td></tr>
+      }
+    }
+  </tbody>
+</table>

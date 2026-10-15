@@ -1,0 +1,26 @@
+<a routerLink="/clubes">← Volver a clubes</a>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else if (club(); as club) {
+  <h1>{{ club.nombre }}</h1>
+  <p>{{ club.direccion }} @if (club.telefono) { · Tel: {{ club.telefono }} }</p>
+
+  <h2>Canchas</h2>
+  <ul class="tarjetas">
+    @for (cancha of club.canchas; track cancha.id) {
+      <li>
+        <a [routerLink]="['/canchas', cancha.id]">
+          <h3>{{ cancha.nombre }}</h3>
+          <p>{{ cancha.tipo }} · {{ cancha.capacidad_jugadores }} jugadores · {{ cancha.estado }}</p>
+          <p>{{ cancha.descripcion }}</p>
+          <p class="precio">{{ +cancha.tarifa | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</p>
+        </a>
+      </li>
+    } @empty {
+      <li>Este club no tiene canchas.</li>
+    }
+  </ul>
+} @else {
+  <p>Cargando...</p>
+}

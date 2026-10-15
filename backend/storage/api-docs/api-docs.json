@@ -55,7 +55,7 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "admin@f5gol.com"
+                                        "example": "admin1@f5gol.com"
                                     },
                                     "password": {
                                         "type": "string",

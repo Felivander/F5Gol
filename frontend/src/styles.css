@@ -1,0 +1,106 @@
+/* Estilos globales de F5Gol */
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: #1f2937;
+  background: #f9fafb;
+}
+
+a {
+  color: #15803d;
+}
+
+button,
+input {
+  font: inherit;
+  padding: 0.4rem 0.8rem;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+/* Listas de clubes y canchas */
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.tarjetas li a {
+  display: block;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+}
+
+.tarjetas li a:hover {
+  border-color: #15803d;
+}
+
+.tarjetas h2,
+.tarjetas h3 {
+  margin-top: 0;
+}
+
+.precio {
+  font-weight: 600;
+  color: #15803d;
+}
+
+.paginado {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Grilla de turnos */
+table {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+th,
+td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.estado {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+}
+
+.estado.disponible {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.estado.ocupado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.estado.bloqueado {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Login */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 320px;
+}

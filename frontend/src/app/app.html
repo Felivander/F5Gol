@@ -1,0 +1,16 @@
+<header>
+  <a class="marca" routerLink="/clubes">F5Gol</a>
+  <nav>
+    <a routerLink="/clubes" routerLinkActive="activo">Clubes</a>
+    @if (auth.logueado()) {
+      <span>{{ auth.usuario()?.name }}</span>
+      <button (click)="salir()">Salir</button>
+    } @else {
+      <a routerLink="/login" routerLinkActive="activo">Ingresar</a>
+    }
+  </nav>
+</header>
+
+<main>
+  <router-outlet />
+</main>
