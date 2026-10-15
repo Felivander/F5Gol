@@ -4,9 +4,11 @@ import { RouterLink } from '@angular/router';
 import { Cancha, Turno } from '../../models';
 import { Api } from '../../services/api';
 
+import { CanchaDiagrama } from '../../components/cancha-diagrama/cancha-diagrama';
+
 @Component({
   selector: 'app-cancha-turnos',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, CanchaDiagrama],
   templateUrl: './cancha-turnos.html'
 })
 export class CanchaTurnos implements OnInit {

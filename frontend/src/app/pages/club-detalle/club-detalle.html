@@ -23,6 +23,8 @@
       <li>
         <a [routerLink]="['/canchas', cancha.id]">
           <div>
+            <app-cancha-diagrama [tipo]="cancha.tipo" [mini]="true"></app-cancha-diagrama>
+
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
               <span class="badge badge-tipo">⚽ {{ cancha.tipo }}</span>
               <span class="badge badge-jugadores">👥 {{ cancha.capacidad_jugadores }} jug.</span>

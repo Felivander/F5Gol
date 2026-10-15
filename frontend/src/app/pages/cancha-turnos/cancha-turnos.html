@@ -1,14 +1,30 @@
 @if (cancha(); as cancha) {
   <a class="volver-link" [routerLink]="['/clubes', cancha.club_id]">← Volver a {{ cancha.club?.nombre }}</a>
-  <div class="club-hero" style="margin-bottom: 1.5rem;">
-    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
-      <span class="badge badge-tipo">⚽ {{ cancha.tipo }}</span>
-      <span class="badge badge-jugadores">👥 Capacidad: {{ cancha.capacidad_jugadores }} jugadores</span>
+  <div class="club-hero" style="margin-bottom: 2rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.75rem; align-items: center;">
+      <div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+          <span class="badge badge-tipo">⚽ {{ cancha.tipo }}</span>
+          <span class="badge badge-jugadores">👥 {{ cancha.capacidad_jugadores }} jugadores</span>
+          <span class="estado" [class]="cancha.estado">{{ cancha.estado }}</span>
+        </div>
+        <h1 style="margin-bottom: 0.5rem;">{{ cancha.nombre }}</h1>
+        @if (cancha.descripcion) {
+          <p style="color: var(--text-muted); margin-bottom: 1rem;">{{ cancha.descripcion }}</p>
+        }
+        <div style="background: #f8fafc; border-radius: 8px; padding: 0.75rem 1rem; border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 0.5rem;">
+          <span>🏟️</span>
+          <div>
+            <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Formato del partido</span>
+            <strong style="font-size: 0.92rem; color: var(--dark-navy);">Cancha reglamentaria Fútbol 5 (5 vs 5)</strong>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <app-cancha-diagrama [tipo]="cancha.tipo" [mostrarJugadores]="true"></app-cancha-diagrama>
+      </div>
     </div>
-    <h1>{{ cancha.nombre }}</h1>
-    @if (cancha.descripcion) {
-      <p style="color: var(--text-muted); margin: 0.25rem 0 0 0;">{{ cancha.descripcion }}</p>
-    }
   </div>
 }
 

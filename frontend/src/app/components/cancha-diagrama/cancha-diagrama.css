@@ -1,0 +1,71 @@
+.campo-contenedor {
+  position: relative;
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px rgba(21, 128, 61, 0.35);
+  border: 2px solid #166534;
+  background: #14532d;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.campo-mini {
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 14px -2px rgba(21, 128, 61, 0.25);
+  border-radius: 10px;
+}
+
+.campo-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 500 / 300;
+  transition: transform 0.3s ease;
+}
+
+.campo-mini:hover .campo-svg {
+  transform: scale(1.025);
+}
+
+.leyenda-tactica {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1.15rem;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.equipo-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.equipo-tag .punto-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.equipo-a .punto-color {
+  background: #0284c7;
+  box-shadow: 0 0 8px #38bdf8;
+}
+
+.equipo-b .punto-color {
+  background: #ea580c;
+  box-shadow: 0 0 8px #fb923c;
+}
+
+.cancha-formato-tag {
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  color: #34d399;
+  letter-spacing: 0.02em;
+}

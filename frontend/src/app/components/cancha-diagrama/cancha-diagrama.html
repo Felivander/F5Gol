@@ -1,0 +1,156 @@
+<div class="campo-contenedor" [class.campo-mini]="mini()">
+  <svg class="campo-svg" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Patrón de red realista para los arcos -->
+      <pattern id="redArco" width="6" height="6" patternUnits="userSpaceOnUse">
+        <path d="M 0 0 L 6 6 M 0 6 L 6 0" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.8" />
+      </pattern>
+      <!-- Sombra para fichas de jugadores -->
+      <filter id="jugadorSombra" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.5" />
+      </filter>
+    </defs>
+
+    <!-- Césped base verde profundo -->
+    <rect width="500" height="300" rx="12" fill="#15803d" />
+
+    <!-- Franjas de corte de césped profesional alternadas -->
+    <g class="franjas-cesped">
+      <rect x="0" y="0" width="50" height="300" fill="#14532d" opacity="0.4" />
+      <rect x="50" y="0" width="50" height="300" fill="#16a34a" opacity="0.3" />
+      <rect x="100" y="0" width="50" height="300" fill="#14532d" opacity="0.4" />
+      <rect x="150" y="0" width="50" height="300" fill="#16a34a" opacity="0.3" />
+      <rect x="200" y="0" width="50" height="300" fill="#14532d" opacity="0.4" />
+      <rect x="250" y="0" width="50" height="300" fill="#16a34a" opacity="0.3" />
+      <rect x="300" y="0" width="50" height="300" fill="#14532d" opacity="0.4" />
+      <rect x="350" y="0" width="50" height="300" fill="#16a34a" opacity="0.3" />
+      <rect x="400" y="0" width="50" height="300" fill="#14532d" opacity="0.4" />
+      <rect x="450" y="0" width="50" height="300" fill="#16a34a" opacity="0.3" />
+    </g>
+
+    <!-- Líneas Reglamentarias Oficiales de Fútbol -->
+    <g class="lineas-cancha" stroke="#ffffff" stroke-width="2.5" fill="none" opacity="0.95">
+      <!-- Límites perimetrales (línea de banda y fondo) -->
+      <rect x="25" y="20" width="450" height="260" rx="2" />
+
+      <!-- Línea de medio campo -->
+      <line x1="250" y1="20" x2="250" y2="280" />
+
+      <!-- Círculo central y punto de saque inicial -->
+      <circle cx="250" cy="150" r="42" />
+      <circle cx="250" cy="150" r="3.5" fill="#ffffff" />
+
+      <!-- Tiros de esquina (Corner arcs en las 4 esquinas) -->
+      <path d="M 25,32 A 12,12 0 0,0 37,20" />
+      <path d="M 25,268 A 12,12 0 0,1 37,280" />
+      <path d="M 463,20 A 12,12 0 0,0 475,32" />
+      <path d="M 463,280 A 12,12 0 0,1 475,268" />
+
+      <!-- LADO IZQUIERDO -->
+      <!-- Área Grande (Área de penal) -->
+      <rect x="25" y="65" width="85" height="170" />
+      <!-- Área Chica (Área de meta) -->
+      <rect x="25" y="105" width="35" height="90" />
+      <!-- Punto de penal -->
+      <circle cx="85" cy="150" r="3.5" fill="#ffffff" />
+      <!-- Medialuna / Semicírculo de penal -->
+      <path d="M 110,116 A 42,42 0 0,1 110,184" />
+
+      <!-- LADO DERECHO -->
+      <!-- Área Grande (Área de penal) -->
+      <rect x="390" y="65" width="85" height="170" />
+      <!-- Área Chica (Área de meta) -->
+      <rect x="440" y="105" width="35" height="90" />
+      <!-- Punto de penal -->
+      <circle cx="415" cy="150" r="3.5" fill="#ffffff" />
+      <!-- Medialuna / Semicírculo de penal -->
+      <path d="M 390,116 A 42,42 0 0,0 390,184" />
+
+      <!-- Arcos / Porterías sobresalientes con red -->
+      <rect x="12" y="120" width="13" height="60" stroke="#ffffff" stroke-width="2" fill="url(#redArco)" />
+      <rect x="475" y="120" width="13" height="60" stroke="#ffffff" stroke-width="2" fill="url(#redArco)" />
+    </g>
+
+    <!-- Superposición táctica (Formación 5 vs 5 reglamentaria) -->
+    @if (mostrarJugadores()) {
+      <g class="tactica-jugadores">
+        <!-- EQUIPO AZUL (Local) -->
+        <!-- Arquero (GK) -->
+        <g transform="translate(55, 150)" filter="url(#jugadorSombra)">
+          <circle r="12" fill="#0284c7" stroke="#ffffff" stroke-width="2" />
+          <text y="4" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">1</text>
+        </g>
+        <!-- Defensor Superior -->
+        <g transform="translate(120, 95)" filter="url(#jugadorSombra)">
+          <circle r="12" fill="#0284c7" stroke="#ffffff" stroke-width="2" />
+          <text y="4" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">2</text>
+        </g>
+        <!-- Defensor Inferior -->
+        <g transform="translate(120, 205)" filter="url(#jugadorSombra)">
+          <circle r="12" fill="#0284c7" stroke="#ffffff" stroke-width="2" />
+          <text y="4" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">3</text>
+        </g>
+        <!-- Mediocampista -->
+        <g transform="translate(180, 150)" filter="url(#jugadorSombra)">
+          <circle r="12" fill="#0284c7" stroke="#ffffff" stroke-width="2" />
+          <text y="4" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">4</text>
+        </g>
+        <!-- Delantero -->
+        <g transform="translate(230, 150)" filter="url(#jugadorSombra)">
+          <circle r="12" fill="#0284c7" stroke="#ffffff" stroke-width="2" />
+          <text y="4" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">5</text>
+        </g>
+
+        <!-- EQUIPO NARANJA (Visitante) -->
+        <!-- Delantero -->
+        <g transform="translate(270, 150)" filter="url(#jugadorSombra)">
+          <circle r="12" fill="#ea580c" stroke="#ffffff" stroke-width="2" />
+          <text y="4" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">5</text>
+        </g>
+        <!-- Mediocampista -->
+        <g transform="translate(320, 150)" filter="url(#jugadorSombra)">
+          <circle r="12" fill="#ea580c" stroke="#ffffff" stroke-width="2" />
+          <text y="4" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">4</text>
+        </g>
+        <!-- Defensor Superior -->
+        <g transform="translate(380, 95)" filter="url(#jugadorSombra)">
+          <circle r="12" fill="#ea580c" stroke="#ffffff" stroke-width="2" />
+          <text y="4" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">2</text>
+        </g>
+        <!-- Defensor Inferior -->
+        <g transform="translate(380, 205)" filter="url(#jugadorSombra)">
+          <circle r="12" fill="#ea580c" stroke="#ffffff" stroke-width="2" />
+          <text y="4" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">3</text>
+        </g>
+        <!-- Arquero (GK) -->
+        <g transform="translate(445, 150)" filter="url(#jugadorSombra)">
+          <circle r="12" fill="#ea580c" stroke="#ffffff" stroke-width="2" />
+          <text y="4" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800">1</text>
+        </g>
+      </g>
+    }
+
+    <!-- Insignia y formato en la cancha -->
+    <g class="insignia-cancha" opacity="0.9">
+      <text x="250" y="268" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="800" letter-spacing="3">
+        {{ (tipo() || 'FÚTBOL 5') | uppercase }}
+      </text>
+    </g>
+  </svg>
+
+  @if (mostrarJugadores()) {
+    <div class="leyenda-tactica">
+      <div class="equipo-tag equipo-a">
+        <span class="punto-color"></span>
+        <span>Equipo A (5)</span>
+      </div>
+      <div class="cancha-formato-tag">
+        <span>⚔️ 5 vs 5 Reglamentario</span>
+      </div>
+      <div class="equipo-tag equipo-b">
+        <span class="punto-color"></span>
+        <span>Equipo B (5)</span>
+      </div>
+    </div>
+  }
+</div>

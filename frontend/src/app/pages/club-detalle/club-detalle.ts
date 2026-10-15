@@ -4,9 +4,11 @@ import { RouterLink } from '@angular/router';
 import { Club } from '../../models';
 import { Api } from '../../services/api';
 
+import { CanchaDiagrama } from '../../components/cancha-diagrama/cancha-diagrama';
+
 @Component({
   selector: 'app-club-detalle',
-  imports: [RouterLink, CurrencyPipe],
+  imports: [RouterLink, CurrencyPipe, CanchaDiagrama],
   templateUrl: './club-detalle.html'
 })
 export class ClubDetalle implements OnInit {
