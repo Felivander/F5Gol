@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Turno;
+use App\Http\Requests\TurnoRequest;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
@@ -60,9 +61,9 @@ class TurnoController extends Controller
             new OA\Response(response: 401, description: 'No autenticado.'),
         ]
     )]
-    public function store(Request $request)
+    public function store(TurnoRequest $request)
     {
-        $turno = Turno::create($request->all());
+        $turno = Turno::create($request->validated());
 
         return response()->json([
             'message' => 'Turno creado correctamente',
@@ -107,7 +108,7 @@ class TurnoController extends Controller
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
-    public function update(Request $request, string $id)
+    public function update(TurnoRequest $request, string $id)
     {
         $turno = Turno::find($id);
 
@@ -117,7 +118,7 @@ class TurnoController extends Controller
             ], 404);
         }
 
-        $turno->update($request->all());
+        $turno->update($request->validated());
 
         return response()->json([
             'message' => 'Turno actualizado correctamente',

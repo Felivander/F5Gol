@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\JugadorAnotado;
+use App\Http\Requests\JugadorAnotadoRequest;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
@@ -48,9 +49,9 @@ class JugadorAnotadoController extends Controller
             new OA\Response(response: 401, description: 'No autenticado.'),
         ]
     )]
-    public function store(Request $request)
+    public function store(JugadorAnotadoRequest $request)
     {
-        $jugadorAnotado = JugadorAnotado::create($request->all());
+        $jugadorAnotado = JugadorAnotado::create($request->validated());
 
         return response()->json([
             'message' => 'Jugador anotado correctamente',
@@ -94,7 +95,7 @@ class JugadorAnotadoController extends Controller
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
-    public function update(Request $request, string $id)
+    public function update(JugadorAnotadoRequest $request, string $id)
     {
         $jugadorAnotado = JugadorAnotado::find($id);
 
@@ -104,7 +105,7 @@ class JugadorAnotadoController extends Controller
             ], 404);
         }
 
-        $jugadorAnotado->update($request->all());
+        $jugadorAnotado->update($request->validated());
 
         return response()->json([
             'message' => 'Jugador anotado actualizado correctamente',

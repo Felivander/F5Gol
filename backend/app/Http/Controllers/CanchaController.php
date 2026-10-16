@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cancha;
+use App\Http\Requests\CanchaRequest;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
@@ -49,9 +50,9 @@ class CanchaController extends Controller
             new OA\Response(response: 401, description: 'No autenticado.'),
         ]
     )]
-    public function store(Request $request)
+    public function store(CanchaRequest $request)
     {
-        $cancha = Cancha::create($request->all());
+        $cancha = Cancha::create($request->validated());
 
         return response()->json([
             'message' => 'Cancha creada correctamente',
@@ -95,7 +96,7 @@ class CanchaController extends Controller
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
-    public function update(Request $request, string $id)
+    public function update(CanchaRequest $request, string $id)
     {
         $cancha = Cancha::find($id);
 
@@ -105,7 +106,7 @@ class CanchaController extends Controller
             ], 404);
         }
 
-        $cancha->update($request->all());
+        $cancha->update($request->validated());
 
         return response()->json([
             'message' => 'Cancha actualizada correctamente',

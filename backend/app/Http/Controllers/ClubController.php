@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Club;
+use App\Http\Requests\ClubRequest;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
@@ -45,9 +46,9 @@ class ClubController extends Controller
             new OA\Response(response: 401, description: 'No autenticado.'),
         ]
     )]
-    public function store(Request $request)
+    public function store(ClubRequest $request)
     {
-        $club = Club::create($request->all());
+        $club = Club::create($request->validated());
 
         return response()->json([
             'message' => 'Club creado correctamente',
@@ -91,7 +92,7 @@ class ClubController extends Controller
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
-    public function update(Request $request, string $id)
+    public function update(ClubRequest $request, string $id)
     {
         $club = Club::find($id);
 
@@ -101,7 +102,7 @@ class ClubController extends Controller
             ], 404);
         }
 
-        $club->update($request->all());
+        $club->update($request->validated());
 
         return response()->json([
             'message' => 'Club actualizado correctamente',
