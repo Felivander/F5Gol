@@ -85,6 +85,20 @@ use OpenApi\Attributes as OA;
             ]
         ),
         new OA\Schema(
+            schema: 'ErrorValidacion',
+            properties: [
+                new OA\Property(property: 'message', type: 'string', example: 'El campo nombre es obligatorio. (y 1 error más)'),
+                new OA\Property(
+                    property: 'errors',
+                    type: 'object',
+                    example: [
+                        'nombre' => ['El campo nombre es obligatorio.'],
+                        'administrador_id' => ['El administrador indicado no existe.'],
+                    ]
+                ),
+            ]
+        ),
+        new OA\Schema(
             schema: 'Mensaje',
             properties: [
                 new OA\Property(property: 'message', type: 'string', example: 'Operación realizada correctamente'),

@@ -43,6 +43,7 @@ class ClubController extends Controller
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/ClubInput')),
         responses: [
             new OA\Response(response: 201, description: 'Creado correctamente.'),
+            new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
         ]
     )]
@@ -88,6 +89,7 @@ class ClubController extends Controller
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/ClubInput')),
         responses: [
             new OA\Response(response: 200, description: 'Actualizado correctamente.'),
+            new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]

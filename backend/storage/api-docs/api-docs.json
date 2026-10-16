@@ -196,6 +196,16 @@
                     "201": {
                         "description": "Creado correctamente."
                     },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    },
                     "401": {
                         "description": "No autenticado."
                     }
@@ -254,6 +264,16 @@
                 "responses": {
                     "200": {
                         "description": "Actualizado correctamente."
+                    },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "No autenticado."
@@ -351,6 +371,16 @@
                     "201": {
                         "description": "Creado correctamente."
                     },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    },
                     "401": {
                         "description": "No autenticado."
                     }
@@ -409,6 +439,16 @@
                 "responses": {
                     "200": {
                         "description": "Actualizado correctamente."
+                    },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "No autenticado."
@@ -506,6 +546,16 @@
                     "201": {
                         "description": "Creado correctamente."
                     },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    },
                     "401": {
                         "description": "No autenticado."
                     }
@@ -564,6 +614,16 @@
                 "responses": {
                     "200": {
                         "description": "Actualizado correctamente."
+                    },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "No autenticado."
@@ -679,6 +739,16 @@
                     "201": {
                         "description": "Creado correctamente."
                     },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    },
                     "401": {
                         "description": "No autenticado."
                     },
@@ -743,6 +813,16 @@
                 "responses": {
                     "200": {
                         "description": "Actualizado correctamente."
+                    },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "No autenticado."
@@ -849,6 +929,16 @@
                     "201": {
                         "description": "Creado correctamente."
                     },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    },
                     "401": {
                         "description": "No autenticado."
                     }
@@ -907,6 +997,16 @@
                 "responses": {
                     "200": {
                         "description": "Actualizado correctamente."
+                    },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "No autenticado."
@@ -1107,6 +1207,26 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2026-09-05 18:30:00"
+                    }
+                },
+                "type": "object"
+            },
+            "ErrorValidacion": {
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "El campo nombre es obligatorio. (y 1 error más)"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": {
+                            "nombre": [
+                                "El campo nombre es obligatorio."
+                            ],
+                            "administrador_id": [
+                                "El administrador indicado no existe."
+                            ]
+                        }
                     }
                 },
                 "type": "object"
