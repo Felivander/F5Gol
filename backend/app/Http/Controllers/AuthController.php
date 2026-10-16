@@ -80,4 +80,31 @@ class AuthController extends Controller
             'user' => $user
         ]);
     }
+
+    #[OA\Post(
+        path: '/api/logout',
+        summary: 'Cerrar sesión',
+        description: 'Revoca el token con el que se hizo el pedido. Después de esto, ese token deja de servir.',
+        tags: ['Autenticación'],
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Sesión cerrada.',
+                content: new OA\JsonContent(properties: [
+                    new OA\Property(property: 'message', type: 'string', example: 'Sesión cerrada correctamente'),
+                ])
+            ),
+            new OA\Response(response: 401, description: 'No autenticado.'),
+        ]
+    )]
+    public function logout(Request $request)
+    {
+        // Borra solo el token actual: las sesiones en otros dispositivos siguen activas
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Sesión cerrada correctamente'
+        ]);
+    }
 }
