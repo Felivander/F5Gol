@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Reserva;
 use App\Models\Turno;
+use App\Http\Requests\ReservaRequest;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
@@ -63,7 +64,7 @@ class ReservaController extends Controller
             new OA\Response(response: 409, description: 'Turno no disponible o sin cupo suficiente.'),
         ]
     )]
-    public function store(Request $request)
+    public function store(ReservaRequest $request)
     {
         $turno = Turno::find($request->input('turno_id'));
 
@@ -92,7 +93,7 @@ class ReservaController extends Controller
             }
         }
 
-        $reserva = Reserva::create(array_merge($request->all(), [
+        $reserva = Reserva::create(array_merge($request->validated(), [
             'estado' => 'confirmada',
         ]));
 
@@ -146,7 +147,7 @@ class ReservaController extends Controller
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
-    public function update(Request $request, string $id)
+    public function update(ReservaRequest $request, string $id)
     {
         $reserva = Reserva::find($id);
 
@@ -156,7 +157,7 @@ class ReservaController extends Controller
             ], 404);
         }
 
-        $reserva->update($request->all());
+        $reserva->update($request->validated());
 
         return response()->json([
             'message' => 'Reserva actualizada correctamente',
@@ -194,11 +195,16 @@ class ReservaController extends Controller
         $turno = $reserva->turno;
         $reserva->delete();
 
-        if ($turno) {
-            // Si ya no queda ningún jugador anotado (matchmaking) ni reserva
-            // completa activa, el turno vuelve a estar disponible.
-            $sigueOcupado = $turno->reservas()->where('estado', '!=', 'cancelada')->exists();
-            $turno->update(['estado' => $sigueOcupado ? $turno->estado : 'disponible']);
+        if ($turno && $turno->estado !== 'bloqueado') {
+            // El turno sigue ocupado solo si queda una reserva completa activa
+            // o si los jugadores de matchmaking todavía llenan el cupo.
+            $hayCompleta = $turno->reservas()
+                ->where('tipo', 'completa')
+                ->where('estado', '!=', 'cancelada')
+                ->exists();
+            $cupoLleno = $turno->cupoActual() >= $turno->cupo_maximo;
+
+            $turno->update(['estado' => $hayCompleta || $cupoLleno ? 'ocupado' : 'disponible']);
         }
 
         return response()->json([
