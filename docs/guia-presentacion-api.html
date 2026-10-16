@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía API F5Gol</title>
+<style>
+  :root {
+    --bg: #f7f8f6;
+    --surface: #ffffff;
+    --text: #1c2420;
+    --muted: #5b665f;
+    --border: #dfe4e0;
+    --accent: #15803d;
+    --accent-soft: #e5f4ea;
+    --warn: #9a3412;
+    --warn-soft: #fff1e6;
+    --code-bg: #f1f4f2;
+    --get: #1d6fd1;
+    --post: #15803d;
+    --put: #b45309;
+    --delete: #b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121614;
+      --surface: #1a201d;
+      --text: #e6ebe8;
+      --muted: #9aa69f;
+      --border: #2c3531;
+      --accent: #4ade80;
+      --accent-soft: #1b3325;
+      --warn: #fdba74;
+      --warn-soft: #3a2416;
+      --code-bg: #222a26;
+      --get: #6aa8f0;
+      --post: #4ade80;
+      --put: #fbbf24;
+      --delete: #f87171;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121614;
+    --surface: #1a201d;
+    --text: #e6ebe8;
+    --muted: #9aa69f;
+    --border: #2c3531;
+    --accent: #4ade80;
+    --accent-soft: #1b3325;
+    --warn: #fdba74;
+    --warn-soft: #3a2416;
+    --code-bg: #222a26;
+    --get: #6aa8f0;
+    --post: #4ade80;
+    --put: #fbbf24;
+    --delete: #f87171;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 32px 16px 80px; }
+  header.top { margin-bottom: 24px; }
+  header.top h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 8px; }
+  .lead { color: var(--muted); margin: 0; max-width: 62ch; }
+  h2 { font-size: 1.35rem; margin: 0 0 12px; line-height: 1.3; }
+  h3 { font-size: 1.05rem; margin: 20px 0 8px; scroll-margin-top: 110px; }
+  p, li { max-width: 70ch; }
+  a { color: var(--accent); }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 2;
+    display: flex; gap: 6px; flex-wrap: wrap;
+    padding: 10px 0; margin-bottom: 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.toc a {
+    font-size: 0.875rem; text-decoration: none; color: var(--muted);
+    padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  nav.toc a:hover { color: var(--text); border-color: var(--accent); }
+
+  section.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 0 0 16px;
+    scroll-margin-top: 64px;
+  }
+  .meta { color: var(--muted); font-size: 0.875rem; margin: -6px 0 12px; }
+
+  .urls { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .url { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .url b { display: block; font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .url a { word-break: break-all; }
+
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
+  .node { border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; background: var(--code-bg); font-size: 0.9rem; }
+  .node small { display: block; color: var(--muted); }
+  .arrow { color: var(--muted); }
+
+  ol.steps { list-style: none; padding: 0; margin: 12px 0 0; counter-reset: paso; }
+  ol.steps > li {
+    counter-increment: paso;
+    position: relative;
+    padding: 10px 0 10px 40px;
+    border-top: 1px solid var(--border);
+  }
+  ol.steps > li:first-child { border-top: 0; }
+  ol.steps > li::before {
+    content: counter(paso);
+    position: absolute; left: 0; top: 10px;
+    width: 26px; height: 26px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 0.8rem; font-weight: 700;
+  }
+  .say {
+    margin: 6px 0 0; padding: 8px 12px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 8px 8px 0;
+  }
+  .say::before { content: "Decí: "; font-weight: 600; }
+
+  .warn {
+    background: var(--warn-soft); color: var(--text);
+    border-left: 3px solid var(--warn);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px; margin: 12px 0 0;
+  }
+  .warn strong { color: var(--warn); }
+
+  code, pre { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 0.875em; }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+  .codebox { position: relative; margin: 8px 0 0; }
+  .codebox pre {
+    margin: 0; padding: 12px 14px; overflow-x: auto;
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+  }
+  .copy {
+    position: absolute; top: 6px; right: 6px;
+    font: inherit; font-size: 0.75rem;
+    padding: 2px 10px; min-height: 28px;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--surface); color: var(--text); cursor: pointer;
+  }
+  .copy:hover { border-color: var(--accent); }
+  .copy:focus-visible, nav.toc a:focus-visible, .check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .m { display: inline-block; min-width: 58px; text-align: center; font-size: 0.75rem; font-weight: 700; border-radius: 4px; padding: 1px 6px; color: #fff; }
+  .m.get { background: var(--get); } .m.post { background: var(--post); } .m.put { background: var(--put); } .m.delete { background: var(--delete); }
+  :root[data-theme="dark"] .m, :root:not([data-theme="light"]) .m { color: #fff; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .m { color: #0d1210; } }
+  :root[data-theme="dark"] .m { color: #0d1210; }
+
+  .table-wrap { overflow-x: auto; margin-top: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  td.path { font-family: ui-monospace, Consolas, monospace; font-size: 0.85rem; white-space: nowrap; }
+  .lock { white-space: nowrap; }
+
+  .codes { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-top: 8px; }
+  .code-item { border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
+  .code-item b { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+  .code-item span { display: block; color: var(--muted); font-size: 0.875rem; }
+
+  details { border-top: 1px solid var(--border); padding: 10px 0; }
+  details:first-of-type { border-top: 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: 8px 0 0; }
+
+  .checklist { list-style: none; padding: 0; margin: 8px 0 0; }
+  .checklist li { padding: 4px 0; }
+  .checklist label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .check { width: 18px; height: 18px; margin-top: 4px; accent-color: var(--accent); flex: none; }
+
+  .progress { font-size: 0.875rem; color: var(--muted); margin-top: 8px; }
+
+  @media print {
+    nav.toc, .copy { display: none; }
+    section.card { break-inside: avoid; border-color: #ccc; }
+    body { background: #fff; color: #000; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="top">
+  <h1>Guía para presentar la API de F5Gol</h1>
+  <p class="lead">Paso a paso para mostrar la API en Swagger: qué hacer en cada momento, qué decir y qué evitar. Unos 10 minutos.</p>
+</header>
+
+<nav class="toc" aria-label="Secciones">
+  <a href="#preparar">Antes de empezar</a>
+  <a href="#arquitectura">Cómo funciona</a>
+  <a href="#guion">Guion</a>
+  <a href="#editar">Editar</a>
+  <a href="#errores">Errores</a>
+  <a href="#interaccion">Interacción</a>
+  <a href="#endpoints">Endpoints</a>
+  <a href="#codigos">Códigos</a>
+  <a href="#cuidados">Cuidados</a>
+  <a href="#preguntas">Preguntas</a>
+</nav>
+
+<section class="card" id="preparar">
+  <h2>Antes de empezar</h2>
+  <ul class="checklist" id="checklist">
+    <li><label><input type="checkbox" class="check" data-k="xampp"> MySQL prendido. Lo arranca solo <code>iniciar-f5gol.bat</code>, o desde el panel de XAMPP.</label></li>
+    <li><label><input type="checkbox" class="check" data-k="bat"> Doble clic en <code>F5Gol\iniciar-f5gol.bat</code>. Se abren las ventanas <b>F5Gol Back</b> y <b>F5Gol Front</b>.</label></li>
+    <li><label><input type="checkbox" class="check" data-k="swagger"> Swagger abierto en el navegador (dirección abajo).</label></li>
+    <li><label><input type="checkbox" class="check" data-k="front"> El front abierto en otra pestaña, para el cierre.</label></li>
+    <li><label><input type="checkbox" class="check" data-k="zoom"> Zoom del navegador al 125% o más, para que se lea en el proyector.</label></li>
+  </ul>
+  <p class="progress" id="progress" aria-live="polite"></p>
+
+  <h3>Direcciones</h3>
+  <div class="urls">
+    <div class="url"><b>Swagger</b><a href="http://127.0.0.1:8000/api/documentation">http://127.0.0.1:8000/api/documentation</a></div>
+    <div class="url"><b>API</b><a href="http://127.0.0.1:8000/api/clubs">http://127.0.0.1:8000/api</a></div>
+    <div class="url"><b>Front</b><a href="http://localhost:4200">http://localhost:4200</a></div>
+  </div>
+
+  <h3>Usuario de prueba</h3>
+  <p>Creado por los seeders: <code>admin1@f5gol.com</code> / <code>password</code>.</p>
+</section>
+
+<section class="card" id="arquitectura">
+  <h2>Cómo funciona (para explicarlo al principio)</h2>
+  <div class="flow" role="img" aria-label="El front en el puerto 4200 pide datos a /api, el proxy los manda a Laravel en el puerto 8000, que consulta MySQL. Swagger está en Laravel.">
+    <div class="node">Front Angular<small>puerto 4200</small></div>
+    <span class="arrow" aria-hidden="true">→ /api →</span>
+    <div class="node">API Laravel + Sanctum<small>puerto 8000 · acá vive Swagger</small></div>
+    <span class="arrow" aria-hidden="true">→</span>
+    <div class="node">MySQL<small>base f5gol</small></div>
+  </div>
+  <ul>
+    <li><b>Front y back son dos programas distintos</b>, por eso tienen distinto puerto. La página no tiene datos propios: se los pide a la API.</li>
+    <li><b>Swagger documenta la API</b>, así que vive en el back. Se genera solo, a partir de atributos <code>#[OA\...]</code> escritos arriba de cada método de los controladores.</li>
+    <li><b>Sanctum</b> es el sistema de Laravel que genera el token en el login y lo controla en cada pedido protegido.</li>
+  </ul>
+</section>
+
+<section class="card" id="guion">
+  <h2>Guion de la demo</h2>
+
+  <h3>1. Qué es Swagger <span class="meta">· 1 min</span></h3>
+  <ol class="steps">
+    <li>Mostrá el título <b>API F5Gol 1.0.0</b> y la descripción.
+      <p class="say">“Esta es la documentación de nuestra API. Se genera automáticamente desde el código, así que siempre está al día.”</p></li>
+    <li>Tocá el link <code>api-docs.json</code> debajo del título.
+      <p class="say">“Esto es el archivo OpenAPI: un formato estándar que entienden muchas herramientas, no solo Swagger.”</p></li>
+    <li>Volvé atrás y mostrá <b>Servers</b>: <code>http://127.0.0.1:8000</code>, servidor local.</li>
+  </ol>
+
+  <h3>2. Cómo está organizada <span class="meta">· 1 min</span></h3>
+  <ol class="steps">
+    <li>Bajá por los grupos: <b>Autenticación, Canchas, Clubes, Jugadores anotados, Reservas, Turnos</b>.</li>
+    <li>Señalá los colores de cada método:
+      <span class="m get">GET</span> leer ·
+      <span class="m post">POST</span> crear ·
+      <span class="m put">PUT</span> editar ·
+      <span class="m delete">DELETE</span> borrar.</li>
+    <li>Mostrá el <b>candado</b> a la derecha de los <code>POST</code>, <code>PUT</code> y <code>DELETE</code>.
+      <p class="say">“Cualquiera puede consultar clubes, canchas y turnos, pero para crear, editar o borrar hay que iniciar sesión.”</p></li>
+  </ol>
+
+  <h3>3. Una lectura pública <span class="meta">· 2 min</span></h3>
+  <ol class="steps">
+    <li><b>Clubes → GET /api/clubs → Try it out → Execute.</b></li>
+    <li>Explicá la respuesta: código <b>200</b>, la lista en <code>data</code> y los datos de paginación (<code>current_page</code>, <code>last_page</code>, <code>total</code>).
+      <p class="say">“La lista viene paginada de a 10, para no traer todo de golpe.”</p></li>
+    <li><b>Turnos → GET /api/turnos → Try it out</b>, con <code>cancha_id</code> = <code>1</code> y <code>fecha</code> = <code>2026-09-04</code>. <b>Execute.</b>
+      <p class="say">“Esta es la grilla de disponibilidad: cada turno tiene su estado y cuántos jugadores ya se anotaron.”</p></li>
+    <li><b>Clubes → GET /api/clubs/{id}</b> con <code>999</code>. Devuelve <b>404</b>.
+      <p class="say">“Si algo no existe, la API lo dice con el código correcto.”</p></li>
+  </ol>
+
+  <h3>4. La seguridad <span class="meta">· 2 min</span></h3>
+  <ol class="steps">
+    <li><b>Clubes → POST /api/clubs → Try it out → Execute</b>, todavía sin iniciar sesión.</li>
+    <li>Mostrá el <b>401</b> con el mensaje: <code>"No autenticado. Iniciá sesión y mandá el token en el encabezado Authorization."</code>
+      <p class="say">“Swagger muestra el candado, pero quien bloquea de verdad es Laravel: las rutas de escritura tienen el middleware <code>auth:sanctum</code>.”</p></li>
+  </ol>
+
+  <h3>5. Login y Authorize <span class="meta">· 2 min</span></h3>
+  <ol class="steps">
+    <li><b>Autenticación → POST /api/login → Try it out.</b> El cuerpo ya trae el usuario de prueba:
+      <div class="codebox"><pre><code>{
+  "email": "admin1@f5gol.com",
+  "password": "password"
+}</code></pre><button class="copy" type="button">Copiar</button></div></li>
+    <li><b>Execute.</b> Mostrá la respuesta: <code>access_token</code> y <code>token_type: "Bearer"</code>. Copiá el token completo, con el número y la barra (por ejemplo <code>5|AbC...</code>).</li>
+    <li>Arriba a la derecha tocá <b>Authorize</b>, pegá el token y tocá <b>Authorize</b> otra vez. Cerrá el cuadro.
+      <p class="say">“Desde ahora Swagger manda el token en cada pedido, en el encabezado <code>Authorization: Bearer ...</code>.”</p></li>
+    <li><b>Autenticación → GET /api/user → Execute.</b> Devuelve el usuario logueado.</li>
+  </ol>
+
+  <h3>6. Crear un club <span class="meta">· 1 min</span></h3>
+  <ol class="steps">
+    <li><b>Clubes → POST /api/clubs → Try it out.</b> Pegá este cuerpo:
+      <div class="codebox"><pre><code>{
+  "administrador_id": 1,
+  "nombre": "Club de la presentación",
+  "direccion": "Av. Siempre Viva 742",
+  "telefono": "3454000000"
+}</code></pre><button class="copy" type="button">Copiar</button></div>
+      <b>Execute:</b> devuelve <b>201</b> con <code>"message": "Club creado correctamente"</code> y el club. <b>Anotá el <code>id</code></b>: lo usás en los pasos que siguen.</li>
+  </ol>
+
+  <h3 id="editar">7. Editar un dato y mandarlo <span class="meta">· 1 min</span></h3>
+  <ol class="steps">
+    <li><b>Clubes → PUT /api/clubs/{id} → Try it out.</b> En <code>id</code> poné el del club que creaste.</li>
+    <li>En el cuerpo mandá solo el campo que querés cambiar:
+      <div class="codebox"><pre><code>{
+  "nombre": "Club de la presentación (editado)"
+}</code></pre><button class="copy" type="button">Copiar</button></div></li>
+    <li><b>Execute.</b> Devuelve <b>200</b> con <code>"message": "Club actualizado correctamente"</code> y el club con el nombre nuevo.
+      <p class="say">“Al editar no hace falta mandar todo: solo se validan y se guardan los campos que vienen en el pedido.”</p></li>
+    <li>Para comprobarlo: <b>GET /api/clubs/{id}</b> con el mismo id muestra el nombre cambiado.</li>
+  </ol>
+
+  <h3 id="errores">8. Mandar un dato erróneo y leer el mensaje <span class="meta">· 2 min</span></h3>
+  <ol class="steps">
+    <li>Mismo <b>PUT /api/clubs/{id}</b>, ahora con el nombre vacío:
+      <div class="codebox"><pre><code>{
+  "nombre": ""
+}</code></pre><button class="copy" type="button">Copiar</button></div>
+      <b>Execute.</b> Respuesta: código <b>422</b> y este cuerpo:
+      <div class="codebox"><pre><code>{
+  "message": "El campo nombre es obligatorio.",
+  "errors": {
+    "nombre": ["El campo nombre es obligatorio."]
+  }
+}</code></pre></div>
+      <p class="say">“422 significa que el pedido llegó bien pero los datos no son válidos. En <code>errors</code> viene un mensaje por cada campo con problema, para que el front lo pueda mostrar al lado del campo.”</p></li>
+    <li>Varios errores juntos: un administrador que no existe y un teléfono que no es texto.
+      <div class="codebox"><pre><code>{
+  "administrador_id": 999,
+  "telefono": 12345
+}</code></pre><button class="copy" type="button">Copiar</button></div>
+      Respuesta <b>422</b>:
+      <div class="codebox"><pre><code>{
+  "message": "El administrador indicado no existe. (y 1 error más)",
+  "errors": {
+    "administrador_id": ["El administrador indicado no existe."],
+    "telefono": ["El campo teléfono tiene que ser un texto."]
+  }
+}</code></pre></div></li>
+    <li>Un texto demasiado largo: <code>"nombre"</code> con más de 150 caracteres da <code>"El campo nombre supera el máximo permitido (150)."</code></li>
+    <li>Corregí el dato y volvé a mandarlo: ahora devuelve <b>200</b>.
+      <p class="say">“Los datos inválidos nunca llegan a la base: Laravel los frena antes, en las clases de <code>app/Http/Requests</code>.”</p></li>
+  </ol>
+  <p class="meta">Otros errores para mostrar si te lo piden (todos dan <b>422</b>):</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Endpoint</th><th>Cuerpo</th><th>Mensaje</th></tr></thead>
+      <tbody>
+        <tr><td class="path">PUT /api/canchas/1</td><td><code>{"tarifa": -5}</code></td><td>El campo tarifa tiene que ser como mínimo 0.</td></tr>
+        <tr><td class="path">PUT /api/canchas/1</td><td><code>{"estado": "rota"}</code></td><td>El campo estado tiene que ser uno de estos valores: activa, inactiva.</td></tr>
+        <tr><td class="path">PUT /api/turnos/1</td><td><code>{"fecha": "10/12/2026"}</code></td><td>La fecha tiene que tener el formato AAAA-MM-DD (por ejemplo 2026-12-10).</td></tr>
+        <tr><td class="path">PUT /api/turnos/1</td><td><code>{"hora_fin": "14:00"}</code></td><td>La hora de fin tiene que ser posterior a la hora de inicio.</td></tr>
+        <tr><td class="path">PUT /api/turnos/1</td><td><code>{"estado": "roto"}</code></td><td>El campo estado tiene que ser uno de estos valores: disponible, ocupado, bloqueado.</td></tr>
+        <tr><td class="path">PUT /api/reservas/1</td><td><code>{"estado_pago": "regalado"}</code></td><td>El campo estado de pago tiene que ser uno de estos valores: pendiente, sena, pagado.</td></tr>
+        <tr><td class="path">POST /api/login</td><td><code>{"email": "hola"}</code></td><td>El campo correo electrónico debe ser una dirección de correo válida.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="meta">Y otros códigos: <b>PUT /api/clubs/999</b> con datos válidos da <b>404</b> “Club no encontrado”; <b>POST /api/login</b> con contraseña mala da <b>401</b> “Credenciales incorrectas”.</p>
+
+  <h3>9. Borrar el club <span class="meta">· 30 s</span></h3>
+  <ol class="steps">
+    <li><b>DELETE /api/clubs/{id}</b> con el mismo id. Devuelve <b>200</b>: “Club eliminado correctamente”.</li>
+    <li><b>GET /api/clubs/{id}</b> otra vez: ahora da <b>404</b> “No se encontró el recurso pedido.”
+      <p class="say">“Así quedó el ciclo completo: crear, editar, validar y borrar, todo protegido con el token.”</p></li>
+  </ol>
+
+  <h3>10. Cerrar sesión <span class="meta">· 1 min</span></h3>
+  <ol class="steps">
+    <li><b>Autenticación → POST /api/logout → Try it out → Execute.</b> Devuelve <b>200</b>: “Sesión cerrada correctamente”.</li>
+    <li>Sin tocar Authorize, ejecutá <b>GET /api/user</b>: ahora da <b>401</b>, aunque Swagger sigue mandando el mismo token.
+      <p class="say">“El logout borra el token en el servidor. Aunque alguien lo haya copiado, ya no sirve.”</p></li>
+  </ol>
+
+  <h3>11. Reservas con cupo (opcional) <span class="meta">· 1 min</span></h3>
+  <ol class="steps">
+    <li>Explicá la regla del negocio: una reserva <b>completa</b> ocupa el turno entero; las reservas <b>individuales</b> suman jugadores hasta completar el cupo, y ahí el turno pasa a <b>ocupado</b>.</li>
+    <li>Si un turno ya está ocupado, <b>POST /api/reservas</b> devuelve <b>409</b>: “El turno ya no está disponible”. Si no alcanza el cupo: “No hay cupo suficiente en este turno”.</li>
+    <li>Al cancelar una reserva (<b>DELETE /api/reservas/{id}</b>) el turno se libera si vuelve a haber lugar.</li>
+  </ol>
+
+  <h3>12. Cierre <span class="meta">· 30 s</span></h3>
+  <ol class="steps">
+    <li>Pasá a la pestaña del front, <a href="http://localhost:4200">http://localhost:4200</a>: clubes → club → cancha → turnos.
+      <p class="say">“La página usa exactamente esta API. Lo que vimos en Swagger es lo que consume el front.”</p></li>
+  </ol>
+</section>
+
+<section class="card" id="interaccion">
+  <h2>Cómo interactúa la API</h2>
+  <p>Cada vez que tocás <b>Execute</b>, Swagger hace un pedido HTTP real. Debajo del botón muestra todo lo que viaja y vuelve:</p>
+  <ul>
+    <li><b>Curl:</b> el pedido completo como comando. Se ven el método, la URL y los encabezados: <code>accept: application/json</code>, <code>Authorization: Bearer ...</code> y <code>Content-Type: application/json</code>, más el cuerpo con <code>-d</code>.</li>
+    <li><b>Request URL:</b> la dirección exacta, con los filtros si los hay (por ejemplo <code>/api/turnos?cancha_id=1&amp;fecha=2026-09-04</code>).</li>
+    <li><b>Server response:</b> el <b>código</b>, el <b>cuerpo</b> en JSON y los <b>encabezados</b> de respuesta.</li>
+  </ul>
+
+  <h3>El recorrido de un pedido (por ejemplo, PUT /api/clubs/5)</h3>
+  <ol class="steps">
+    <li><b>Ruta:</b> Laravel busca en <code>routes/api.php</code> qué controlador atiende <code>PUT /api/clubs/{id}</code>. Si no existe la ruta → <b>404</b> “La ruta pedida no existe.”</li>
+    <li><b>Autenticación:</b> el middleware <code>auth:sanctum</code> revisa el token del encabezado <code>Authorization</code>. Si falta o no es válido → <b>401</b>.</li>
+    <li><b>Validación:</b> la clase <code>ClubRequest</code> (en <code>app/Http/Requests</code>) revisa los datos. Si algo está mal → <b>422</b> con un mensaje por campo, y el pedido no sigue.</li>
+    <li><b>Controlador:</b> <code>ClubController@update</code> busca el club. Si no existe → <b>404</b> “Club no encontrado”.</li>
+    <li><b>Base de datos:</b> Eloquent guarda los cambios en MySQL (tabla <code>clubs</code>).</li>
+    <li><b>Respuesta:</b> la API devuelve JSON con el código <b>200</b> y el club actualizado.</li>
+  </ol>
+  <p class="say">“El front hace exactamente estos mismos pedidos. Swagger nos deja verlos y probarlos sin escribir código.”</p>
+</section>
+
+<section class="card" id="endpoints">
+  <h2>Todos los endpoints</h2>
+  <p class="meta">28 en total. 🔒 = necesita token.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Método</th><th>Ruta</th><th>Qué hace</th><th>Token</th></tr></thead>
+      <tbody>
+        <tr><td><span class="m post">POST</span></td><td class="path">/api/login</td><td>Inicia sesión y devuelve el token</td><td></td></tr>
+        <tr><td><span class="m get">GET</span></td><td class="path">/api/user</td><td>Usuario logueado</td><td class="lock">🔒</td></tr>
+        <tr><td><span class="m post">POST</span></td><td class="path">/api/logout</td><td>Cierra la sesión (revoca el token)</td><td class="lock">🔒</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Cada recurso tiene los mismos 5 endpoints. Reemplazá <code>{recurso}</code> por <code>clubs</code>, <code>canchas</code>, <code>turnos</code>, <code>reservas</code> o <code>jugador-anotados</code>:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Método</th><th>Ruta</th><th>Qué hace</th><th>Token</th></tr></thead>
+      <tbody>
+        <tr><td><span class="m get">GET</span></td><td class="path">/api/{recurso}</td><td>Lista (con filtros)</td><td></td></tr>
+        <tr><td><span class="m get">GET</span></td><td class="path">/api/{recurso}/{id}</td><td>Un registro con sus relaciones</td><td></td></tr>
+        <tr><td><span class="m post">POST</span></td><td class="path">/api/{recurso}</td><td>Crear</td><td class="lock">🔒</td></tr>
+        <tr><td><span class="m put">PUT</span></td><td class="path">/api/{recurso}/{id}</td><td>Editar</td><td class="lock">🔒</td></tr>
+        <tr><td><span class="m delete">DELETE</span></td><td class="path">/api/{recurso}/{id}</td><td>Borrar</td><td class="lock">🔒</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Filtros de las listas</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Lista</th><th>Filtros</th><th>Paginada</th></tr></thead>
+      <tbody>
+        <tr><td class="path">/api/clubs</td><td><code>page</code></td><td>Sí, de a 10</td></tr>
+        <tr><td class="path">/api/canchas</td><td><code>club_id</code>, <code>page</code></td><td>Sí, de a 10</td></tr>
+        <tr><td class="path">/api/turnos</td><td><code>cancha_id</code>, <code>fecha</code></td><td>No</td></tr>
+        <tr><td class="path">/api/reservas</td><td><code>usuario_id</code>, <code>turno_id</code>, <code>page</code></td><td>Sí, de a 10</td></tr>
+        <tr><td class="path">/api/jugador-anotados</td><td><code>reserva_id</code></td><td>No</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card" id="codigos">
+  <h2>Códigos de respuesta</h2>
+  <div class="codes">
+    <div class="code-item"><b>200</b><span>OK: lectura, edición o borrado</span></div>
+    <div class="code-item"><b>201</b><span>Creado</span></div>
+    <div class="code-item"><b>401</b><span>Sin token, token revocado o credenciales incorrectas</span></div>
+    <div class="code-item"><b>404</b><span>No existe ese registro o esa ruta</span></div>
+    <div class="code-item"><b>409</b><span>Turno ocupado o sin cupo</span></div>
+    <div class="code-item"><b>422</b><span>Datos inválidos: un mensaje por campo en <code>errors</code></span></div>
+  </div>
+</section>
+
+<section class="card" id="cuidados">
+  <h2>Cuidados en vivo</h2>
+  <p class="warn"><strong>Si algo da 401 después de Authorize</strong>, revisá que hayas pegado el token completo, incluido el número y la barra del principio. Si ya hiciste logout, volvé a hacer login y pegá el token nuevo.</p>
+  <p class="warn"><strong>Usá un club creado en la demo para editar y borrar</strong>, no uno de los que vienen cargados, así no cambiás los datos de prueba.</p>
+  <p class="warn"><strong>El ejemplo de <code>POST /api/turnos</code> sirve una sola vez.</strong> La segunda vez da 422 “Ya existe un turno en esa cancha para esa fecha y hora de inicio”. Si querés crear otro, cambiá la hora.</p>
+  <p class="warn"><strong>Si Execute queda girando unos segundos</strong>, es normal en la lista de turnos: calcula el cupo de cada uno.</p>
+</section>
+
+<section class="card" id="preguntas">
+  <h2>Preguntas que te pueden hacer</h2>
+  <details>
+    <summary>¿Cómo se documenta un endpoint?</summary>
+    <p>Con un atributo de PHP arriba del método del controlador. Por ejemplo, <code>#[OA\Get(path: '/api/clubs', tags: ['Clubes'], ...)]</code>. La parte general (título, servidor y esquema de seguridad) está en <code>backend/app/Swagger/OpenApi.php</code>.</p>
+  </details>
+  <details>
+    <summary>¿Cómo se actualiza la documentación?</summary>
+    <p>Después de cambiar los atributos, en la carpeta <code>backend</code> se corre <code>php artisan l5-swagger:generate</code>. Eso vuelve a generar <code>storage/api-docs/api-docs.json</code>, que es lo que lee la página.</p>
+  </details>
+  <details>
+    <summary>¿Qué librerías usan?</summary>
+    <p><b>L5-Swagger</b> (darkaonline/l5-swagger) integra Swagger UI con Laravel, y <b>swagger-php</b> (zircote/swagger-php) lee los atributos y arma el archivo OpenAPI.</p>
+  </details>
+  <details>
+    <summary>¿El candado de Swagger es lo que protege la ruta?</summary>
+    <p>No. El candado solo indica que hace falta un token y permite enviarlo con Authorize. La protección real es el middleware <code>auth:sanctum</code> en <code>routes/api.php</code>.</p>
+  </details>
+  <details>
+    <summary>¿Qué es Sanctum y cómo funciona el token?</summary>
+    <p>Es el sistema de autenticación de Laravel para APIs. En el login se crea un token personal que se guarda en la tabla <code>personal_access_tokens</code>. El cliente lo manda en cada pedido como <code>Authorization: Bearer &lt;token&gt;</code>, y Sanctum identifica al usuario con él.</p>
+  </details>
+  <details>
+    <summary>¿Por qué el front y Swagger tienen distinto puerto?</summary>
+    <p>Porque son dos programas: Angular corre en el 4200 y Laravel en el 8000. Swagger documenta la API, así que está en Laravel. En desarrollo, el front manda todo lo que empieza con <code>/api</code> al 8000 mediante un proxy (<code>frontend/proxy.conf.json</code>).</p>
+  </details>
+  <details>
+    <summary>¿Dónde está la validación de los datos?</summary>
+    <p>En <code>backend/app/Http/Requests</code>: una clase por recurso (<code>ClubRequest</code>, <code>CanchaRequest</code>, <code>TurnoRequest</code>, <code>ReservaRequest</code>, <code>JugadorAnotadoRequest</code>) con las reglas, y <code>ApiRequest</code> con los mensajes en español. El controlador las recibe como parámetro y Laravel valida antes de entrar al método.</p>
+  </details>
+  <details>
+    <summary>¿Por qué 422 y no 400?</summary>
+    <p>422 (Unprocessable Content) indica que el pedido está bien formado pero los datos no cumplen las reglas. Es el código que usa Laravel para los errores de validación.</p>
+  </details>
+  <details>
+    <summary>¿Qué hace el logout?</summary>
+    <p>Borra de la tabla <code>personal_access_tokens</code> el token con el que se hizo el pedido. Desde ese momento ese token devuelve 401. Las sesiones en otros dispositivos siguen activas porque usan otros tokens.</p>
+  </details>
+  <details>
+    <summary>¿Qué falta hacer?</summary>
+    <p>Usar roles para que solo los administradores puedan crear clubes y canchas, y tomar el usuario de la reserva desde el token en vez de recibir <code>usuario_id</code> en el cuerpo.</p>
+  </details>
+</section>
+
+</div>
+
+<script>
+  // Botones "Copiar" de los bloques de código
+  document.querySelectorAll('.codebox').forEach(function (box) {
+    var btn = box.querySelector('.copy');
+    if (!btn) return; // las respuestas de ejemplo no tienen botón
+    btn.addEventListener('click', function () {
+      var text = box.querySelector('code').innerText;
+      var done = function () {
+        btn.textContent = 'Copiado';
+        setTimeout(function () { btn.textContent = 'Copiar'; }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { btn.textContent = 'Seleccioná y copiá'; });
+      } else {
+        btn.textContent = 'Seleccioná y copiá';
+      }
+    });
+  });
+
+  // Lista de preparación: recuerda lo tildado en este navegador
+  (function () {
+    var KEY = 'f5gol-guia-checklist';
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+    var boxes = Array.prototype.slice.call(document.querySelectorAll('#checklist .check'));
+    var progress = document.getElementById('progress');
+    function update() {
+      var done = boxes.filter(function (b) { return b.checked; }).length;
+      progress.textContent = done === boxes.length ? 'Todo listo para empezar.' : done + ' de ' + boxes.length + ' listos';
+    }
+    boxes.forEach(function (b) {
+      b.checked = !!saved[b.dataset.k];
+      b.addEventListener('change', function () {
+        saved[b.dataset.k] = b.checked;
+        try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+        update();
+      });
+    });
+    update();
+  })();
+</script>
+</body>
+</html>
