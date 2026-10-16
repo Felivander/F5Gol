@@ -13,7 +13,9 @@ export class App {
   private router = inject(Router);
 
   salir() {
-    this.auth.logout();
-    this.router.navigate(['/clubes']);
+    this.auth.logout().subscribe({
+      complete: () => this.router.navigate(['/clubes']),
+      error: () => this.router.navigate(['/clubes'])
+    });
   }
 }

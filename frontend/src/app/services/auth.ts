@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { tap } from 'rxjs';
+import { finalize, tap } from 'rxjs';
 import { LoginResponse, Usuario } from '../models';
 
 const TOKEN_KEY = 'f5gol_token';
@@ -25,7 +25,15 @@ export class Auth {
     );
   }
 
+  // Revoca el token en la API y después limpia la sesión local,
+  // aunque la API falle (por ejemplo, si el token ya había vencido)
   logout() {
+    return this.http.post('/api/logout', {}).pipe(
+      finalize(() => this.limpiarSesion())
+    );
+  }
+
+  private limpiarSesion() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     this.token.set(null);
