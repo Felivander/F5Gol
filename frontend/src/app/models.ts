@@ -3,8 +3,9 @@
 export interface Usuario {
   id: number;
   name: string;
-  email: string;
   rol?: string;
+  // Solo viene en relaciones como el administrador de un club; el login no lo devuelve
+  email?: string;
 }
 
 export interface Club {

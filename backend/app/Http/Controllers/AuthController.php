@@ -7,19 +7,11 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use OpenApi\Attributes as OA;
 
-// GET /api/user se define como closure en routes/api.php; se documenta acá.
-#[OA\Get(
-    path: '/api/user',
-    summary: 'Obtener usuario autenticado',
-    tags: ['Autenticación'],
-    security: [['sanctum' => []]],
-    responses: [
-        new OA\Response(response: 200, description: 'Usuario autenticado correctamente.'),
-        new OA\Response(response: 401, description: 'No autenticado.'),
-    ]
-)]
 class AuthController extends Controller
 {
+    // Datos del usuario que se devuelven en las respuestas; el resto (email, fechas, etc.) no hace falta
+    private const CAMPOS_USUARIO = ['id', 'name', 'rol'];
+
     #[OA\Post(
         path: '/api/login',
         summary: 'Iniciar sesión',
@@ -43,7 +35,7 @@ class AuthController extends Controller
                     new OA\Property(property: 'message', type: 'string', example: 'Login exitoso'),
                     new OA\Property(property: 'access_token', type: 'string', example: '1|xxxxxxxxxxxxxxxxxxxxxxxx'),
                     new OA\Property(property: 'token_type', type: 'string', example: 'Bearer'),
-                    new OA\Property(property: 'user', type: 'object'),
+                    new OA\Property(property: 'user', ref: '#/components/schemas/Usuario'),
                 ])
             ),
             new OA\Response(response: 401, description: 'Credenciales incorrectas.'),
@@ -77,8 +69,27 @@ class AuthController extends Controller
             'message' => 'Login exitoso',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user
+            'user' => $user->only(self::CAMPOS_USUARIO)
         ]);
+    }
+
+    #[OA\Get(
+        path: '/api/user',
+        summary: 'Obtener usuario autenticado',
+        tags: ['Autenticación'],
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Usuario autenticado correctamente.',
+                content: new OA\JsonContent(ref: '#/components/schemas/Usuario')
+            ),
+            new OA\Response(response: 401, description: 'No autenticado.'),
+        ]
+    )]
+    public function me(Request $request)
+    {
+        return response()->json($request->user()->only(self::CAMPOS_USUARIO));
     }
 
     #[OA\Post(

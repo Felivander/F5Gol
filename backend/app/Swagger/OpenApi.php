@@ -85,6 +85,14 @@ use OpenApi\Attributes as OA;
             ]
         ),
         new OA\Schema(
+            schema: 'Usuario',
+            properties: [
+                new OA\Property(property: 'id', type: 'integer', example: 1),
+                new OA\Property(property: 'name', type: 'string', example: 'Admin Concordia FC'),
+                new OA\Property(property: 'rol', type: 'string', enum: ['administrador', 'jugador'], example: 'administrador'),
+            ]
+        ),
+        new OA\Schema(
             schema: 'ErrorValidacion',
             properties: [
                 new OA\Property(property: 'message', type: 'string', example: 'El campo nombre es obligatorio. (y 1 error más)'),

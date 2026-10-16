@@ -6,14 +6,11 @@ use App\Http\Controllers\ClubController;
 use App\Http\Controllers\JugadorAnotadoController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\TurnoController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::get('/user', [AuthController::class, 'me'])->middleware('auth:sanctum');
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
