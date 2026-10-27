@@ -18,6 +18,9 @@ class Reserva extends Model
 {
     use HasFactory;
 
+    // Un jugador puede cancelar hasta esta cantidad de horas antes del partido
+    public const HORAS_MINIMAS_PARA_CANCELAR = 2;
+
     // Una reserva pertenece a un turno
     public function turno()
     {

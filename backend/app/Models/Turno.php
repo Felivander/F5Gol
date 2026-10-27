@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 #[Fillable([
     'cancha_id',
@@ -28,6 +29,12 @@ class Turno extends Model
     public function reservas()
     {
         return $this->hasMany(Reserva::class);
+    }
+
+    // Fecha y hora en que empieza el partido
+    public function inicio(): Carbon
+    {
+        return Carbon::parse(substr($this->fecha, 0, 10).' '.$this->hora_inicio);
     }
 
     // Cantidad de jugadores anotados actualmente vía matchmaking en este turno
