@@ -828,6 +828,25 @@
                         }
                     },
                     {
+                        "name": "cancha_id",
+                        "in": "query",
+                        "description": "Filtrar por cancha del turno",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "fecha",
+                        "in": "query",
+                        "description": "Filtrar por fecha del turno (AAAA-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "description": "Número de página",
