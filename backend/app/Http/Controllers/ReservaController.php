@@ -193,18 +193,20 @@ class ReservaController extends Controller
      * Remove the specified resource from storage.
      *
      * Cancelar una reserva libera el turno automáticamente.
+     * La reserva no se borra: queda con estado "cancelada" en el historial.
      */
     #[OA\Delete(
         path: '/api/reservas/{id}',
-        summary: 'Eliminar reserva',
+        summary: 'Cancelar reserva',
+        description: 'La reserva queda con estado "cancelada" (sigue apareciendo en el historial) y el turno se libera si corresponde.',
         tags: ['Reservas'],
         security: [['sanctum' => []]],
         parameters: [new OA\Parameter(ref: '#/components/parameters/id')],
         responses: [
-            new OA\Response(response: 200, description: 'Eliminado correctamente.', content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')),
+            new OA\Response(response: 200, description: 'Cancelada correctamente.', content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')),
             new OA\Response(response: 401, description: 'No autenticado.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
-            new OA\Response(response: 409, description: 'Fuera del plazo de cancelación (hasta 2 horas antes del turno).'),
+            new OA\Response(response: 409, description: 'La reserva ya estaba cancelada o está fuera del plazo de cancelación (hasta 2 horas antes del turno).'),
         ]
     )]
     public function destroy(Request $request, string $id)
@@ -217,6 +219,12 @@ class ReservaController extends Controller
             ], 404);
         }
 
+        if ($reserva->estado === 'cancelada') {
+            return response()->json([
+                'message' => 'La reserva ya estaba cancelada',
+            ], 409);
+        }
+
         $turno = $reserva->turno;
 
         // El administrador del club puede cancelar siempre; el jugador, solo dentro del plazo
@@ -227,7 +235,7 @@ class ReservaController extends Controller
             ], 409);
         }
 
-        $reserva->delete();
+        $reserva->update(['estado' => 'cancelada']);
 
         if ($turno && $turno->estado !== 'bloqueado') {
             // El turno sigue ocupado solo si queda una reserva completa activa
