@@ -317,7 +317,7 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o el club no es suyo."
                     }
                 },
                 "security": [
@@ -389,7 +389,7 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o el club no es suyo."
                     },
                     "404": {
                         "description": "No encontrado."
@@ -428,7 +428,7 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o el club no es suyo."
                     },
                     "404": {
                         "description": "No encontrado."
