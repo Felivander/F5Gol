@@ -8,6 +8,8 @@ use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\TurnoController;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/register', [AuthController::class, 'register']);
+
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/user', [AuthController::class, 'me'])->middleware('auth:sanctum');
