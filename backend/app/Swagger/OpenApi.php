@@ -52,6 +52,15 @@ use OpenApi\Attributes as OA;
                 new OA\Property(property: 'descripcion', type: 'string', nullable: true, example: 'Césped sintético, techada'),
                 new OA\Property(property: 'tarifa', type: 'number', format: 'float', example: 25000),
                 new OA\Property(property: 'estado', type: 'string', maxLength: 20, example: 'activa'),
+                new OA\Property(
+                    property: 'fotos',
+                    type: 'array',
+                    items: new OA\Items(type: 'string', format: 'uri'),
+                    nullable: true,
+                    readOnly: true,
+                    description: 'URLs públicas de las fotos. Se cargan con POST /api/canchas/{id}/fotos y se borran con DELETE /api/canchas/{id}/fotos/{indice}.',
+                    example: ['http://localhost:8000/storage/canchas/1/foto.jpg']
+                ),
             ]
         ),
         new OA\Schema(

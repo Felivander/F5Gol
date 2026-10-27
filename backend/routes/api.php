@@ -29,6 +29,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('administrador')->group(function () {
         Route::apiResource('clubs', ClubController::class)->except(['index', 'show']);
         Route::apiResource('canchas', CanchaController::class)->except(['index', 'show']);
+        Route::post('canchas/{id}/fotos', [CanchaController::class, 'subirFoto']);
+        Route::delete('canchas/{id}/fotos/{indice}', [CanchaController::class, 'borrarFoto'])->whereNumber('indice');
         Route::apiResource('turnos', TurnoController::class)->except(['index', 'show']);
     });
 
