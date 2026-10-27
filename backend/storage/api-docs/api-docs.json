@@ -1005,8 +1005,8 @@
                 "tags": [
                     "Reservas"
                 ],
-                "summary": "Eliminar reserva",
-                "description": "Remove the specified resource from storage.\n\nCancelar una reserva libera el turno automáticamente.",
+                "summary": "Cancelar reserva",
+                "description": "La reserva queda con estado \"cancelada\" (sigue apareciendo en el historial) y el turno se libera si corresponde.",
                 "operationId": "992ae788935b42ab455ff366e9887ab7",
                 "parameters": [
                     {
@@ -1015,7 +1015,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Eliminado correctamente.",
+                        "description": "Cancelada correctamente.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1031,7 +1031,7 @@
                         "description": "No encontrado."
                     },
                     "409": {
-                        "description": "Fuera del plazo de cancelación (hasta 2 horas antes del turno)."
+                        "description": "La reserva ya estaba cancelada o está fuera del plazo de cancelación (hasta 2 horas antes del turno)."
                     }
                 },
                 "security": [

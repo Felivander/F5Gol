@@ -56,6 +56,52 @@ class CancelarReservaTest extends TestCase
         $this->assertSame('disponible', $turno->fresh()->estado);
     }
 
+    public function test_la_reserva_cancelada_queda_en_el_historial(): void
+    {
+        $jugador = $this->crearJugador();
+        $reserva = $this->reservaDe($jugador, $this->turnoQueEmpiezaEn(3 * 60));
+        Sanctum::actingAs($jugador);
+
+        $this->deleteJson("/api/reservas/{$reserva->id}")->assertOk();
+
+        $this->assertSame('cancelada', $reserva->fresh()->estado);
+        $this->getJson("/api/reservas?usuario_id={$jugador->id}")
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.estado', 'cancelada');
+    }
+
+    public function test_no_se_puede_cancelar_dos_veces(): void
+    {
+        $jugador = $this->crearJugador();
+        $reserva = $this->reservaDe($jugador, $this->turnoQueEmpiezaEn(3 * 60));
+        Sanctum::actingAs($jugador);
+
+        $this->deleteJson("/api/reservas/{$reserva->id}")->assertOk();
+        $this->deleteJson("/api/reservas/{$reserva->id}")
+            ->assertConflict()
+            ->assertJsonPath('message', 'La reserva ya estaba cancelada');
+    }
+
+    public function test_cancelar_en_matchmaking_libera_cupo(): void
+    {
+        $turno = $this->turnoQueEmpiezaEn(3 * 60);
+        $jugadores = collect(range(1, 5))->map(fn () => $this->crearJugador());
+        $reservas = $jugadores->map(fn ($j) => Reserva::create([
+            'turno_id' => $turno->id,
+            'usuario_id' => $j->id,
+            'tipo' => 'individual',
+            'cantidad_jugadores' => 1,
+            'estado' => 'confirmada',
+        ]));
+        $turno->update(['estado' => 'ocupado']);
+        Sanctum::actingAs($jugadores[0]);
+
+        $this->deleteJson("/api/reservas/{$reservas[0]->id}")->assertOk();
+
+        $this->assertSame(4, $turno->cupoActual());
+        $this->assertSame('disponible', $turno->fresh()->estado);
+    }
+
     public function test_no_deja_cancelar_a_menos_de_dos_horas(): void
     {
         $jugador = $this->crearJugador();
