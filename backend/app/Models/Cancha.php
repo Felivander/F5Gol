@@ -14,10 +14,16 @@ use Illuminate\Database\Eloquent\Model;
     'descripcion',
     'tarifa',
     'estado',
+    'fotos',
 ])]
 class Cancha extends Model
 {
     use HasFactory;
+
+    // URLs públicas de las fotos, en el orden en que se subieron
+    protected $casts = [
+        'fotos' => 'array',
+    ];
 
     // Una cancha pertenece a un club
     public function club()

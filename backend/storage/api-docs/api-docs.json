@@ -441,6 +441,115 @@
                 ]
             }
         },
+        "/api/canchas/{id}/fotos": {
+            "post": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Subir una foto de la cancha",
+                "description": "Agrega la URL pública de la foto al final del array fotos de la cancha.",
+                "operationId": "344359efcdf8521c2299abeb677471bf",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "foto"
+                                ],
+                                "properties": {
+                                    "foto": {
+                                        "description": "Imagen jpg, png o webp de hasta 4 MB.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Foto subida: devuelve la cancha con el array fotos actualizado."
+                    },
+                    "422": {
+                        "description": "El archivo no es una imagen válida o pesa más de 4 MB.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o el club no es suyo."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/canchas/{id}/fotos/{indice}": {
+            "delete": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Borrar una foto de la cancha",
+                "description": "Borra la foto que está en esa posición del array fotos (empieza en 0). Las siguientes se corren un lugar.",
+                "operationId": "3752ca5e96135624c8e91428f1b05d31",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "name": "indice",
+                        "in": "path",
+                        "description": "Posición de la foto en el array fotos",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "example": 0
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Foto borrada: devuelve la cancha con el array fotos actualizado."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o el club no es suyo."
+                    },
+                    "404": {
+                        "description": "No existe la cancha o la foto."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/clubs": {
             "get": {
                 "tags": [
@@ -1297,6 +1406,19 @@
                         "type": "string",
                         "example": "activa",
                         "maxLength": 20
+                    },
+                    "fotos": {
+                        "description": "URLs públicas de las fotos. Se cargan con POST /api/canchas/{id}/fotos y se borran con DELETE /api/canchas/{id}/fotos/{indice}.",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "readOnly": true,
+                        "example": [
+                            "http://localhost:8000/storage/canchas/1/foto.jpg"
+                        ],
+                        "nullable": true
                     }
                 },
                 "type": "object"
