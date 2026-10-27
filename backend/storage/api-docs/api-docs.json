@@ -847,6 +847,26 @@
                         }
                     },
                     {
+                        "name": "desde",
+                        "in": "query",
+                        "description": "Turnos desde esta fecha inclusive (AAAA-MM-DD), por ejemplo el lunes de la semana",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "hasta",
+                        "in": "query",
+                        "description": "Turnos hasta esta fecha inclusive (AAAA-MM-DD), por ejemplo el domingo de la semana",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "description": "Número de página",

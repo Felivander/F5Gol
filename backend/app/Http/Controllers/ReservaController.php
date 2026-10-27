@@ -24,6 +24,8 @@ class ReservaController extends Controller
             new OA\Parameter(name: 'turno_id', description: 'Filtrar por turno', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
             new OA\Parameter(name: 'cancha_id', description: 'Filtrar por cancha del turno', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
             new OA\Parameter(name: 'fecha', description: 'Filtrar por fecha del turno (AAAA-MM-DD)', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'desde', description: 'Turnos desde esta fecha inclusive (AAAA-MM-DD), por ejemplo el lunes de la semana', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'hasta', description: 'Turnos hasta esta fecha inclusive (AAAA-MM-DD), por ejemplo el domingo de la semana', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
             new OA\Parameter(name: 'page', description: 'Número de página', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
@@ -50,6 +52,15 @@ class ReservaController extends Controller
 
         if ($request->has('fecha')) {
             $query->whereHas('turno', fn ($q) => $q->whereDate('fecha', $request->query('fecha')));
+        }
+
+        // Rango de fechas, para ver la semana completa de una cancha
+        if ($request->has('desde')) {
+            $query->whereHas('turno', fn ($q) => $q->whereDate('fecha', '>=', $request->query('desde')));
+        }
+
+        if ($request->has('hasta')) {
+            $query->whereHas('turno', fn ($q) => $q->whereDate('fecha', '<=', $request->query('hasta')));
         }
 
         return response()->json($query->paginate(10), 200);
