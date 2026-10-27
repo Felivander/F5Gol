@@ -22,6 +22,8 @@ class ReservaController extends Controller
         parameters: [
             new OA\Parameter(name: 'usuario_id', description: 'Filtrar por usuario ("mis reservas")', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
             new OA\Parameter(name: 'turno_id', description: 'Filtrar por turno', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'cancha_id', description: 'Filtrar por cancha del turno', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'fecha', description: 'Filtrar por fecha del turno (AAAA-MM-DD)', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
             new OA\Parameter(name: 'page', description: 'Número de página', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
@@ -39,6 +41,15 @@ class ReservaController extends Controller
 
         if ($request->has('turno_id')) {
             $query->where('turno_id', $request->query('turno_id'));
+        }
+
+        // Para el panel del administrador: reservas de una cancha en un día
+        if ($request->has('cancha_id')) {
+            $query->whereHas('turno', fn ($q) => $q->where('cancha_id', $request->query('cancha_id')));
+        }
+
+        if ($request->has('fecha')) {
+            $query->whereHas('turno', fn ($q) => $q->whereDate('fecha', $request->query('fecha')));
         }
 
         return response()->json($query->paginate(10), 200);
