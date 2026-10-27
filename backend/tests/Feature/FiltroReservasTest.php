@@ -48,6 +48,22 @@ class FiltroReservasTest extends TestCase
             ->assertJsonPath('data.0.id', $deLaCancha1->id);
     }
 
+    public function test_filtra_por_rango_de_fechas_para_ver_la_semana(): void
+    {
+        $cancha = $this->crearCancha();
+        $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-08']));
+        $lunes = $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-09']));
+        $domingo = $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-15']));
+        $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-16']));
+
+        $ids = $this->getJson("/api/reservas?cancha_id={$cancha->id}&desde=2026-11-09&hasta=2026-11-15")
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->json('data.*.id');
+
+        $this->assertEqualsCanonicalizing([$lunes->id, $domingo->id], $ids);
+    }
+
     public function test_combina_cancha_y_fecha(): void
     {
         $cancha = $this->crearCancha();
