@@ -1029,6 +1029,9 @@
                     },
                     "404": {
                         "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "Fuera del plazo de cancelación (hasta 2 horas antes del turno)."
                     }
                 },
                 "security": [

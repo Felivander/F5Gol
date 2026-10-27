@@ -204,9 +204,10 @@ class ReservaController extends Controller
             new OA\Response(response: 200, description: 'Eliminado correctamente.', content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')),
             new OA\Response(response: 401, description: 'No autenticado.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
+            new OA\Response(response: 409, description: 'Fuera del plazo de cancelación (hasta 2 horas antes del turno).'),
         ]
     )]
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $reserva = Reserva::find($id);
 
@@ -217,6 +218,15 @@ class ReservaController extends Controller
         }
 
         $turno = $reserva->turno;
+
+        // El administrador del club puede cancelar siempre; el jugador, solo dentro del plazo
+        $limite = $turno?->inicio()->subHours(Reserva::HORAS_MINIMAS_PARA_CANCELAR);
+        if ($request->user()->rol !== 'administrador' && $limite && now()->greaterThan($limite)) {
+            return response()->json([
+                'message' => 'Las reservas se pueden cancelar hasta '.Reserva::HORAS_MINIMAS_PARA_CANCELAR.' horas antes del turno.',
+            ], 409);
+        }
+
         $reserva->delete();
 
         if ($turno && $turno->estado !== 'bloqueado') {
