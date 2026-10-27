@@ -4,6 +4,7 @@ namespace Tests;
 
 use App\Models\Cancha;
 use App\Models\Club;
+use App\Models\Reserva;
 use App\Models\Turno;
 use App\Models\User;
 
@@ -46,6 +47,17 @@ trait CreaDatosDePrueba
             'fecha' => now()->addDays(2)->toDateString(),
             'hora_inicio' => '20:00',
             'hora_fin' => '21:00',
+        ], $datos));
+    }
+
+    protected function crearReserva(Turno $turno, array $datos = []): Reserva
+    {
+        return Reserva::create(array_merge([
+            'turno_id' => $turno->id,
+            'usuario_id' => $this->crearJugador()->id,
+            'tipo' => 'completa',
+            'cantidad_jugadores' => 1,
+            'estado' => 'confirmada',
         ], $datos));
     }
 }
