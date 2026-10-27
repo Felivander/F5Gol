@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cancha;
+use App\Models\Club;
 use App\Http\Requests\CanchaRequest;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
@@ -49,11 +50,15 @@ class CanchaController extends Controller
             new OA\Response(response: 201, description: 'Creado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
-            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o el club no es suyo.'),
         ]
     )]
     public function store(CanchaRequest $request)
     {
+        if (! $this->esDuenoDelClub($request, $request->input('club_id'))) {
+            return $this->respuestaNoEsDueno();
+        }
+
         $cancha = Cancha::create($request->validated());
 
         return response()->json([
@@ -96,7 +101,7 @@ class CanchaController extends Controller
             new OA\Response(response: 200, description: 'Actualizado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
-            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o el club no es suyo.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
@@ -108,6 +113,12 @@ class CanchaController extends Controller
             return response()->json([
                 'message' => 'Cancha no encontrada',
             ], 404);
+        }
+
+        // Tiene que ser dueño del club actual y, si la mueve, también del club nuevo
+        if (! $this->esDuenoDelClub($request, $cancha->club_id)
+            || ($request->has('club_id') && ! $this->esDuenoDelClub($request, $request->input('club_id')))) {
+            return $this->respuestaNoEsDueno();
         }
 
         $cancha->update($request->validated());
@@ -130,11 +141,11 @@ class CanchaController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Eliminado correctamente.', content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')),
             new OA\Response(response: 401, description: 'No autenticado.'),
-            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o el club no es suyo.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $cancha = Cancha::find($id);
 
@@ -144,10 +155,29 @@ class CanchaController extends Controller
             ], 404);
         }
 
+        if (! $this->esDuenoDelClub($request, $cancha->club_id)) {
+            return $this->respuestaNoEsDueno();
+        }
+
         $cancha->delete();
 
         return response()->json([
             'message' => 'Cancha eliminada correctamente',
         ], 200);
+    }
+
+    // Un administrador solo gestiona las canchas de los clubes que administra
+    private function esDuenoDelClub(Request $request, mixed $clubId): bool
+    {
+        return Club::where('id', $clubId)
+            ->where('administrador_id', $request->user()->id)
+            ->exists();
+    }
+
+    private function respuestaNoEsDueno()
+    {
+        return response()->json([
+            'message' => 'Solo podés gestionar las canchas de tus propios clubes.',
+        ], 403);
     }
 }
