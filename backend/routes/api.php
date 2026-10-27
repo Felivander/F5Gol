@@ -25,9 +25,13 @@ Route::apiResource('jugador-anotados', JugadorAnotadoController::class)->only(['
 
 // Rutas protegidas (escritura)
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('clubs', ClubController::class)->except(['index', 'show']);
-    Route::apiResource('canchas', CanchaController::class)->except(['index', 'show']);
-    Route::apiResource('turnos', TurnoController::class)->except(['index', 'show']);
+    // Gestión del club, sus canchas y sus turnos: solo administradores
+    Route::middleware('administrador')->group(function () {
+        Route::apiResource('clubs', ClubController::class)->except(['index', 'show']);
+        Route::apiResource('canchas', CanchaController::class)->except(['index', 'show']);
+        Route::apiResource('turnos', TurnoController::class)->except(['index', 'show']);
+    });
+
     Route::apiResource('reservas', ReservaController::class)->except(['index', 'show']);
     Route::apiResource('jugador-anotados', JugadorAnotadoController::class)->except(['index', 'show']);
 });

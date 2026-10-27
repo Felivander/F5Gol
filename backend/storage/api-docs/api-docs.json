@@ -315,6 +315,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador."
                     }
                 },
                 "security": [
@@ -385,6 +388,9 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "El usuario no es administrador."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
@@ -420,6 +426,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador."
                     },
                     "404": {
                         "description": "No encontrado."
@@ -490,6 +499,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador."
                     }
                 },
                 "security": [
@@ -560,6 +572,9 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "El usuario no es administrador."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
@@ -595,6 +610,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador."
                     },
                     "404": {
                         "description": "No encontrado."
@@ -1048,6 +1066,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador."
                     }
                 },
                 "security": [
@@ -1118,6 +1139,9 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "El usuario no es administrador."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
@@ -1153,6 +1177,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador."
                     },
                     "404": {
                         "description": "No encontrado."
