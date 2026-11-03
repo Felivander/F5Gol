@@ -18,7 +18,7 @@ En desarrollo, el front redirige todo lo que va a `/api` hacia el back (ver `fro
 
 - XAMPP con MySQL
 - PHP 8.3 y Composer
-- Node.js 24 y Angular CLI 22 (`npm install -g @angular/cli@22`)
+- Node.js **22.22.3 o más nuevo** (lo pide Angular 22; probado con Node 24) y Angular CLI 22 (`npm install -g @angular/cli@22`). Con una versión anterior, `ng serve` falla al arrancar: revisar con `node -v`.
 
 ## Primera vez (después de clonar)
 
