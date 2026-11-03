@@ -73,7 +73,11 @@ class ClubController extends Controller
     )]
     public function show(string $id)
     {
-        $club = Club::with('canchas')->findOrFail($id);
+        $club = Club::findOrFail($id);
+
+        // El dueño del club ve también sus canchas inactivas; el público, solo las activas
+        $esDueno = auth('sanctum')->id() === $club->administrador_id;
+        $club->load(['canchas' => fn ($q) => $esDueno ? $q : $q->where('estado', 'activa')]);
 
         return response()->json($club, 200);
     }

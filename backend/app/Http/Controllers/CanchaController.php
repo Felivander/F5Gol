@@ -21,6 +21,7 @@ class CanchaController extends Controller
         tags: ['Canchas'],
         parameters: [
             new OA\Parameter(name: 'club_id', description: 'Filtrar por club', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'incluir_inactivas', description: 'Solo administradores: incluir las canchas inactivas', in: 'query', required: false, schema: new OA\Schema(type: 'boolean')),
             new OA\Parameter(name: 'page', description: 'Número de página', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
@@ -34,6 +35,13 @@ class CanchaController extends Controller
         // Permite filtrar por club: /api/canchas?club_id=1
         if ($request->has('club_id')) {
             $query->where('club_id', $request->query('club_id'));
+        }
+
+        // Las canchas dadas de baja no se muestran al público;
+        // un administrador puede pedirlas con ?incluir_inactivas=1 para gestionarlas
+        $esAdministrador = auth('sanctum')->user()?->rol === 'administrador';
+        if (! ($esAdministrador && $request->boolean('incluir_inactivas'))) {
+            $query->where('estado', 'activa');
         }
 
         return response()->json($query->paginate(10), 200);
