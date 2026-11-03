@@ -31,7 +31,12 @@ export class CanchaTurnos implements OnInit {
 
   // Se puede reservar entero solo si nadie se anotó por matchmaking
   puedeReservar(turno: Turno) {
-    return turno.estado === 'disponible' && turno.cupo_actual === 0;
+    return turno.estado === 'disponible' && turno.cupo_actual === 0 && !this.yaPaso(turno);
+  }
+
+  // Los turnos que ya empezaron se muestran, pero sin botones (la API respondería 409)
+  yaPaso(turno: Turno) {
+    return new Date(`${turno.fecha.slice(0, 10)}T${turno.hora_inicio}`).getTime() <= Date.now();
   }
 
   // Lugares libres para sumarse al partido por matchmaking
