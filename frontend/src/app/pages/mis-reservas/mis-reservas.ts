@@ -27,6 +27,11 @@ export class MisReservas implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
+    // Mensaje que deja la grilla después de mover una reserva de turno
+    const avisoAnterior = history.state?.aviso;
+    if (avisoAnterior) {
+      this.aviso.set(avisoAnterior);
+    }
     this.cargar(1);
   }
 

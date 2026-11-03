@@ -21,6 +21,8 @@ export class CanchaTurnos implements OnInit {
 
   // Viene del parámetro de ruta /canchas/:id
   id = input.required<string>();
+  // ?mover=<id de reserva>: el jugador viene de Mis reservas a elegir un turno nuevo
+  mover = input<string>();
 
   cancha = signal<Cancha | null>(null);
   turnos = signal<Turno[]>([]);
@@ -90,6 +92,20 @@ export class CanchaTurnos implements OnInit {
   cambiarCantidad(turno: Turno, valor: number) {
     const acotado = Math.min(Math.max(1, Number(valor) || 1), this.lugaresLibres(turno));
     this.cantidades.update(c => ({ ...c, [turno.id]: acotado }));
+  }
+
+  moverAca(turno: Turno) {
+    this.reservando.set(turno.id);
+    this.error.set('');
+    this.api.actualizarReserva(Number(this.mover()), { turno_id: turno.id }).subscribe({
+      next: () => this.router.navigate(['/mis-reservas'], { state: { aviso: 'Listo, tu reserva pasó al turno nuevo.' } }),
+      error: err => {
+        // 409: el turno nuevo se ocupó, ya pasó o el original está fuera de plazo
+        this.error.set(err.error?.message ?? 'No se pudo cambiar el turno.');
+        this.reservando.set(null);
+        this.buscarTurnos();
+      }
+    });
   }
 
   reservar(turno: Turno) {

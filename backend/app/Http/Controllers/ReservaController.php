@@ -268,6 +268,12 @@ class ReservaController extends Controller
                 ], 409);
             }
 
+            if ($request->input('tipo', $reserva->tipo) === 'completa' && $nuevoTurno->cupoActual() > 0) {
+                return response()->json([
+                    'message' => 'El turno nuevo ya tiene jugadores anotados',
+                ], 409);
+            }
+
             $cantidad = (int) $request->input('cantidad_jugadores', $reserva->cantidad_jugadores);
             if ($request->input('tipo', $reserva->tipo) === 'individual'
                 && $cantidad > $nuevoTurno->cupo_maximo - $nuevoTurno->cupoActual()) {

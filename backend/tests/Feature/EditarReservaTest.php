@@ -80,6 +80,19 @@ class EditarReservaTest extends TestCase
         $this->assertSame('ocupado', $anterior->fresh()->estado);
     }
 
+    public function test_no_deja_mover_una_reserva_completa_a_un_turno_con_anotados(): void
+    {
+        $anterior = $this->crearTurno(null, ['estado' => 'ocupado']);
+        $nuevo = $this->crearTurno($anterior->cancha, ['hora_inicio' => '21:00', 'hora_fin' => '22:00']);
+        $this->crearReserva($nuevo, ['tipo' => 'individual', 'cantidad_jugadores' => 2]);
+        $reserva = $this->crearReserva($anterior);
+        Sanctum::actingAs($reserva->usuario);
+
+        $this->putJson("/api/reservas/{$reserva->id}", ['turno_id' => $nuevo->id])
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'El turno nuevo ya tiene jugadores anotados');
+    }
+
     public function test_no_deja_cambiar_a_un_turno_que_ya_paso(): void
     {
         $anterior = $this->crearTurno(null, ['estado' => 'ocupado']);

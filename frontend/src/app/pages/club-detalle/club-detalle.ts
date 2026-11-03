@@ -16,6 +16,8 @@ export class ClubDetalle implements OnInit {
 
   // Viene del parámetro de ruta /clubes/:id
   id = input.required<string>();
+  // ?mover=<id de reserva>: se está eligiendo un turno nuevo para esa reserva
+  mover = input<string>();
 
   club = signal<Club | null>(null);
   error = signal('');

@@ -28,6 +28,16 @@
   </div>
 }
 
+@if (mover()) {
+  <p class="aviso">
+    Elegí el turno nuevo para tu reserva.
+    @if (cancha(); as cancha) {
+      <a [routerLink]="['/clubes', cancha.club_id]" [queryParams]="{ mover: mover() }">Ver otra cancha del club</a>
+    }
+    <a routerLink="/mis-reservas">Cancelar el cambio</a>
+  </p>
+}
+
 @if (error()) {
   <p class="error">{{ error() }}</p>
 }
@@ -80,6 +90,11 @@
               </span>
             </td>
             <td class="acciones-turno">
+              @if (mover()) {
+                @if (turno.estado === 'disponible' && !yaPaso(turno)) {
+                  <button (click)="moverAca(turno)" [disabled]="reservando() !== null">Mover mi reserva acá</button>
+                }
+              } @else {
               @if (esDueno() && !yaPaso(turno) && (turno.estado === 'bloqueado' || puedeReservar(turno))) {
                 <button class="btn-secundario" (click)="cambiarBloqueo(turno)" [disabled]="reservando() === turno.id">
                   {{ turno.estado === 'bloqueado' ? 'Desbloquear' : 'Bloquear por mantenimiento' }}
@@ -104,6 +119,7 @@
                 <button class="btn-secundario" (click)="anotarme(turno)" [disabled]="reservando() === turno.id">
                   Sumarme al partido
                 </button>
+              }
               }
             </td>
           </tr>

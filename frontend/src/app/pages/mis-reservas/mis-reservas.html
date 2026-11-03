@@ -49,6 +49,9 @@
             <td><span class="estado-reserva" [class]="reserva.estado">{{ reserva.estado }}</span></td>
             <td>{{ reserva.estado_pago === 'sena' ? 'seña' : reserva.estado_pago }}</td>
             <td>
+              @if (sePuedeCancelar(reserva) && reserva.turno?.cancha; as cancha) {
+                <a class="btn-link" [routerLink]="['/canchas', cancha.id]" [queryParams]="{ mover: reserva.id }">Cambiar turno</a>
+              }
               @if (sePuedeCancelar(reserva)) {
                 <button class="btn-secundario" (click)="cancelar(reserva)" [disabled]="cancelando() === reserva.id">
                   {{ cancelando() === reserva.id ? 'Cancelando...' : 'Cancelar' }}

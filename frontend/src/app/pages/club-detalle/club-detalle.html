@@ -21,7 +21,7 @@
   <ul class="tarjetas">
     @for (cancha of club.canchas; track cancha.id) {
       <li>
-        <a [routerLink]="['/canchas', cancha.id]">
+        <a [routerLink]="['/canchas', cancha.id]" [queryParams]="mover() ? { mover: mover() } : {}">
           <div>
             <app-cancha-diagrama [tipo]="cancha.tipo" [mini]="true"></app-cancha-diagrama>
 
