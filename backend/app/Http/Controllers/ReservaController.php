@@ -103,6 +103,12 @@ class ReservaController extends Controller
             ], 409);
         }
 
+        if ($turno->yaPaso()) {
+            return response()->json([
+                'message' => 'No se puede reservar un turno que ya pasó',
+            ], 409);
+        }
+
         $tipo = $request->input('tipo', 'completa');
         $cantidad = (int) $request->input('cantidad_jugadores', 1);
 

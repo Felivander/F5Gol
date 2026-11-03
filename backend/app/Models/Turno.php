@@ -37,6 +37,12 @@ class Turno extends Model
         return Carbon::parse(substr($this->fecha, 0, 10).' '.$this->hora_inicio);
     }
 
+    // El partido ya empezó o terminó: no se puede reservar
+    public function yaPaso(): bool
+    {
+        return $this->inicio()->isPast();
+    }
+
     // Cantidad de jugadores anotados actualmente vía matchmaking en este turno
     public function cupoActual(): int
     {

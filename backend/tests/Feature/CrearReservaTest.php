@@ -81,6 +81,19 @@ class CrearReservaTest extends TestCase
         $this->assertSame('bloqueado', $turno->fresh()->estado);
     }
 
+    public function test_no_deja_reservar_un_turno_que_ya_paso(): void
+    {
+        $turno = $this->crearTurno(null, ['fecha' => now()->subDay()->toDateString()]);
+
+        $this->reservar($turno, ['tipo' => 'completa'])
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'No se puede reservar un turno que ya pasó');
+        $this->reservar($turno, ['tipo' => 'individual'])->assertStatus(409);
+
+        $this->assertSame(0, $turno->reservas()->count());
+        $this->assertSame('disponible', $turno->fresh()->estado);
+    }
+
     public function test_el_matchmaking_suma_al_cupo_sin_ocupar_el_turno(): void
     {
         $turno = $this->crearTurno();
