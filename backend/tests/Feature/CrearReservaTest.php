@@ -106,6 +106,20 @@ class CrearReservaTest extends TestCase
         $this->assertSame('disponible', $turno->estado);
     }
 
+    public function test_no_deja_reservar_completo_un_turno_con_jugadores_anotados(): void
+    {
+        $turno = $this->crearTurno();
+        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 2])->assertCreated();
+
+        $this->reservar($turno, ['tipo' => 'completa'])
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'El turno ya tiene jugadores anotados: solo se puede sumar al partido');
+
+        $turno->refresh();
+        $this->assertSame(1, $turno->reservas()->count());
+        $this->assertSame('disponible', $turno->estado);
+    }
+
     public function test_al_completar_el_cupo_el_turno_queda_ocupado(): void
     {
         $turno = $this->crearTurno();

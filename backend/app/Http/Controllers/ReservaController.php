@@ -117,6 +117,13 @@ class ReservaController extends Controller
             $tipo = $request->input('tipo', 'completa');
             $cantidad = (int) $request->input('cantidad_jugadores', 1);
 
+            // Si ya hay jugadores anotados por matchmaking, el turno no se puede reservar entero
+            if ($tipo === 'completa' && $turno->cupoActual() > 0) {
+                return response()->json([
+                    'message' => 'El turno ya tiene jugadores anotados: solo se puede sumar al partido',
+                ], 409);
+            }
+
             if ($tipo === 'individual') {
                 $cupoDisponible = $turno->cupo_maximo - $turno->cupoActual();
 
