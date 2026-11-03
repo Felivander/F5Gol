@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Cancha, Turno } from '../../models';
@@ -6,6 +6,8 @@ import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 
 import { CanchaDiagrama } from '../../components/cancha-diagrama/cancha-diagrama';
+
+const REFRESCO_MS = 15_000;
 
 @Component({
   selector: 'app-cancha-turnos',
@@ -28,6 +30,16 @@ export class CanchaTurnos implements OnInit {
   aviso = signal('');
   // Turno que se está reservando, para deshabilitar su botón mientras espera la API
   reservando = signal<number | null>(null);
+
+  constructor() {
+    // Cupo "en tiempo real": se vuelve a pedir la grilla cada 15 segundos mientras la página está abierta
+    const refresco = setInterval(() => {
+      if (this.reservando() === null && !document.hidden) {
+        this.buscarTurnos(true);
+      }
+    }, REFRESCO_MS);
+    inject(DestroyRef).onDestroy(() => clearInterval(refresco));
+  }
 
   // El administrador dueño del club puede bloquear y desbloquear turnos
   esDueno() {
@@ -124,8 +136,11 @@ export class CanchaTurnos implements OnInit {
     this.buscarTurnos();
   }
 
-  buscarTurnos() {
-    this.cargando.set(true);
+  // silencioso: refresco automático, sin mostrar "Buscando turnos..." ni pisar errores
+  buscarTurnos(silencioso = false) {
+    if (!silencioso) {
+      this.cargando.set(true);
+    }
     this.api.getTurnos(Number(this.id()), this.fecha).subscribe({
       next: turnos => {
         // La API ordena solo por hora; acá ordenamos por fecha y hora
@@ -134,7 +149,9 @@ export class CanchaTurnos implements OnInit {
         this.cargando.set(false);
       },
       error: () => {
-        this.error.set('No se pudieron cargar los turnos.');
+        if (!silencioso) {
+          this.error.set('No se pudieron cargar los turnos.');
+        }
         this.cargando.set(false);
       }
     });
