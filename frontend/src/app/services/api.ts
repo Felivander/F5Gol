@@ -32,4 +32,13 @@ export class Api {
   crearReserva(reserva: NuevaReserva) {
     return this.http.post<{ message: string; reserva: Reserva }>(`${API}/reservas`, reserva);
   }
+
+  // Filtros de GET /api/reservas: usuario_id, cancha_id, fecha, desde, hasta, page
+  getReservas(filtros: Record<string, string | number>) {
+    return this.http.get<Paginado<Reserva>>(`${API}/reservas`, { params: filtros });
+  }
+
+  cancelarReserva(id: number) {
+    return this.http.delete<{ message: string }>(`${API}/reservas/${id}`);
+  }
 }

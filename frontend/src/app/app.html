@@ -7,6 +7,7 @@
     <nav>
       <a class="nav-link" routerLink="/clubes" routerLinkActive="activo">Clubes</a>
       @if (auth.logueado()) {
+        <a class="nav-link" routerLink="/mis-reservas" routerLinkActive="activo">Mis reservas</a>
         <div class="usuario-badge">
           <span class="usuario-avatar">{{ auth.usuario()?.name?.charAt(0) || 'U' }}</span>
           <span class="usuario-nombre">{{ auth.usuario()?.name }}</span>

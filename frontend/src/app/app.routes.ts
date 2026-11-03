@@ -3,6 +3,7 @@ import { CanchaTurnos } from './pages/cancha-turnos/cancha-turnos';
 import { ClubDetalle } from './pages/club-detalle/club-detalle';
 import { Clubes } from './pages/clubes/clubes';
 import { Login } from './pages/login/login';
+import { MisReservas } from './pages/mis-reservas/mis-reservas';
 import { Practica } from './pages/practica/practica';
 
 export const routes: Routes = [
@@ -10,6 +11,7 @@ export const routes: Routes = [
   { path: 'clubes', component: Clubes },
   { path: 'clubes/:id', component: ClubDetalle },
   { path: 'canchas/:id', component: CanchaTurnos },
+  { path: 'mis-reservas', component: MisReservas },
   { path: 'login', component: Login },
   { path: 'practica', component: Practica },
   { path: '**', redirectTo: 'clubes' }
