@@ -6,6 +6,7 @@ use App\Models\Reserva;
 use App\Models\Turno;
 use App\Http\Requests\ReservaRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use OpenApi\Attributes as OA;
 
 class ReservaController extends Controller
@@ -89,54 +90,59 @@ class ReservaController extends Controller
     )]
     public function store(ReservaRequest $request)
     {
-        $turno = Turno::find($request->input('turno_id'));
+        // Todo pasa dentro de una transacción con el turno bloqueado (lockForUpdate):
+        // si dos jugadores reservan el mismo turno a la vez, el segundo espera
+        // a que termine el primero y ve el estado ya actualizado.
+        return DB::transaction(function () use ($request) {
+            $turno = Turno::lockForUpdate()->find($request->input('turno_id'));
 
-        if (! $turno) {
-            return response()->json([
-                'message' => 'Turno no encontrado',
-            ], 404);
-        }
-
-        if (in_array($turno->estado, ['ocupado', 'bloqueado'])) {
-            return response()->json([
-                'message' => 'El turno ya no está disponible',
-            ], 409);
-        }
-
-        if ($turno->yaPaso()) {
-            return response()->json([
-                'message' => 'No se puede reservar un turno que ya pasó',
-            ], 409);
-        }
-
-        $tipo = $request->input('tipo', 'completa');
-        $cantidad = (int) $request->input('cantidad_jugadores', 1);
-
-        if ($tipo === 'individual') {
-            $cupoDisponible = $turno->cupo_maximo - $turno->cupoActual();
-
-            if ($cantidad > $cupoDisponible) {
+            if (! $turno) {
                 return response()->json([
-                    'message' => 'No hay cupo suficiente en este turno',
+                    'message' => 'Turno no encontrado',
+                ], 404);
+            }
+
+            if (in_array($turno->estado, ['ocupado', 'bloqueado'])) {
+                return response()->json([
+                    'message' => 'El turno ya no está disponible',
                 ], 409);
             }
-        }
 
-        $reserva = Reserva::create(array_merge($request->validated(), [
-            'estado' => 'confirmada',
-        ]));
+            if ($turno->yaPaso()) {
+                return response()->json([
+                    'message' => 'No se puede reservar un turno que ya pasó',
+                ], 409);
+            }
 
-        if ($tipo === 'completa') {
-            $turno->update(['estado' => 'ocupado']);
-        } elseif ($turno->cupoActual() >= $turno->cupo_maximo) {
-            // Se completó el cupo de matchmaking: el turno queda confirmado
-            $turno->update(['estado' => 'ocupado']);
-        }
+            $tipo = $request->input('tipo', 'completa');
+            $cantidad = (int) $request->input('cantidad_jugadores', 1);
 
-        return response()->json([
-            'message' => 'Reserva creada correctamente',
-            'reserva' => $reserva->fresh(),
-        ], 201);
+            if ($tipo === 'individual') {
+                $cupoDisponible = $turno->cupo_maximo - $turno->cupoActual();
+
+                if ($cantidad > $cupoDisponible) {
+                    return response()->json([
+                        'message' => 'No hay cupo suficiente en este turno',
+                    ], 409);
+                }
+            }
+
+            $reserva = Reserva::create(array_merge($request->validated(), [
+                'estado' => 'confirmada',
+            ]));
+
+            if ($tipo === 'completa') {
+                $turno->update(['estado' => 'ocupado']);
+            } elseif ($turno->cupoActual() >= $turno->cupo_maximo) {
+                // Se completó el cupo de matchmaking: el turno queda confirmado
+                $turno->update(['estado' => 'ocupado']);
+            }
+
+            return response()->json([
+                'message' => 'Reserva creada correctamente',
+                'reserva' => $reserva->fresh(),
+            ], 201);
+        });
     }
 
     /**
