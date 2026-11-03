@@ -1375,6 +1375,62 @@
                     }
                 ]
             }
+        },
+        "/api/turnos/{id}/bloqueo": {
+            "patch": {
+                "tags": [
+                    "Turnos"
+                ],
+                "summary": "Bloquear o desbloquear un turno",
+                "description": "Bloquea un turno libre (por ejemplo, por mantenimiento) para que no se pueda reservar. Al desbloquearlo vuelve a calcularse su estado.",
+                "operationId": "0a360ea1d1a52e20f73b7f92f8173587",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "bloqueado"
+                                ],
+                                "properties": {
+                                    "bloqueado": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Estado del turno actualizado."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o la cancha no es de su club."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "El turno tiene reservas activas."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {

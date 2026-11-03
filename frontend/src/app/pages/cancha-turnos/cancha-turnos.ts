@@ -29,6 +29,30 @@ export class CanchaTurnos implements OnInit {
   // Turno que se está reservando, para deshabilitar su botón mientras espera la API
   reservando = signal<number | null>(null);
 
+  // El administrador dueño del club puede bloquear y desbloquear turnos
+  esDueno() {
+    const usuario = this.auth.usuario();
+    return !!usuario && usuario.id === this.cancha()?.club?.administrador_id;
+  }
+
+  cambiarBloqueo(turno: Turno) {
+    const bloquear = turno.estado !== 'bloqueado';
+    this.reservando.set(turno.id);
+    this.error.set('');
+    this.aviso.set('');
+    this.api.bloquearTurno(turno.id, bloquear).subscribe({
+      next: res => {
+        this.aviso.set(res.message);
+        this.reservando.set(null);
+        this.buscarTurnos();
+      },
+      error: err => {
+        this.error.set(err.error?.message ?? 'No se pudo cambiar el bloqueo del turno.');
+        this.reservando.set(null);
+      }
+    });
+  }
+
   // Se puede reservar entero solo si nadie se anotó por matchmaking
   puedeReservar(turno: Turno) {
     return turno.estado === 'disponible' && turno.cupo_actual === 0 && !this.yaPaso(turno);

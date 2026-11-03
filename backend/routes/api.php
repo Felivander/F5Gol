@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('canchas/{id}/fotos', [CanchaController::class, 'subirFoto']);
         Route::delete('canchas/{id}/fotos/{indice}', [CanchaController::class, 'borrarFoto'])->whereNumber('indice');
         Route::apiResource('turnos', TurnoController::class)->except(['index', 'show']);
+        Route::patch('turnos/{id}/bloqueo', [TurnoController::class, 'bloqueo']);
     });
 
     Route::apiResource('reservas', ReservaController::class)->except(['index', 'show']);

@@ -79,6 +79,11 @@
               </span>
             </td>
             <td class="acciones-turno">
+              @if (esDueno() && !yaPaso(turno) && (turno.estado === 'bloqueado' || puedeReservar(turno))) {
+                <button class="btn-secundario" (click)="cambiarBloqueo(turno)" [disabled]="reservando() === turno.id">
+                  {{ turno.estado === 'bloqueado' ? 'Desbloquear' : 'Bloquear por mantenimiento' }}
+                </button>
+              }
               @if (puedeReservar(turno)) {
                 <button (click)="reservar(turno)" [disabled]="reservando() === turno.id">
                   {{ reservando() === turno.id ? 'Reservando...' : 'Reservar cancha' }}

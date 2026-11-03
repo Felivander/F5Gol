@@ -38,6 +38,10 @@ export class Api {
     return this.http.get<Paginado<Reserva>>(`${API}/reservas`, { params: filtros });
   }
 
+  bloquearTurno(id: number, bloqueado: boolean) {
+    return this.http.patch<{ message: string; turno: Turno }>(`${API}/turnos/${id}/bloqueo`, { bloqueado });
+  }
+
   cancelarReserva(id: number) {
     return this.http.delete<{ message: string }>(`${API}/reservas/${id}`);
   }
