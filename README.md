@@ -22,7 +22,9 @@ En desarrollo, el front redirige todo lo que va a `/api` hacia el back (ver `fro
 
 ## Primera vez (después de clonar)
 
-Doble clic en **`instalar-dependencias.bat`**: corre `composer install` en el back, `npm install` en el front, crea `backend/.env` si no existe e instala Angular CLI 22 si falta. Después falta la base de datos (ver abajo, desde "En `backend/.env`...").
+Antes, crear la base `f5gol` en phpMyAdmin con MySQL de XAMPP andando.
+
+Doble clic en **`instalar-dependencias.bat`**: corre `composer install` en el back, crea `backend/.env` si no existe, crea el enlace `public/storage` (para las fotos de las canchas), corre `php artisan migrate --seed`, hace `npm install` en el front e instala Angular CLI 22 si falta. Si la base no existe todavía, avisa al final y se puede volver a ejecutar.
 
 O a mano. Back:
 
@@ -37,6 +39,7 @@ En `backend/.env` configurar la base de datos (`DB_DATABASE=f5gol`, usuario `roo
 
 ```bash
 php artisan migrate --seed
+php artisan storage:link
 ```
 
 Front:
