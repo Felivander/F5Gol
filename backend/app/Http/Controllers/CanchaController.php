@@ -113,6 +113,7 @@ class CanchaController extends Controller
             new OA\Response(response: 401, description: 'No autenticado.'),
             new OA\Response(response: 403, description: 'El usuario no es administrador o el club no es suyo.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
+            new OA\Response(response: 409, description: 'Se intentó desactivar una cancha con reservas futuras.'),
         ]
     )]
     public function update(CanchaRequest $request, string $id)
@@ -129,6 +130,12 @@ class CanchaController extends Controller
         if (! $this->esDuenoDelClub($request, $cancha->club_id)
             || ($request->has('club_id') && ! $this->esDuenoDelClub($request, $request->input('club_id')))) {
             return $this->respuestaNoEsDueno();
+        }
+
+        if ($request->input('estado') === 'inactiva' && $cancha->estado !== 'inactiva' && $cancha->tieneReservasFuturas()) {
+            return response()->json([
+                'message' => 'La cancha tiene reservas futuras: cancelalas antes de desactivarla.',
+            ], 409);
         }
 
         $cancha->update($request->validated());

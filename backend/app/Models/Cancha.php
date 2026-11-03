@@ -36,4 +36,14 @@ class Cancha extends Model
     {
         return $this->hasMany(Turno::class);
     }
+
+    // Hay alguna reserva activa en un turno de hoy en adelante
+    public function tieneReservasFuturas(): bool
+    {
+        return Reserva::where('estado', '!=', 'cancelada')
+            ->whereHas('turno', fn ($q) => $q
+                ->where('cancha_id', $this->id)
+                ->whereDate('fecha', '>=', now()->toDateString()))
+            ->exists();
+    }
 }

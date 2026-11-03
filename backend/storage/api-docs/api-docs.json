@@ -267,6 +267,15 @@
                         }
                     },
                     {
+                        "name": "incluir_inactivas",
+                        "in": "query",
+                        "description": "Solo administradores: incluir las canchas inactivas",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "description": "Número de página",
@@ -393,6 +402,9 @@
                     },
                     "404": {
                         "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "Se intentó desactivar una cancha con reservas futuras."
                     }
                 },
                 "security": [
