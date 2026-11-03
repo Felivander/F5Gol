@@ -41,6 +41,26 @@ export interface Turno {
   cupo_actual: number;
 }
 
+export interface Reserva {
+  id: number;
+  turno_id: number;
+  usuario_id: number;
+  tipo: 'completa' | 'individual';
+  cantidad_jugadores: number;
+  estado: 'pendiente' | 'confirmada' | 'cancelada';
+  estado_pago: 'pendiente' | 'sena' | 'pagado';
+  created_at: string;
+  turno?: Turno & { cancha?: Cancha };
+  usuario?: Usuario;
+}
+
+export interface NuevaReserva {
+  turno_id: number;
+  usuario_id: number;
+  tipo: 'completa' | 'individual';
+  cantidad_jugadores?: number;
+}
+
 // Respuesta de paginate() de Laravel
 export interface Paginado<T> {
   data: T[];

@@ -31,6 +31,9 @@
 @if (error()) {
   <p class="error">{{ error() }}</p>
 }
+@if (aviso()) {
+  <p class="aviso">{{ aviso() }} <a routerLink="/mis-reservas">Ver mis reservas</a></p>
+}
 
 <section class="filtro-turnos">
   <label for="fecha">📅 Filtrar por fecha:</label>
@@ -48,12 +51,13 @@
         <th>Horario</th>
         <th>Estado</th>
         <th>Cupo de jugadores</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
       @if (cargando()) {
         <tr>
-          <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+          <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
             ⚽ Buscando turnos disponibles...
           </td>
         </tr>
@@ -74,10 +78,17 @@
                 👥 {{ turno.cupo_actual }} / {{ turno.cupo_maximo }}
               </span>
             </td>
+            <td class="acciones-turno">
+              @if (puedeReservar(turno)) {
+                <button (click)="reservar(turno)" [disabled]="reservando() === turno.id">
+                  {{ reservando() === turno.id ? 'Reservando...' : 'Reservar cancha' }}
+                </button>
+              }
+            </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+            <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
               No hay turnos disponibles para la fecha seleccionada.
             </td>
           </tr>

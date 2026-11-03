@@ -139,6 +139,34 @@ button:disabled {
   font-size: 1rem;
 }
 
+.aviso {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.92rem;
+  margin: 1rem 0;
+}
+
+.aviso a {
+  margin-left: 0.5rem;
+  font-weight: 700;
+}
+
+.acciones-turno {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.acciones-turno button {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+}
+
 /* Back Link (Volver) */
 .volver-link {
   display: inline-flex;

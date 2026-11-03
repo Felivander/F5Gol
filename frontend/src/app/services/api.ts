@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Cancha, Club, Paginado, Turno } from '../models';
+import { Cancha, Club, NuevaReserva, Paginado, Reserva, Turno } from '../models';
 
 // En desarrollo, ng serve redirige /api a Laravel (ver proxy.conf.json)
 const API = '/api';
@@ -27,5 +27,9 @@ export class Api {
       params = params.set('fecha', fecha);
     }
     return this.http.get<Turno[]>(`${API}/turnos`, { params });
+  }
+
+  crearReserva(reserva: NuevaReserva) {
+    return this.http.post<{ message: string; reserva: Reserva }>(`${API}/reservas`, reserva);
   }
 }
