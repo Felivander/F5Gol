@@ -21,7 +21,8 @@ export class Login {
     this.enviando.set(true);
     this.error.set('');
     this.auth.login(this.email, this.password).subscribe({
-      next: () => this.router.navigate(['/clubes']),
+      // El administrador entra a su panel; el jugador, a buscar canchas
+      next: res => this.router.navigate([res.user.rol === 'administrador' ? '/panel' : '/clubes']),
       error: err => {
         // 401: credenciales incorrectas, 422: errores de validación de Laravel
         this.error.set(err.error?.message ?? 'No se pudo iniciar sesión.');

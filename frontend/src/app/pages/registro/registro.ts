@@ -31,7 +31,7 @@ export class Registro {
     this.error.set('');
     this.errores.set({});
     this.auth.register(this.datos).subscribe({
-      next: () => this.router.navigate(['/clubes']),
+      next: res => this.router.navigate([res.user.rol === 'administrador' ? '/panel' : '/clubes']),
       error: err => {
         this.errores.set(err.error?.errors ?? {});
         this.error.set(err.status === 422 ? 'Revisá los datos marcados.' : (err.error?.message ?? 'No se pudo crear la cuenta.'));
