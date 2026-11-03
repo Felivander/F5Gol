@@ -243,6 +243,16 @@ class ReservaController extends Controller
                     'message' => 'No hay cupo suficiente en el turno nuevo',
                 ], 409);
             }
+        } elseif ($reserva->tipo === 'individual' && $reserva->estado !== 'cancelada' && $request->has('cantidad_jugadores')) {
+            // Mismo turno: los jugadores extra tienen que entrar en el cupo que queda libre
+            $extra = (int) $request->input('cantidad_jugadores') - $reserva->cantidad_jugadores;
+            $libre = $turnoAnterior->cupo_maximo - $turnoAnterior->cupoActual();
+
+            if ($extra > $libre) {
+                return response()->json([
+                    'message' => 'No hay cupo suficiente en este turno',
+                ], 409);
+            }
         }
 
         $reserva->update($request->validated());

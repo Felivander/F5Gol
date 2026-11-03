@@ -23,6 +23,21 @@ class EditarReservaTest extends TestCase
         $this->assertSame('ocupado', $turno->fresh()->estado);
     }
 
+    public function test_no_deja_subir_jugadores_por_encima_del_cupo(): void
+    {
+        $turno = $this->crearTurno();
+        $this->crearReserva($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 3]);
+        $reserva = $this->crearReserva($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 1]);
+        Sanctum::actingAs($reserva->usuario);
+
+        $this->putJson("/api/reservas/{$reserva->id}", ['cantidad_jugadores' => 3])
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'No hay cupo suficiente en este turno');
+
+        $this->assertSame(1, $reserva->fresh()->cantidad_jugadores);
+        $this->assertSame('disponible', $turno->fresh()->estado);
+    }
+
     public function test_al_bajar_jugadores_el_turno_se_libera(): void
     {
         $turno = $this->crearTurno(null, ['estado' => 'ocupado']);
