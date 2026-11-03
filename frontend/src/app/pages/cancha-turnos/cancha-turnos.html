@@ -84,6 +84,19 @@
                   {{ reservando() === turno.id ? 'Reservando...' : 'Reservar cancha' }}
                 </button>
               }
+              @if (turno.estado === 'disponible' && lugaresLibres(turno) > 0) {
+                <input
+                  class="cantidad-jugadores"
+                  type="number"
+                  min="1"
+                  [max]="lugaresLibres(turno)"
+                  [ngModel]="cantidad(turno)"
+                  (ngModelChange)="cambiarCantidad(turno, $event)"
+                  [attr.aria-label]="'Cantidad de jugadores para el turno de las ' + turno.hora_inicio.slice(0, 5)">
+                <button class="btn-secundario" (click)="anotarme(turno)" [disabled]="reservando() === turno.id">
+                  Sumarme al partido
+                </button>
+              }
             </td>
           </tr>
         } @empty {

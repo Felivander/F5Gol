@@ -167,6 +167,21 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+.acciones-turno .cantidad-jugadores {
+  width: 4rem;
+  padding: 0.4rem 0.5rem;
+}
+
+.btn-secundario {
+  background: #ffffff;
+  color: var(--dark-navy);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secundario:hover {
+  background: #f1f5f9;
+}
+
 /* Back Link (Volver) */
 .volver-link {
   display: inline-flex;

@@ -34,7 +34,32 @@ export class CanchaTurnos implements OnInit {
     return turno.estado === 'disponible' && turno.cupo_actual === 0;
   }
 
+  // Lugares libres para sumarse al partido por matchmaking
+  lugaresLibres(turno: Turno) {
+    return turno.cupo_maximo - turno.cupo_actual;
+  }
+
+  // Cuántos jugadores anota cada uno al sumarse (por turno, arranca en 1)
+  private cantidades = signal<Record<number, number>>({});
+
+  cantidad(turno: Turno) {
+    return this.cantidades()[turno.id] ?? 1;
+  }
+
+  cambiarCantidad(turno: Turno, valor: number) {
+    const acotado = Math.min(Math.max(1, Number(valor) || 1), this.lugaresLibres(turno));
+    this.cantidades.update(c => ({ ...c, [turno.id]: acotado }));
+  }
+
   reservar(turno: Turno) {
+    this.enviarReserva(turno, 'completa');
+  }
+
+  anotarme(turno: Turno) {
+    this.enviarReserva(turno, 'individual', this.cantidad(turno));
+  }
+
+  private enviarReserva(turno: Turno, tipo: 'completa' | 'individual', cantidad = 1) {
     const usuario = this.auth.usuario();
     if (!usuario) {
       this.router.navigate(['/login']);
@@ -44,9 +69,12 @@ export class CanchaTurnos implements OnInit {
     this.reservando.set(turno.id);
     this.error.set('');
     this.aviso.set('');
-    this.api.crearReserva({ turno_id: turno.id, usuario_id: usuario.id, tipo: 'completa' }).subscribe({
+    this.api.crearReserva({ turno_id: turno.id, usuario_id: usuario.id, tipo, cantidad_jugadores: cantidad }).subscribe({
       next: () => {
-        this.aviso.set(`¡Listo! Reservaste el turno de las ${turno.hora_inicio.slice(0, 5)} del ${turno.fecha}.`);
+        const horario = `las ${turno.hora_inicio.slice(0, 5)} del ${turno.fecha}`;
+        this.aviso.set(tipo === 'completa'
+          ? `¡Listo! Reservaste el turno de ${horario}.`
+          : `¡Listo! Te anotaste ${cantidad === 1 ? '' : `con ${cantidad} jugadores `}al partido de ${horario}.`);
         this.reservando.set(null);
         this.buscarTurnos();
       },
