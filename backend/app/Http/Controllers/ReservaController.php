@@ -187,7 +187,9 @@ class ReservaController extends Controller
             new OA\Response(response: 200, description: 'Actualizado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'Un jugador intentó cambiar el estado de pago.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
+            new OA\Response(response: 409, description: 'El turno nuevo no está disponible o no tiene cupo.'),
         ]
     )]
     public function update(ReservaRequest $request, string $id)
@@ -198,6 +200,13 @@ class ReservaController extends Controller
             return response()->json([
                 'message' => 'Reserva no encontrada',
             ], 404);
+        }
+
+        // El estado de pago lo maneja el club: un jugador no puede marcar su reserva como pagada
+        if ($request->has('estado_pago') && $request->user()->rol !== 'administrador') {
+            return response()->json([
+                'message' => 'Solo el administrador del club puede cambiar el estado de pago',
+            ], 403);
         }
 
         $turnoAnterior = $reserva->turno;

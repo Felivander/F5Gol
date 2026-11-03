@@ -77,6 +77,28 @@ class EditarReservaTest extends TestCase
         $this->assertSame($anterior->id, $reserva->fresh()->turno_id);
     }
 
+    public function test_el_jugador_no_puede_cambiar_el_estado_de_pago(): void
+    {
+        $reserva = $this->crearReserva($this->crearTurno());
+        Sanctum::actingAs($reserva->usuario);
+
+        $this->putJson("/api/reservas/{$reserva->id}", ['estado_pago' => 'pagado'])
+            ->assertForbidden()
+            ->assertJsonPath('message', 'Solo el administrador del club puede cambiar el estado de pago');
+
+        $this->assertNotSame('pagado', $reserva->fresh()->estado_pago);
+    }
+
+    public function test_el_administrador_puede_cambiar_el_estado_de_pago(): void
+    {
+        $reserva = $this->crearReserva($this->crearTurno());
+        Sanctum::actingAs($this->crearAdministrador());
+
+        $this->putJson("/api/reservas/{$reserva->id}", ['estado_pago' => 'pagado'])
+            ->assertOk()
+            ->assertJsonPath('reserva.estado_pago', 'pagado');
+    }
+
     public function test_editar_no_desbloquea_un_turno_bloqueado(): void
     {
         $turno = $this->crearTurno(null, ['estado' => 'bloqueado']);
