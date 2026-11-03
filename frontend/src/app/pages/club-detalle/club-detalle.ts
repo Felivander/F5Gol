@@ -3,6 +3,7 @@ import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Club } from '../../models';
 import { Api } from '../../services/api';
+import { Auth } from '../../services/auth';
 
 import { CanchaDiagrama } from '../../components/cancha-diagrama/cancha-diagrama';
 
@@ -13,6 +14,7 @@ import { CanchaDiagrama } from '../../components/cancha-diagrama/cancha-diagrama
 })
 export class ClubDetalle implements OnInit {
   private api = inject(Api);
+  private auth = inject(Auth);
 
   // Viene del parámetro de ruta /clubes/:id
   id = input.required<string>();
@@ -21,6 +23,12 @@ export class ClubDetalle implements OnInit {
 
   club = signal<Club | null>(null);
   error = signal('');
+
+  // El administrador dueño ve los botones para cargar y editar canchas
+  esDueno() {
+    const usuario = this.auth.usuario();
+    return !!usuario && usuario.id === this.club()?.administrador_id;
+  }
 
   ngOnInit() {
     this.api.getClub(Number(this.id())).subscribe({

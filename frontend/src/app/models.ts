@@ -27,7 +27,19 @@ export interface Cancha {
   descripcion: string | null;
   tarifa: string;
   estado: string;
+  // URLs públicas de las fotos subidas
+  fotos?: string[] | null;
   club?: Club;
+}
+
+export interface CanchaInput {
+  club_id: number;
+  nombre: string;
+  tipo: string;
+  capacidad_jugadores: number;
+  descripcion: string;
+  tarifa: number;
+  estado: 'activa' | 'inactiva';
 }
 
 export interface Turno {

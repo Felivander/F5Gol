@@ -1,0 +1,85 @@
+<a class="volver-link" [routerLink]="['/clubes', datos.club_id]">← Volver al club</a>
+
+<div class="login-card" style="max-width: 640px;">
+  <h1 style="font-size: 1.6rem;">{{ cancha() ? 'Editar cancha' : 'Nueva cancha' }}</h1>
+
+  <form class="formulario" (ngSubmit)="guardar()">
+    <div class="campo">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" name="nombre" [(ngModel)]="datos.nombre" required maxlength="100">
+      @for (msg of errores()['nombre'] ?? []; track msg) {
+        <small class="error-campo">{{ msg }}</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="tipo">Tipo</label>
+      <select id="tipo" name="tipo" [(ngModel)]="datos.tipo">
+        <option value="futbol5">Fútbol 5</option>
+        <option value="futbol7">Fútbol 7</option>
+        <option value="futbol11">Fútbol 11</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="capacidad">Capacidad de jugadores</label>
+      <input id="capacidad" name="capacidad_jugadores" type="number" min="2" max="22" [(ngModel)]="datos.capacidad_jugadores">
+      @for (msg of errores()['capacidad_jugadores'] ?? []; track msg) {
+        <small class="error-campo">{{ msg }}</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="tarifa">Tarifa por turno ($)</label>
+      <input id="tarifa" name="tarifa" type="number" min="0" step="100" [(ngModel)]="datos.tarifa" required>
+      @for (msg of errores()['tarifa'] ?? []; track msg) {
+        <small class="error-campo">{{ msg }}</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" name="descripcion" rows="3" [(ngModel)]="datos.descripcion"></textarea>
+    </div>
+
+    <div class="campo">
+      <label for="estado">Estado</label>
+      <select id="estado" name="estado" [(ngModel)]="datos.estado">
+        <option value="activa">Activa (visible para los jugadores)</option>
+        <option value="inactiva">Inactiva (no se muestra en las búsquedas)</option>
+      </select>
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+    @if (aviso()) {
+      <p class="aviso">{{ aviso() }}</p>
+    }
+
+    <button type="submit" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando...' : (cancha() ? 'Guardar cambios' : 'Crear cancha') }}
+    </button>
+  </form>
+
+  @if (cancha(); as cancha) {
+    <h2 style="font-size: 1.2rem; margin-top: 2rem;">Fotos</h2>
+    <div class="fotos-cancha">
+      @for (foto of cancha.fotos ?? []; track foto; let i = $index) {
+        <figure>
+          <img [src]="foto" [alt]="'Foto ' + (i + 1) + ' de ' + cancha.nombre">
+          <button type="button" class="btn-secundario" (click)="borrarFoto(i)">Borrar</button>
+        </figure>
+      } @empty {
+        <p style="color: var(--text-muted);">Todavía no tiene fotos.</p>
+      }
+    </div>
+    <label class="campo-foto">
+      <span>Agregar foto (jpg, png o webp, hasta 4 MB)</span>
+      <input type="file" accept="image/jpeg,image/png,image/webp" (change)="subirFoto($event)" [disabled]="subiendoFoto()">
+    </label>
+    @if (subiendoFoto()) {
+      <p style="color: var(--text-muted);">Subiendo foto...</p>
+    }
+  }
+</div>

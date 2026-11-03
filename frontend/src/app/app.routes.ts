@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { CanchaForm } from './pages/cancha-form/cancha-form';
 import { CanchaTurnos } from './pages/cancha-turnos/cancha-turnos';
 import { ClubDetalle } from './pages/club-detalle/club-detalle';
 import { Clubes } from './pages/clubes/clubes';
@@ -12,6 +13,8 @@ export const routes: Routes = [
   { path: '', redirectTo: 'clubes', pathMatch: 'full' },
   { path: 'clubes', component: Clubes },
   { path: 'clubes/:id', component: ClubDetalle },
+  { path: 'canchas/nueva', component: CanchaForm },
+  { path: 'canchas/:id/editar', component: CanchaForm },
   { path: 'canchas/:id', component: CanchaTurnos },
   { path: 'mis-reservas', component: MisReservas },
   { path: 'panel', component: PanelAdmin },

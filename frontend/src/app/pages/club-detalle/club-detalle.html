@@ -16,7 +16,12 @@
     </div>
   </div>
 
-  <h2>Canchas en este complejo</h2>
+  <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+    <h2>Canchas en este complejo</h2>
+    @if (esDueno()) {
+      <a class="btn-login-nav" routerLink="/canchas/nueva" [queryParams]="{ club: club.id }">+ Agregar cancha</a>
+    }
+  </div>
 
   <ul class="tarjetas">
     @for (cancha of club.canchas; track cancha.id) {
@@ -50,6 +55,9 @@
             <span class="flecha">→</span>
           </div>
         </a>
+        @if (esDueno()) {
+          <a class="btn-link editar-cancha" [routerLink]="['/canchas', cancha.id, 'editar']">Editar cancha y fotos</a>
+        }
       </li>
     } @empty {
       <li style="grid-column: 1 / -1; background: #ffffff; padding: 2rem; border-radius: var(--radius-md); text-align: center; border: 1px dashed var(--border-color); color: var(--text-muted);">

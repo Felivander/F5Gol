@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Cancha, Club, NuevaReserva, Paginado, Reserva, Turno } from '../models';
+import { Cancha, CanchaInput, Club, NuevaReserva, Paginado, Reserva, Turno } from '../models';
 
 // En desarrollo, ng serve redirige /api a Laravel (ver proxy.conf.json)
 const API = '/api';
@@ -19,6 +19,24 @@ export class Api {
 
   getCancha(id: number) {
     return this.http.get<Cancha>(`${API}/canchas/${id}`);
+  }
+
+  crearCancha(cancha: CanchaInput) {
+    return this.http.post<{ message: string; cancha: Cancha }>(`${API}/canchas`, cancha);
+  }
+
+  actualizarCancha(id: number, cancha: Partial<CanchaInput>) {
+    return this.http.put<{ message: string; cancha: Cancha }>(`${API}/canchas/${id}`, cancha);
+  }
+
+  subirFotoCancha(id: number, foto: File) {
+    const datos = new FormData();
+    datos.append('foto', foto);
+    return this.http.post<{ message: string; cancha: Cancha }>(`${API}/canchas/${id}/fotos`, datos);
+  }
+
+  borrarFotoCancha(id: number, indice: number) {
+    return this.http.delete<{ message: string; cancha: Cancha }>(`${API}/canchas/${id}/fotos/${indice}`);
   }
 
   getTurnos(canchaId: number, fecha?: string) {
