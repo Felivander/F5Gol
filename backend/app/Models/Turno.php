@@ -37,6 +37,24 @@ class Turno extends Model
         return Carbon::parse(substr($this->fecha, 0, 10).' '.$this->hora_inicio);
     }
 
+    // Vuelve a calcular si el turno está ocupado a partir de sus reservas activas:
+    // queda ocupado si hay una reserva completa o si los jugadores de matchmaking llenan el cupo.
+    // Un turno bloqueado por el administrador no se toca.
+    public function recalcularEstado(): void
+    {
+        if ($this->estado === 'bloqueado') {
+            return;
+        }
+
+        $hayCompleta = $this->reservas()
+            ->where('tipo', 'completa')
+            ->where('estado', '!=', 'cancelada')
+            ->exists();
+        $cupoLleno = $this->cupoActual() >= $this->cupo_maximo;
+
+        $this->update(['estado' => $hayCompleta || $cupoLleno ? 'ocupado' : 'disponible']);
+    }
+
     // El partido ya empezó o terminó: no se puede reservar
     public function yaPaso(): bool
     {

@@ -202,6 +202,9 @@ class ReservaController extends Controller
 
         $reserva->update($request->validated());
 
+        // Al cambiar la cantidad de jugadores o el estado, el cupo del turno puede llenarse o liberarse
+        $reserva->turno?->recalcularEstado();
+
         return response()->json([
             'message' => 'Reserva actualizada correctamente',
             'reserva' => $reserva->fresh(),
@@ -256,17 +259,7 @@ class ReservaController extends Controller
 
         $reserva->update(['estado' => 'cancelada']);
 
-        if ($turno && $turno->estado !== 'bloqueado') {
-            // El turno sigue ocupado solo si queda una reserva completa activa
-            // o si los jugadores de matchmaking todavía llenan el cupo.
-            $hayCompleta = $turno->reservas()
-                ->where('tipo', 'completa')
-                ->where('estado', '!=', 'cancelada')
-                ->exists();
-            $cupoLleno = $turno->cupoActual() >= $turno->cupo_maximo;
-
-            $turno->update(['estado' => $hayCompleta || $cupoLleno ? 'ocupado' : 'disponible']);
-        }
+        $turno?->recalcularEstado();
 
         return response()->json([
             'message' => 'Reserva cancelada correctamente',
