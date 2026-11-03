@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Turno;
 use App\Models\User;
+use App\Notifications\PartidoCompleto;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\TestResponse;
 use Laravel\Sanctum\Sanctum;
 use Tests\CreaDatosDePrueba;
@@ -138,6 +140,22 @@ class CrearReservaTest extends TestCase
         $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 1])
             ->assertStatus(409)
             ->assertJsonPath('message', 'El turno ya no está disponible');
+    }
+
+    public function test_al_completar_el_cupo_se_avisa_a_todos_los_anotados(): void
+    {
+        Notification::fake();
+        $turno = $this->crearTurno();
+        $primero = $this->crearJugador();
+        $segundo = $this->crearJugador();
+
+        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 3], $primero)->assertCreated();
+        Notification::assertNothingSent();
+
+        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 2], $segundo)->assertCreated();
+
+        Notification::assertSentTo([$primero, $segundo], PartidoCompleto::class);
+        Notification::assertCount(2);
     }
 
     public function test_no_deja_anotar_mas_jugadores_que_el_cupo_disponible(): void

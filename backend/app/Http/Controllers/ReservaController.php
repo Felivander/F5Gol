@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Reserva;
 use App\Models\Turno;
+use App\Models\User;
 use App\Http\Requests\ReservaRequest;
+use App\Notifications\PartidoCompleto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use OpenApi\Attributes as OA;
 
 class ReservaController extends Controller
@@ -161,8 +164,13 @@ class ReservaController extends Controller
             if ($tipo === 'completa') {
                 $turno->update(['estado' => 'ocupado']);
             } elseif ($turno->cupoActual() >= $turno->cupo_maximo) {
-                // Se completó el cupo de matchmaking: el turno queda confirmado
+                // Se completó el cupo de matchmaking: el turno queda confirmado y se avisa a todos los anotados
                 $turno->update(['estado' => 'ocupado']);
+                $anotados = User::whereIn('id', $turno->reservas()
+                    ->where('tipo', 'individual')
+                    ->where('estado', '!=', 'cancelada')
+                    ->pluck('usuario_id'))->get();
+                Notification::send($anotados, new PartidoCompleto($turno->load('cancha')));
             }
 
             return response()->json([
