@@ -45,7 +45,16 @@
                   }
                 </td>
                 <td>{{ reserva.tipo === 'completa' ? 'Cancha completa' : 'Matchmaking · ' + reserva.cantidad_jugadores }}</td>
-                <td>{{ reserva.estado_pago === 'sena' ? 'seña' : reserva.estado_pago }}</td>
+                <td>
+                  <select
+                    [ngModel]="reserva.estado_pago"
+                    (ngModelChange)="cambiarPago(reserva, $event)"
+                    [attr.aria-label]="'Estado de pago de ' + reserva.usuario?.name">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="sena">Seña</option>
+                    <option value="pagado">Pagado</option>
+                  </select>
+                </td>
               </tr>
             }
           </tbody>

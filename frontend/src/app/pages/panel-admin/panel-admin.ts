@@ -59,6 +59,17 @@ export class PanelAdmin implements OnInit {
     this.buscar();
   }
 
+  cambiarPago(reserva: Reserva, estadoPago: Reserva['estado_pago']) {
+    this.error.set('');
+    this.api.actualizarReserva(reserva.id, { estado_pago: estadoPago }).subscribe({
+      next: res => this.reservas.update(lista => lista.map(r => r.id === reserva.id ? { ...r, estado_pago: res.reserva.estado_pago } : r)),
+      error: err => {
+        this.error.set(err.error?.message ?? 'No se pudo actualizar el pago.');
+        this.buscar();
+      }
+    });
+  }
+
   buscar() {
     this.cargando.set(true);
     this.error.set('');

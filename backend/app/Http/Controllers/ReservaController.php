@@ -222,8 +222,18 @@ class ReservaController extends Controller
             ], 404);
         }
 
+        // El jugador solo edita sus reservas; el administrador, las de las canchas de sus clubes
+        $usuario = $request->user();
+        $esAdministradorDelClub = $usuario->rol === 'administrador'
+            && $reserva->turno?->cancha?->club?->administrador_id === $usuario->id;
+        if (! $esAdministradorDelClub && $reserva->usuario_id !== $usuario->id) {
+            return response()->json([
+                'message' => 'Solo podés editar tus propias reservas o las de tus clubes.',
+            ], 403);
+        }
+
         // El estado de pago lo maneja el club: un jugador no puede marcar su reserva como pagada
-        if ($request->has('estado_pago') && $request->user()->rol !== 'administrador') {
+        if ($request->has('estado_pago') && ! $esAdministradorDelClub) {
             return response()->json([
                 'message' => 'Solo el administrador del club puede cambiar el estado de pago',
             ], 403);

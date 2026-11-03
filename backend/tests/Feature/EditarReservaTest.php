@@ -139,14 +139,37 @@ class EditarReservaTest extends TestCase
         $this->assertNotSame('pagado', $reserva->fresh()->estado_pago);
     }
 
-    public function test_el_administrador_puede_cambiar_el_estado_de_pago(): void
+    public function test_el_administrador_del_club_puede_cambiar_el_estado_de_pago(): void
+    {
+        $admin = $this->crearAdministrador();
+        $reserva = $this->crearReserva($this->crearTurno($this->crearCancha($this->crearClub($admin))));
+        Sanctum::actingAs($admin);
+
+        $this->putJson("/api/reservas/{$reserva->id}", ['estado_pago' => 'sena'])
+            ->assertOk()
+            ->assertJsonPath('reserva.estado_pago', 'sena');
+
+        // El jugador ve el estado nuevo en su listado
+        $this->getJson("/api/reservas?usuario_id={$reserva->usuario_id}")
+            ->assertJsonPath('data.0.estado_pago', 'sena');
+    }
+
+    public function test_otro_administrador_no_puede_editar_la_reserva(): void
     {
         $reserva = $this->crearReserva($this->crearTurno());
         Sanctum::actingAs($this->crearAdministrador());
 
-        $this->putJson("/api/reservas/{$reserva->id}", ['estado_pago' => 'pagado'])
-            ->assertOk()
-            ->assertJsonPath('reserva.estado_pago', 'pagado');
+        $this->putJson("/api/reservas/{$reserva->id}", ['estado_pago' => 'pagado'])->assertForbidden();
+    }
+
+    public function test_un_jugador_no_puede_editar_la_reserva_de_otro(): void
+    {
+        $reserva = $this->crearReserva($this->crearTurno(), ['tipo' => 'individual']);
+        Sanctum::actingAs($this->crearJugador());
+
+        $this->putJson("/api/reservas/{$reserva->id}", ['cantidad_jugadores' => 2])
+            ->assertForbidden()
+            ->assertJsonPath('message', 'Solo podés editar tus propias reservas o las de tus clubes.');
     }
 
     public function test_editar_no_desbloquea_un_turno_bloqueado(): void

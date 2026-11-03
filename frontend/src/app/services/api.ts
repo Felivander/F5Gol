@@ -42,6 +42,10 @@ export class Api {
     return this.http.patch<{ message: string; turno: Turno }>(`${API}/turnos/${id}/bloqueo`, { bloqueado });
   }
 
+  actualizarReserva(id: number, cambios: Partial<Pick<Reserva, 'turno_id' | 'cantidad_jugadores' | 'estado_pago'>>) {
+    return this.http.put<{ message: string; reserva: Reserva }>(`${API}/reservas/${id}`, cambios);
+  }
+
   cancelarReserva(id: number) {
     return this.http.delete<{ message: string }>(`${API}/reservas/${id}`);
   }
