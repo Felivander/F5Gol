@@ -1,12 +1,22 @@
 <h1>Panel del club</h1>
-<p style="color: var(--text-muted); margin-bottom: 1.25rem;">Reservas del día en las canchas de tus clubes.</p>
+<p style="color: var(--text-muted); margin-bottom: 1.25rem;">
+  @if (vista() === 'dia') {
+    Reservas del día en las canchas de tus clubes.
+  } @else {
+    Reservas de la semana {{ textoSemana() }}, agrupadas por cancha.
+  }
+</p>
 
 <section class="filtro-turnos">
-  <label for="fecha">📅 Día:</label>
+  <div class="selector-vista" role="group" aria-label="Vista del panel">
+    <button [class.btn-secundario]="vista() !== 'dia'" [attr.aria-pressed]="vista() === 'dia'" (click)="cambiarVista('dia')">Día</button>
+    <button [class.btn-secundario]="vista() !== 'semana'" [attr.aria-pressed]="vista() === 'semana'" (click)="cambiarVista('semana')">Semana</button>
+  </div>
+  <label for="fecha">📅 {{ vista() === 'dia' ? 'Día' : 'Semana del' }}:</label>
   <input id="fecha" type="date" [(ngModel)]="fecha" (change)="buscar()">
   @if (canceladas() > 0) {
     <span style="color: var(--text-muted); font-size: 0.9rem;">
-      {{ canceladas() }} {{ canceladas() === 1 ? 'reserva cancelada' : 'reservas canceladas' }} ese día
+      {{ canceladas() }} {{ canceladas() === 1 ? 'reserva cancelada' : 'reservas canceladas' }}
     </span>
   }
 </section>
@@ -28,6 +38,9 @@
         <table>
           <thead>
             <tr>
+              @if (vista() === 'semana') {
+                <th>Día</th>
+              }
               <th>Horario</th>
               <th>Jugador</th>
               <th>Tipo</th>
@@ -37,6 +50,9 @@
           <tbody>
             @for (reserva of grupo.reservas; track reserva.id) {
               <tr>
+                @if (vista() === 'semana') {
+                  <td>{{ nombreDia(reserva.turno!.fecha) }}</td>
+                }
                 <td style="font-weight: 700;">{{ reserva.turno?.hora_inicio?.slice(0, 5) }} – {{ reserva.turno?.hora_fin?.slice(0, 5) }}</td>
                 <td>
                   {{ reserva.usuario?.name }}

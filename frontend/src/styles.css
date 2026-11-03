@@ -195,6 +195,16 @@ button:disabled {
   margin-bottom: 0.5rem;
 }
 
+.selector-vista {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.selector-vista button {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+}
+
 /* Registro */
 .selector-rol {
   border: 1px solid var(--border-color);

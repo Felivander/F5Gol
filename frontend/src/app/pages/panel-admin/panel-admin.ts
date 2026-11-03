@@ -11,9 +11,22 @@ interface ReservasDeCancha {
 }
 
 // Fecha local en formato AAAA-MM-DD (toISOString usaría UTC y podría dar el día siguiente)
-function hoy() {
-  const d = new Date();
+function formatear(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function hoy() {
+  return formatear(new Date());
+}
+
+// Lunes y domingo de la semana de una fecha AAAA-MM-DD
+function semanaDe(fecha: string) {
+  const d = new Date(`${fecha}T12:00:00`);
+  const lunes = new Date(d);
+  lunes.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  const domingo = new Date(lunes);
+  domingo.setDate(lunes.getDate() + 6);
+  return { desde: formatear(lunes), hasta: formatear(domingo) };
 }
 
 @Component({
@@ -27,6 +40,7 @@ export class PanelAdmin implements OnInit {
   private router = inject(Router);
 
   fecha = hoy();
+  vista = signal<'dia' | 'semana'>('dia');
   reservas = signal<Reserva[]>([]);
   cargando = signal(true);
   error = signal('');
@@ -45,7 +59,8 @@ export class PanelAdmin implements OnInit {
       grupos.get(cancha.id)!.reservas.push(reserva);
     }
     const lista = [...grupos.values()];
-    lista.forEach(g => g.reservas.sort((a, b) => a.turno!.hora_inicio.localeCompare(b.turno!.hora_inicio)));
+    const orden = (r: Reserva) => r.turno!.fecha.slice(0, 10) + r.turno!.hora_inicio;
+    lista.forEach(g => g.reservas.sort((a, b) => orden(a).localeCompare(orden(b))));
     return lista.sort((a, b) => a.cancha.nombre.localeCompare(b.cancha.nombre));
   });
 
@@ -70,10 +85,31 @@ export class PanelAdmin implements OnInit {
     });
   }
 
+  // "lunes 3/11 al domingo 9/11" para el título de la vista semanal
+  textoSemana() {
+    const { desde, hasta } = semanaDe(this.fecha);
+    const corto = (f: string) => `${Number(f.slice(8, 10))}/${Number(f.slice(5, 7))}`;
+    return `del lunes ${corto(desde)} al domingo ${corto(hasta)}`;
+  }
+
+  // "Lun 3/11"
+  nombreDia(fecha: string) {
+    const d = new Date(`${fecha.slice(0, 10)}T12:00:00`);
+    const dia = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][d.getDay()];
+    return `${dia} ${d.getDate()}/${d.getMonth() + 1}`;
+  }
+
+  cambiarVista(vista: 'dia' | 'semana') {
+    this.vista.set(vista);
+    this.buscar();
+  }
+
   buscar() {
     this.cargando.set(true);
     this.error.set('');
-    this.api.getReservas({ fecha: this.fecha, mis_clubes: 1, por_pagina: 100 }).subscribe({
+    const { desde, hasta } = semanaDe(this.fecha);
+    const rango: Record<string, string> = this.vista() === 'dia' ? { fecha: this.fecha } : { desde, hasta };
+    this.api.getReservas({ ...rango, mis_clubes: 1, por_pagina: 100 }).subscribe({
       next: res => {
         this.reservas.set(res.data);
         this.cargando.set(false);
