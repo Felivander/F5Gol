@@ -35,6 +35,48 @@ class EditarReservaTest extends TestCase
         $this->assertSame('disponible', $turno->fresh()->estado);
     }
 
+    public function test_al_cambiar_de_turno_libera_el_anterior_y_ocupa_el_nuevo(): void
+    {
+        $anterior = $this->crearTurno(null, ['estado' => 'ocupado']);
+        $nuevo = $this->crearTurno($anterior->cancha, ['hora_inicio' => '21:00', 'hora_fin' => '22:00']);
+        $reserva = $this->crearReserva($anterior);
+        Sanctum::actingAs($reserva->usuario);
+
+        $this->putJson("/api/reservas/{$reserva->id}", ['turno_id' => $nuevo->id])
+            ->assertOk()
+            ->assertJsonPath('reserva.turno_id', $nuevo->id);
+
+        $this->assertSame('disponible', $anterior->fresh()->estado);
+        $this->assertSame('ocupado', $nuevo->fresh()->estado);
+    }
+
+    public function test_no_deja_cambiar_a_un_turno_ocupado(): void
+    {
+        $anterior = $this->crearTurno(null, ['estado' => 'ocupado']);
+        $nuevo = $this->crearTurno($anterior->cancha, ['hora_inicio' => '21:00', 'hora_fin' => '22:00', 'estado' => 'ocupado']);
+        $reserva = $this->crearReserva($anterior);
+        Sanctum::actingAs($reserva->usuario);
+
+        $this->putJson("/api/reservas/{$reserva->id}", ['turno_id' => $nuevo->id])
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'El turno nuevo no está disponible');
+
+        $this->assertSame($anterior->id, $reserva->fresh()->turno_id);
+        $this->assertSame('ocupado', $anterior->fresh()->estado);
+    }
+
+    public function test_no_deja_cambiar_a_un_turno_que_ya_paso(): void
+    {
+        $anterior = $this->crearTurno(null, ['estado' => 'ocupado']);
+        $nuevo = $this->crearTurno($anterior->cancha, ['fecha' => now()->subDay()->toDateString()]);
+        $reserva = $this->crearReserva($anterior);
+        Sanctum::actingAs($reserva->usuario);
+
+        $this->putJson("/api/reservas/{$reserva->id}", ['turno_id' => $nuevo->id])->assertStatus(409);
+
+        $this->assertSame($anterior->id, $reserva->fresh()->turno_id);
+    }
+
     public function test_editar_no_desbloquea_un_turno_bloqueado(): void
     {
         $turno = $this->crearTurno(null, ['estado' => 'bloqueado']);

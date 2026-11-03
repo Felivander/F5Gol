@@ -200,10 +200,34 @@ class ReservaController extends Controller
             ], 404);
         }
 
+        $turnoAnterior = $reserva->turno;
+        $nuevoTurnoId = $request->input('turno_id');
+
+        // Cambio de turno: el nuevo tiene que estar libre y no haber pasado
+        if ($nuevoTurnoId && (int) $nuevoTurnoId !== $reserva->turno_id) {
+            $nuevoTurno = Turno::find($nuevoTurnoId);
+
+            if (in_array($nuevoTurno->estado, ['ocupado', 'bloqueado']) || $nuevoTurno->yaPaso()) {
+                return response()->json([
+                    'message' => 'El turno nuevo no está disponible',
+                ], 409);
+            }
+
+            $cantidad = (int) $request->input('cantidad_jugadores', $reserva->cantidad_jugadores);
+            if ($request->input('tipo', $reserva->tipo) === 'individual'
+                && $cantidad > $nuevoTurno->cupo_maximo - $nuevoTurno->cupoActual()) {
+                return response()->json([
+                    'message' => 'No hay cupo suficiente en el turno nuevo',
+                ], 409);
+            }
+        }
+
         $reserva->update($request->validated());
 
-        // Al cambiar la cantidad de jugadores o el estado, el cupo del turno puede llenarse o liberarse
-        $reserva->turno?->recalcularEstado();
+        // Al cambiar la cantidad de jugadores, el estado o el turno,
+        // el cupo puede llenarse o liberarse: se recalculan el turno anterior y el actual
+        $turnoAnterior?->recalcularEstado();
+        $reserva->fresh()->turno?->recalcularEstado();
 
         return response()->json([
             'message' => 'Reserva actualizada correctamente',
