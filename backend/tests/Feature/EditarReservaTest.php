@@ -92,6 +92,41 @@ class EditarReservaTest extends TestCase
         $this->assertSame($anterior->id, $reserva->fresh()->turno_id);
     }
 
+    public function test_el_jugador_no_puede_cambiar_de_turno_fuera_de_plazo(): void
+    {
+        $inicio = now()->addHour();
+        $anterior = $this->crearTurno(null, [
+            'fecha' => $inicio->toDateString(),
+            'hora_inicio' => $inicio->format('H:i'),
+            'hora_fin' => $inicio->copy()->addHour()->format('H:i'),
+            'estado' => 'ocupado',
+        ]);
+        $nuevo = $this->crearTurno($anterior->cancha, ['fecha' => now()->addDays(3)->toDateString()]);
+        $reserva = $this->crearReserva($anterior);
+        Sanctum::actingAs($reserva->usuario);
+
+        $this->putJson("/api/reservas/{$reserva->id}", ['turno_id' => $nuevo->id])
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'Las reservas se pueden cambiar de turno hasta 2 horas antes del partido.');
+
+        $this->assertSame($anterior->id, $reserva->fresh()->turno_id);
+    }
+
+    public function test_el_jugador_no_puede_crear_una_reserva_ya_pagada(): void
+    {
+        $jugador = $this->crearJugador();
+        $turno = $this->crearTurno();
+        Sanctum::actingAs($jugador);
+
+        $this->postJson('/api/reservas', [
+            'turno_id' => $turno->id,
+            'usuario_id' => $jugador->id,
+            'estado_pago' => 'pagado',
+        ])->assertCreated();
+
+        $this->assertNotSame('pagado', $turno->reservas()->first()->estado_pago);
+    }
+
     public function test_el_jugador_no_puede_cambiar_el_estado_de_pago(): void
     {
         $reserva = $this->crearReserva($this->crearTurno());

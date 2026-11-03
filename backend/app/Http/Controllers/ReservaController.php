@@ -148,7 +148,13 @@ class ReservaController extends Controller
                 }
             }
 
-            $reserva = Reserva::create(array_merge($request->validated(), [
+            $datos = $request->validated();
+            // Un jugador no elige el estado de pago: arranca pendiente hasta que el club lo marque
+            if ($request->user()->rol !== 'administrador') {
+                unset($datos['estado_pago']);
+            }
+
+            $reserva = Reserva::create(array_merge($datos, [
                 'estado' => 'confirmada',
             ]));
 
@@ -228,6 +234,14 @@ class ReservaController extends Controller
 
         // Cambio de turno: el nuevo tiene que estar libre y no haber pasado
         if ($nuevoTurnoId && (int) $nuevoTurnoId !== $reserva->turno_id) {
+            // Mismo plazo que para cancelar: el jugador no puede mover un turno que empieza en menos de 2 horas
+            $limite = $turnoAnterior?->inicio()->subHours(Reserva::HORAS_MINIMAS_PARA_CANCELAR);
+            if ($request->user()->rol !== 'administrador' && $limite && now()->greaterThan($limite)) {
+                return response()->json([
+                    'message' => 'Las reservas se pueden cambiar de turno hasta '.Reserva::HORAS_MINIMAS_PARA_CANCELAR.' horas antes del partido.',
+                ], 409);
+            }
+
             $nuevoTurno = Turno::find($nuevoTurnoId);
 
             if (in_array($nuevoTurno->estado, ['ocupado', 'bloqueado']) || $nuevoTurno->yaPaso()) {
