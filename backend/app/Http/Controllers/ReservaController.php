@@ -82,10 +82,9 @@ class ReservaController extends Controller
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/ReservaInput')),
         responses: [
             new OA\Response(response: 201, description: 'Creado correctamente.'),
-            new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
+            new OA\Response(response: 422, description: 'Datos inválidos (incluye un turno_id que no existe): devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
-            new OA\Response(response: 404, description: 'Turno no encontrado.'),
-            new OA\Response(response: 409, description: 'Turno no disponible o sin cupo suficiente.'),
+            new OA\Response(response: 409, description: 'Turno no disponible, ya pasado, con jugadores anotados o sin cupo suficiente.'),
         ]
     )]
     public function store(ReservaRequest $request)
@@ -96,10 +95,14 @@ class ReservaController extends Controller
         return DB::transaction(function () use ($request) {
             $turno = Turno::lockForUpdate()->find($request->input('turno_id'));
 
+            // La regla exists del ReservaRequest ya responde 422 si el turno no existe;
+            // esto cubre el caso de que lo borren entre la validación y el bloqueo,
+            // con la misma respuesta para que el front maneje un solo caso.
             if (! $turno) {
                 return response()->json([
-                    'message' => 'Turno no encontrado',
-                ], 404);
+                    'message' => 'El turno indicado no existe.',
+                    'errors' => ['turno_id' => ['El turno indicado no existe.']],
+                ], 422);
             }
 
             if (in_array($turno->estado, ['ocupado', 'bloqueado'])) {

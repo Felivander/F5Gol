@@ -1013,7 +1013,7 @@
                         "description": "Creado correctamente."
                     },
                     "422": {
-                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "description": "Datos inválidos (incluye un turno_id que no existe): devuelve un mensaje por cada campo con error.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1025,11 +1025,8 @@
                     "401": {
                         "description": "No autenticado."
                     },
-                    "404": {
-                        "description": "Turno no encontrado."
-                    },
                     "409": {
-                        "description": "Turno no disponible o sin cupo suficiente."
+                        "description": "Turno no disponible, ya pasado, con jugadores anotados o sin cupo suficiente."
                     }
                 },
                 "security": [
@@ -1100,8 +1097,14 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "Un jugador intentó cambiar el estado de pago."
+                    },
                     "404": {
                         "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "El turno nuevo no está disponible o no tiene cupo."
                     }
                 },
                 "security": [
