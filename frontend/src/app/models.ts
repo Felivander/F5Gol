@@ -69,6 +69,15 @@ export interface Paginado<T> {
   total: number;
 }
 
+export interface NuevoUsuario {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  rol: 'jugador' | 'administrador';
+  telefono?: string;
+}
+
 export interface LoginResponse {
   message: string;
   access_token: string;
