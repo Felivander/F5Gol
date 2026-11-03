@@ -176,6 +176,12 @@ class CanchaController extends Controller
             return $this->respuestaNoEsDueno();
         }
 
+        if ($cancha->tieneReservasFuturas()) {
+            return response()->json([
+                'message' => 'La cancha tiene reservas futuras: cancelalas antes de borrarla.',
+            ], 409);
+        }
+
         $cancha->delete();
         Storage::disk('public')->deleteDirectory("canchas/{$cancha->id}");
 

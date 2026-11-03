@@ -55,6 +55,20 @@ class CanchasInactivasTest extends TestCase
         $this->assertSame('activa', $cancha->fresh()->estado);
     }
 
+    public function test_no_deja_borrar_una_cancha_con_reservas_futuras(): void
+    {
+        $admin = $this->crearAdministrador();
+        $cancha = $this->crearCancha($this->crearClub($admin));
+        $this->crearReserva($this->crearTurno($cancha));
+        Sanctum::actingAs($admin);
+
+        $this->deleteJson("/api/canchas/{$cancha->id}")
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'La cancha tiene reservas futuras: cancelalas antes de borrarla.');
+
+        $this->assertDatabaseHas('canchas', ['id' => $cancha->id]);
+    }
+
     public function test_deja_desactivar_si_solo_hay_reservas_canceladas_o_pasadas(): void
     {
         $admin = $this->crearAdministrador();
