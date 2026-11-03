@@ -27,10 +27,12 @@ class ReservaController extends Controller
             new OA\Parameter(name: 'fecha', description: 'Filtrar por fecha del turno (AAAA-MM-DD)', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
             new OA\Parameter(name: 'desde', description: 'Turnos desde esta fecha inclusive (AAAA-MM-DD), por ejemplo el lunes de la semana', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
             new OA\Parameter(name: 'hasta', description: 'Turnos hasta esta fecha inclusive (AAAA-MM-DD), por ejemplo el domingo de la semana', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'mis_clubes', description: 'Con token de administrador: solo las reservas de las canchas de sus clubes', in: 'query', required: false, schema: new OA\Schema(type: 'boolean')),
+            new OA\Parameter(name: 'por_pagina', description: 'Reservas por página (de 1 a 100, por defecto 10)', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
             new OA\Parameter(name: 'page', description: 'Número de página', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Listado paginado (10 por página).'),
+            new OA\Response(response: 200, description: 'Listado paginado (10 por página salvo que se pida otra cantidad).'),
         ]
     )]
     public function index(Request $request)
@@ -64,7 +66,16 @@ class ReservaController extends Controller
             $query->whereHas('turno', fn ($q) => $q->whereDate('fecha', '<=', $request->query('hasta')));
         }
 
-        return response()->json($query->paginate(10), 200);
+        // Panel del administrador: solo las reservas de las canchas de sus clubes
+        if ($request->boolean('mis_clubes')) {
+            $administradorId = auth('sanctum')->id();
+            $query->whereHas('turno.cancha.club', fn ($q) => $q->where('administrador_id', $administradorId));
+        }
+
+        // El panel pide todas las del día de una vez; se limita a 100 por página
+        $porPagina = min(max((int) $request->query('por_pagina', 10), 1), 100);
+
+        return response()->json($query->paginate($porPagina), 200);
     }
 
     /**

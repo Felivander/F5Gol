@@ -988,6 +988,24 @@
                         }
                     },
                     {
+                        "name": "mis_clubes",
+                        "in": "query",
+                        "description": "Con token de administrador: solo las reservas de las canchas de sus clubes",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "por_pagina",
+                        "in": "query",
+                        "description": "Reservas por página (de 1 a 100, por defecto 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "description": "Número de página",
@@ -999,7 +1017,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Listado paginado (10 por página)."
+                        "description": "Listado paginado (10 por página salvo que se pida otra cantidad)."
                     }
                 }
             },
