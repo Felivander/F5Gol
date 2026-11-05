@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Cancha, Club, Paginado, Turno } from '../models';
+import { Cancha, Club, NuevaCancha, Paginado, RespuestaCancha, RespuestaMensaje, Turno } from '../models';
 
 // En desarrollo, ng serve redirige /api a Laravel (ver proxy.conf.json)
 const API = '/api';
@@ -27,5 +27,26 @@ export class Api {
       params = params.set('fecha', fecha);
     }
     return this.http.get<Turno[]>(`${API}/turnos`, { params });
+  }
+
+  crearCancha(datos: NuevaCancha) {
+    return this.http.post<RespuestaCancha>(`${API}/canchas`, datos);
+  }
+
+  actualizarCancha(id: number, datos: NuevaCancha) {
+    return this.http.put<RespuestaCancha>(`${API}/canchas/${id}`, datos);
+  }
+
+  eliminarCancha(id: number) {
+    return this.http.delete<RespuestaMensaje>(`${API}/canchas/${id}`);
+  }
+
+  getCanchasEliminadas(clubId: number) {
+    const params = new HttpParams().set('club_id', clubId);
+    return this.http.get<Paginado<Cancha>>(`${API}/canchas/eliminadas`, { params });
+  }
+
+  restaurarCancha(id: number) {
+    return this.http.put<RespuestaMensaje>(`${API}/canchas/${id}/restore`, {});
   }
 }

@@ -16,13 +16,27 @@
     </div>
   </div>
 
-  <h2>Canchas en este complejo</h2>
+  @if (mensaje()) {
+    <div class="alert alert-success alert-dismissible mb-3" role="alert">
+      {{ mensaje() }}
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="mensaje.set('')"></button>
+    </div>
+  }
+
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h2 class="mb-0">Canchas en este complejo</h2>
+    @if (esAdmin()) {
+      <button type="button" class="btn btn-primary" (click)="abrirModalNueva()">
+        + Nueva cancha
+      </button>
+    }
+  </div>
 
   <ul class="tarjetas">
     @for (cancha of club.canchas; track cancha.id) {
       <li>
-        <a [routerLink]="['/canchas', cancha.id]">
-          <div>
+        <div style="display: flex; flex-direction: column; width: 100%; padding: 1.35rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--card-bg); box-shadow: var(--shadow-sm);">
+          <a [routerLink]="['/canchas', cancha.id]" style="color: inherit;">
             <app-cancha-diagrama [tipo]="cancha.tipo" [mini]="true"></app-cancha-diagrama>
 
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
@@ -43,13 +57,26 @@
               {{ +cancha.tarifa | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}
               <span class="precio-sub">/ turno</span>
             </div>
-          </div>
+          </a>
 
           <div class="tarjeta-footer-action">
-            <span>Ver disponibilidad de turnos</span>
-            <span class="flecha">→</span>
+            <a [routerLink]="['/canchas', cancha.id]">
+              <span>Ver disponibilidad de turnos</span>
+              <span class="flecha">→</span>
+            </a>
           </div>
-        </a>
+
+          @if (esAdmin()) {
+            <div class="d-flex gap-2 mt-3 pt-3" style="border-top: 1px solid var(--border-color);">
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="editarCancha(cancha)">
+                Editar
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminarCancha(cancha)">
+                Eliminar
+              </button>
+            </div>
+          }
+        </div>
       </li>
     } @empty {
       <li style="grid-column: 1 / -1; background: #ffffff; padding: 2rem; border-radius: var(--radius-md); text-align: center; border: 1px dashed var(--border-color); color: var(--text-muted);">
@@ -57,6 +84,124 @@
       </li>
     }
   </ul>
+
+  @if (esAdmin()) {
+    <div class="card mt-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Canchas eliminadas</h5>
+        <span class="badge bg-secondary">{{ canchasEliminadas().length }}</span>
+      </div>
+      <div class="card-body">
+        @if (canchasEliminadas().length > 0) {
+          <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Tipo</th>
+                  <th>Eliminada el</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cancha of canchasEliminadas(); track cancha.id) {
+                  <tr>
+                    <td>{{ cancha.nombre }}</td>
+                    <td>{{ cancha.tipo }}</td>
+                    <td>{{ cancha.deleted_at || 'No disponible' }}</td>
+                    <td class="text-end">
+                      <button type="button" class="btn btn-sm btn-success" (click)="restaurarCancha(cancha)">
+                        Restaurar
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="text-muted mb-0">No hay canchas eliminadas para mostrar.</p>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Modal: nueva / editar cancha -->
+  @if (modalAbierto()) {
+    <div class="modal d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="tituloModalCancha" (click)="cerrarModal()">
+      <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title fs-5" id="tituloModalCancha">
+              {{ canchaEditando() !== null ? 'Editar cancha' : 'Nueva cancha' }}
+            </h2>
+            <button type="button" class="btn-close" aria-label="Cerrar" [disabled]="guardando()" (click)="cerrarModal()"></button>
+          </div>
+
+          <form (ngSubmit)="guardarCancha()">
+            <div class="modal-body">
+              @if (errorForm()) {
+                <div class="alert alert-danger">{{ errorForm() }}</div>
+              }
+
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input id="nombre" type="text" class="form-control" name="nombre" [(ngModel)]="nombre" required minlength="2" maxlength="100" placeholder="Ej.: Cancha 1">
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="tipo" class="form-label">Tipo</label>
+                  <select id="tipo" class="form-select" name="tipo" [(ngModel)]="tipo">
+                    <option value="futbol5">Fútbol 5</option>
+                    <option value="futbol7">Fútbol 7</option>
+                    <option value="futbol11">Fútbol 11</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="capacidad" class="form-label">Capacidad de jugadores</label>
+                  <input id="capacidad" type="number" class="form-control" name="capacidad" [(ngModel)]="capacidadJugadores" min="2" max="22">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción</label>
+                <textarea id="descripcion" class="form-control" name="descripcion" [(ngModel)]="descripcion" rows="3" placeholder="Césped sintético, techada, etc."></textarea>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="tarifa" class="form-label">Tarifa por turno ($)</label>
+                  <input id="tarifa" type="number" class="form-control" name="tarifa" [(ngModel)]="tarifa" min="0" step="100" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="estado" class="form-label">Estado</label>
+                  <select id="estado" class="form-select" name="estado" [(ngModel)]="estado">
+                    <option value="activa">Activa</option>
+                    <option value="inactiva">Inactiva</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" [disabled]="guardando()" (click)="cerrarModal()">
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+                @if (guardando()) {
+                  Guardando...
+                } @else {
+                  {{ canchaEditando() !== null ? 'Actualizar cancha' : 'Guardar cancha' }}
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+  }
 } @else {
   <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
     <p style="font-size: 1.1rem; font-weight: 600;">⚽ Cargando información del club...</p>

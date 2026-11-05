@@ -28,6 +28,28 @@ export interface Cancha {
   tarifa: string;
   estado: string;
   club?: Club;
+  // Solo viene en el listado de canchas eliminadas
+  deleted_at?: string | null;
+}
+
+// Datos que se envían al crear o editar una cancha
+export interface NuevaCancha {
+  club_id: number;
+  nombre: string;
+  tipo: string;
+  capacidad_jugadores: number;
+  descripcion: string | null;
+  tarifa: number;
+  estado: string;
+}
+
+export interface RespuestaCancha {
+  message: string;
+  cancha: Cancha;
+}
+
+export interface RespuestaMensaje {
+  message: string;
 }
 
 export interface Turno {
