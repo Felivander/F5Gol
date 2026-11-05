@@ -332,6 +332,87 @@
                 ]
             }
         },
+        "/api/canchas/eliminadas": {
+            "get": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Listar canchas eliminadas",
+                "description": "Display a listing of the soft-deleted resources.",
+                "operationId": "d2c054675d141e439f57ce6834f6790e",
+                "parameters": [
+                    {
+                        "name": "club_id",
+                        "in": "query",
+                        "description": "Filtrar por club",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número de página",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado paginado (10 por página) de canchas eliminadas."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/canchas/{id}/restore": {
+            "put": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Restaurar cancha eliminada",
+                "description": "Restore the specified soft-deleted resource.",
+                "operationId": "0dc987a0d7189c5c757f328500e5b5d7",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restaurada correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mensaje"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "404": {
+                        "description": "No encontrado entre las canchas eliminadas."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/clubs": {
             "get": {
                 "tags": [

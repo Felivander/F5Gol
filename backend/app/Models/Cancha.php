@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'club_id',
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 class Cancha extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     // Una cancha pertenece a un club
     public function club()
