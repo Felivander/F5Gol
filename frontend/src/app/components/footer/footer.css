@@ -1,0 +1,38 @@
+footer {
+  margin-top: auto;
+  background: #0f172a;
+  color: #cbd5e1;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-container {
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.footer-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.footer-marca .marca-destacada {
+  color: #34d399;
+}
+
+.icono-pelota {
+  font-size: 1.1rem;
+}
+
+footer small {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
