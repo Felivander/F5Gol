@@ -182,8 +182,8 @@ class CanchaController extends Controller
             ], 409);
         }
 
+        // Al usar SoftDeletes, delete() no borra la fila: completa deleted_at
         $cancha->delete();
-        Storage::disk('public')->deleteDirectory("canchas/{$cancha->id}");
 
         return response()->json([
             'message' => 'Cancha eliminada correctamente',
@@ -291,6 +291,72 @@ class CanchaController extends Controller
         return response()->json([
             'message' => 'Foto borrada correctamente',
             'cancha' => $cancha->fresh(),
+        ], 200);
+    }
+
+    /**
+     * Display a listing of the soft-deleted resources.
+     */
+    #[OA\Get(
+        path: '/api/canchas/eliminadas',
+        summary: 'Listar canchas eliminadas',
+        tags: ['Canchas'],
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'club_id', description: 'Filtrar por club', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'page', description: 'Número de página', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Listado paginado (10 por página) de canchas eliminadas.'),
+            new OA\Response(response: 401, description: 'No autenticado.'),
+        ]
+    )]
+    public function eliminadas(Request $request)
+    {
+        $query = Cancha::onlyTrashed()
+            ->with('club:id,nombre')
+            ->orderByDesc('deleted_at');
+
+        if ($request->has('club_id')) {
+            $query->where('club_id', $request->query('club_id'));
+        }
+
+        return response()->json($query->paginate(10), 200);
+    }
+
+    /**
+     * Restore the specified soft-deleted resource.
+     */
+    #[OA\Put(
+        path: '/api/canchas/{id}/restore',
+        summary: 'Restaurar cancha eliminada',
+        tags: ['Canchas'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\Parameter(ref: '#/components/parameters/id')],
+        responses: [
+            new OA\Response(response: 200, description: 'Restaurada correctamente.', content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')),
+            new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 404, description: 'No encontrado entre las canchas eliminadas.'),
+        ]
+    )]
+    public function restore(Request $request, string $id)
+    {
+        $cancha = Cancha::onlyTrashed()->find($id);
+
+        if (! $cancha) {
+            return response()->json([
+                'message' => 'Cancha eliminada no encontrada',
+            ], 404);
+        }
+
+        if (! $this->esDuenoDelClub($request, $cancha->club_id)) {
+            return $this->respuestaNoEsDueno();
+        }
+
+        $cancha->restore();
+
+        return response()->json([
+            'message' => 'Cancha restaurada correctamente',
         ], 200);
     }
 

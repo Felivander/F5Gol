@@ -16,6 +16,10 @@ Route::get('/user', [AuthController::class, 'me'])->middleware('auth:sanctum');
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
+// Nota: esta ruta tiene que declararse antes que el "show" público de canchas
+// (canchas/{id}), porque si no Laravel interpreta "eliminadas" como un id.
+Route::middleware('auth:sanctum')->get('canchas/eliminadas', [CanchaController::class, 'eliminadas']);
+
 // Rutas públicas (lectura)
 Route::apiResource('clubs', ClubController::class)->only(['index', 'show']);
 Route::apiResource('canchas', CanchaController::class)->only(['index', 'show']);
@@ -30,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('clubs', ClubController::class)->except(['index', 'show']);
         Route::apiResource('canchas', CanchaController::class)->except(['index', 'show']);
         Route::post('canchas/{id}/fotos', [CanchaController::class, 'subirFoto']);
+        Route::put('canchas/{id}/restore', [CanchaController::class, 'restore']);
         Route::delete('canchas/{id}/fotos/{indice}', [CanchaController::class, 'borrarFoto'])->whereNumber('indice');
         Route::apiResource('turnos', TurnoController::class)->except(['index', 'show']);
         Route::patch('turnos/{id}/bloqueo', [TurnoController::class, 'bloqueo']);

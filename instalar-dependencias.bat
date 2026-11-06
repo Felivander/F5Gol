@@ -22,7 +22,11 @@ rem 1. Back (Laravel)
 echo [1/4] Instalando dependencias del back (composer install)...
 pushd backend
 call composer install
-if errorlevel 1 goto error
+if errorlevel 1 (
+    echo Reintentando con --ignore-platform-req=php...
+    call composer install --ignore-platform-req=php
+    if errorlevel 1 goto error
+)
 
 if not exist .env (
     echo Creando backend\.env a partir de .env.example...

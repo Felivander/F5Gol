@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Cancha, CanchaInput, Club, NuevaReserva, Paginado, Reserva, Turno } from '../models';
+import { Cancha, CanchaInput, Club, NuevaReserva, Paginado, Reserva, RespuestaMensaje, Turno } from '../models';
 
 // En desarrollo, ng serve redirige /api a Laravel (ver proxy.conf.json)
 const API = '/api';
@@ -37,6 +37,20 @@ export class Api {
 
   borrarFotoCancha(id: number, indice: number) {
     return this.http.delete<{ message: string; cancha: Cancha }>(`${API}/canchas/${id}/fotos/${indice}`);
+  }
+
+  // Soft delete: la cancha queda en "eliminadas" y se puede restaurar
+  eliminarCancha(id: number) {
+    return this.http.delete<RespuestaMensaje>(`${API}/canchas/${id}`);
+  }
+
+  getCanchasEliminadas(clubId: number) {
+    const params = new HttpParams().set('club_id', clubId);
+    return this.http.get<Paginado<Cancha>>(`${API}/canchas/eliminadas`, { params });
+  }
+
+  restaurarCancha(id: number) {
+    return this.http.put<RespuestaMensaje>(`${API}/canchas/${id}/restore`, {});
   }
 
   getTurnos(canchaId: number, fecha?: string) {

@@ -1,21 +1,13 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { Auth } from './services/auth';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Header } from './components/header/header';
+import { Footer } from './components/footer/footer';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, Header, Footer],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  protected auth = inject(Auth);
-  private router = inject(Router);
-
-  salir() {
-    this.auth.logout().subscribe({
-      complete: () => this.router.navigate(['/clubes']),
-      error: () => this.router.navigate(['/clubes'])
-    });
-  }
 }

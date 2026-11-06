@@ -143,7 +143,8 @@ class FotosCanchaTest extends TestCase
             ->assertJsonValidationErrors(['foto' => 'La foto no puede pesar más de 4 MB.']);
     }
 
-    public function test_al_borrar_la_cancha_se_borran_sus_fotos(): void
+    // Es soft delete: las fotos se conservan para poder restaurar la cancha
+    public function test_al_borrar_la_cancha_se_conservan_sus_fotos(): void
     {
         $admin = $this->crearAdministrador();
         $cancha = $this->crearCancha($this->crearClub($admin));
@@ -152,6 +153,6 @@ class FotosCanchaTest extends TestCase
 
         $this->deleteJson("/api/canchas/{$cancha->id}")->assertOk();
 
-        $this->assertEmpty(Storage::disk('public')->allFiles());
+        $this->assertCount(1, Storage::disk('public')->allFiles("canchas/{$cancha->id}"));
     }
 }

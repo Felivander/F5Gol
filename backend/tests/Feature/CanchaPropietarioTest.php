@@ -21,7 +21,7 @@ class CanchaPropietarioTest extends TestCase
         $this->assertDatabaseHas('canchas', ['id' => $cancha->id, 'tarifa' => 30000]);
 
         $this->deleteJson("/api/canchas/{$cancha->id}")->assertOk();
-        $this->assertDatabaseMissing('canchas', ['id' => $cancha->id]);
+        $this->assertSoftDeleted('canchas', ['id' => $cancha->id]);
     }
 
     public function test_otro_administrador_no_puede_editar_la_cancha(): void
