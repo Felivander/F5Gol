@@ -15,11 +15,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'descripcion',
     'tarifa',
     'estado',
+    'fotos',
 ])]
 class Cancha extends Model
 {
     use HasFactory;
     use SoftDeletes;
+
+    // URLs públicas de las fotos, en el orden en que se subieron
+    protected $casts = [
+        'fotos' => 'array',
+    ];
 
     // Una cancha pertenece a un club
     public function club()
@@ -31,5 +37,15 @@ class Cancha extends Model
     public function turnos()
     {
         return $this->hasMany(Turno::class);
+    }
+
+    // Hay alguna reserva activa en un turno de hoy en adelante
+    public function tieneReservasFuturas(): bool
+    {
+        return Reserva::where('estado', '!=', 'cancelada')
+            ->whereHas('turno', fn ($q) => $q
+                ->where('cancha_id', $this->id)
+                ->whereDate('fecha', '>=', now()->toDateString()))
+            ->exists();
     }
 }

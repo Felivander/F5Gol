@@ -1,11 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.html'
 })
 export class Login {
@@ -21,7 +21,8 @@ export class Login {
     this.enviando.set(true);
     this.error.set('');
     this.auth.login(this.email, this.password).subscribe({
-      next: () => this.router.navigate(['/clubes']),
+      // El administrador entra a su panel; el jugador, a buscar canchas
+      next: res => this.router.navigate([res.user.rol === 'administrador' ? '/panel' : '/clubes']),
       error: err => {
         // 401: credenciales incorrectas, 422: errores de validación de Laravel
         this.error.set(err.error?.message ?? 'No se pudo iniciar sesión.');

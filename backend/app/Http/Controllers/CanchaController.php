@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cancha;
+use App\Models\Club;
 use App\Http\Requests\CanchaRequest;
+use App\Http\Requests\FotoCanchaRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use OpenApi\Attributes as OA;
 
 class CanchaController extends Controller
@@ -18,6 +21,7 @@ class CanchaController extends Controller
         tags: ['Canchas'],
         parameters: [
             new OA\Parameter(name: 'club_id', description: 'Filtrar por club', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'incluir_inactivas', description: 'Solo administradores: incluir las canchas inactivas', in: 'query', required: false, schema: new OA\Schema(type: 'boolean')),
             new OA\Parameter(name: 'page', description: 'Número de página', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
@@ -31,6 +35,13 @@ class CanchaController extends Controller
         // Permite filtrar por club: /api/canchas?club_id=1
         if ($request->has('club_id')) {
             $query->where('club_id', $request->query('club_id'));
+        }
+
+        // Las canchas dadas de baja no se muestran al público;
+        // un administrador puede pedirlas con ?incluir_inactivas=1 para gestionarlas
+        $esAdministrador = auth('sanctum')->user()?->rol === 'administrador';
+        if (! ($esAdministrador && $request->boolean('incluir_inactivas'))) {
+            $query->where('estado', 'activa');
         }
 
         return response()->json($query->paginate(10), 200);
@@ -49,10 +60,15 @@ class CanchaController extends Controller
             new OA\Response(response: 201, description: 'Creado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o el club no es suyo.'),
         ]
     )]
     public function store(CanchaRequest $request)
     {
+        if (! $this->esDuenoDelClub($request, $request->input('club_id'))) {
+            return $this->respuestaNoEsDueno();
+        }
+
         $cancha = Cancha::create($request->validated());
 
         return response()->json([
@@ -95,7 +111,9 @@ class CanchaController extends Controller
             new OA\Response(response: 200, description: 'Actualizado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o el club no es suyo.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
+            new OA\Response(response: 409, description: 'Se intentó desactivar una cancha con reservas futuras.'),
         ]
     )]
     public function update(CanchaRequest $request, string $id)
@@ -106,6 +124,18 @@ class CanchaController extends Controller
             return response()->json([
                 'message' => 'Cancha no encontrada',
             ], 404);
+        }
+
+        // Tiene que ser dueño del club actual y, si la mueve, también del club nuevo
+        if (! $this->esDuenoDelClub($request, $cancha->club_id)
+            || ($request->has('club_id') && ! $this->esDuenoDelClub($request, $request->input('club_id')))) {
+            return $this->respuestaNoEsDueno();
+        }
+
+        if ($request->input('estado') === 'inactiva' && $cancha->estado !== 'inactiva' && $cancha->tieneReservasFuturas()) {
+            return response()->json([
+                'message' => 'La cancha tiene reservas futuras: cancelalas antes de desactivarla.',
+            ], 409);
         }
 
         $cancha->update($request->validated());
@@ -128,10 +158,11 @@ class CanchaController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Eliminado correctamente.', content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')),
             new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o el club no es suyo.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $cancha = Cancha::find($id);
 
@@ -141,11 +172,125 @@ class CanchaController extends Controller
             ], 404);
         }
 
+        if (! $this->esDuenoDelClub($request, $cancha->club_id)) {
+            return $this->respuestaNoEsDueno();
+        }
+
+        if ($cancha->tieneReservasFuturas()) {
+            return response()->json([
+                'message' => 'La cancha tiene reservas futuras: cancelalas antes de borrarla.',
+            ], 409);
+        }
+
         // Al usar SoftDeletes, delete() no borra la fila: completa deleted_at
         $cancha->delete();
 
         return response()->json([
             'message' => 'Cancha eliminada correctamente',
+        ], 200);
+    }
+
+    #[OA\Post(
+        path: '/api/canchas/{id}/fotos',
+        summary: 'Subir una foto de la cancha',
+        description: 'Agrega la URL pública de la foto al final del array fotos de la cancha.',
+        tags: ['Canchas'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\Parameter(ref: '#/components/parameters/id')],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['foto'],
+                    properties: [
+                        new OA\Property(property: 'foto', type: 'string', format: 'binary', description: 'Imagen jpg, png o webp de hasta 4 MB.'),
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Foto subida: devuelve la cancha con el array fotos actualizado.'),
+            new OA\Response(response: 422, description: 'El archivo no es una imagen válida o pesa más de 4 MB.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
+            new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o el club no es suyo.'),
+            new OA\Response(response: 404, description: 'No encontrado.'),
+        ]
+    )]
+    public function subirFoto(FotoCanchaRequest $request, string $id)
+    {
+        $cancha = Cancha::find($id);
+
+        if (! $cancha) {
+            return response()->json([
+                'message' => 'Cancha no encontrada',
+            ], 404);
+        }
+
+        if (! $this->esDuenoDelClub($request, $cancha->club_id)) {
+            return $this->respuestaNoEsDueno();
+        }
+
+        $ruta = $request->file('foto')->store("canchas/{$cancha->id}", 'public');
+
+        $fotos = $cancha->fotos ?? [];
+        $fotos[] = Storage::disk('public')->url($ruta);
+        $cancha->update(['fotos' => $fotos]);
+
+        return response()->json([
+            'message' => 'Foto subida correctamente',
+            'cancha' => $cancha->fresh(),
+        ], 201);
+    }
+
+    #[OA\Delete(
+        path: '/api/canchas/{id}/fotos/{indice}',
+        summary: 'Borrar una foto de la cancha',
+        description: 'Borra la foto que está en esa posición del array fotos (empieza en 0). Las siguientes se corren un lugar.',
+        tags: ['Canchas'],
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(ref: '#/components/parameters/id'),
+            new OA\Parameter(name: 'indice', description: 'Posición de la foto en el array fotos', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 0), example: 0),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Foto borrada: devuelve la cancha con el array fotos actualizado.'),
+            new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o el club no es suyo.'),
+            new OA\Response(response: 404, description: 'No existe la cancha o la foto.'),
+        ]
+    )]
+    public function borrarFoto(Request $request, string $id, int $indice)
+    {
+        $cancha = Cancha::find($id);
+
+        if (! $cancha) {
+            return response()->json([
+                'message' => 'Cancha no encontrada',
+            ], 404);
+        }
+
+        if (! $this->esDuenoDelClub($request, $cancha->club_id)) {
+            return $this->respuestaNoEsDueno();
+        }
+
+        $fotos = $cancha->fotos ?? [];
+
+        if (! array_key_exists($indice, $fotos)) {
+            return response()->json([
+                'message' => 'Foto no encontrada',
+            ], 404);
+        }
+
+        $archivo = basename(parse_url($fotos[$indice], PHP_URL_PATH));
+        Storage::disk('public')->delete("canchas/{$cancha->id}/{$archivo}");
+
+        array_splice($fotos, $indice, 1);
+        $cancha->update(['fotos' => $fotos]);
+
+        return response()->json([
+            'message' => 'Foto borrada correctamente',
+            'cancha' => $cancha->fresh(),
         ], 200);
     }
 
@@ -194,7 +339,7 @@ class CanchaController extends Controller
             new OA\Response(response: 404, description: 'No encontrado entre las canchas eliminadas.'),
         ]
     )]
-    public function restore(string $id)
+    public function restore(Request $request, string $id)
     {
         $cancha = Cancha::onlyTrashed()->find($id);
 
@@ -204,10 +349,29 @@ class CanchaController extends Controller
             ], 404);
         }
 
+        if (! $this->esDuenoDelClub($request, $cancha->club_id)) {
+            return $this->respuestaNoEsDueno();
+        }
+
         $cancha->restore();
 
         return response()->json([
             'message' => 'Cancha restaurada correctamente',
         ], 200);
+    }
+
+    // Un administrador solo gestiona las canchas de los clubes que administra
+    private function esDuenoDelClub(Request $request, mixed $clubId): bool
+    {
+        return Club::where('id', $clubId)
+            ->where('administrador_id', $request->user()->id)
+            ->exists();
+    }
+
+    private function respuestaNoEsDueno()
+    {
+        return response()->json([
+            'message' => 'Solo podés gestionar las canchas de tus propios clubes.',
+        ], 403);
     }
 }

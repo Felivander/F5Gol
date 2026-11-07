@@ -27,6 +27,8 @@ export interface Cancha {
   descripcion: string | null;
   tarifa: string;
   estado: string;
+  // URLs públicas de las fotos subidas
+  fotos?: string[] | null;
   club?: Club;
   // Solo viene en el listado de canchas eliminadas
   deleted_at?: string | null;
@@ -52,6 +54,16 @@ export interface RespuestaMensaje {
   message: string;
 }
 
+export interface CanchaInput {
+  club_id: number;
+  nombre: string;
+  tipo: string;
+  capacidad_jugadores: number;
+  descripcion: string;
+  tarifa: number;
+  estado: 'activa' | 'inactiva';
+}
+
 export interface Turno {
   id: number;
   cancha_id: number;
@@ -63,12 +75,41 @@ export interface Turno {
   cupo_actual: number;
 }
 
+export interface Reserva {
+  id: number;
+  turno_id: number;
+  usuario_id: number;
+  tipo: 'completa' | 'individual';
+  cantidad_jugadores: number;
+  estado: 'pendiente' | 'confirmada' | 'cancelada';
+  estado_pago: 'pendiente' | 'sena' | 'pagado';
+  created_at: string;
+  turno?: Turno & { cancha?: Cancha };
+  usuario?: Usuario;
+}
+
+export interface NuevaReserva {
+  turno_id: number;
+  usuario_id: number;
+  tipo: 'completa' | 'individual';
+  cantidad_jugadores?: number;
+}
+
 // Respuesta de paginate() de Laravel
 export interface Paginado<T> {
   data: T[];
   current_page: number;
   last_page: number;
   total: number;
+}
+
+export interface NuevoUsuario {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  rol: 'jugador' | 'administrador';
+  telefono?: string;
 }
 
 export interface LoginResponse {

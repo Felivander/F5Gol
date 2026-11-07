@@ -12,6 +12,106 @@
         }
     ],
     "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Registrar usuario",
+                "description": "Crea la cuenta eligiendo el rol (jugador o administrador) y devuelve un access_token, igual que el login.",
+                "operationId": "8a56853624e025573120a09a4c75d468",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "rol"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Juan Pérez"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "juan@f5gol.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secreto123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secreto123"
+                                    },
+                                    "rol": {
+                                        "type": "string",
+                                        "example": "jugador",
+                                        "enum": [
+                                            "jugador",
+                                            "administrador"
+                                        ]
+                                    },
+                                    "telefono": {
+                                        "type": "string",
+                                        "example": "1155554444",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario registrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario registrado correctamente"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|xxxxxxxxxxxxxxxxxxxxxxxx"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/Usuario"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/login": {
             "post": {
                 "tags": [
@@ -167,6 +267,15 @@
                         }
                     },
                     {
+                        "name": "incluir_inactivas",
+                        "in": "query",
+                        "description": "Solo administradores: incluir las canchas inactivas",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "description": "Número de página",
@@ -215,6 +324,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o el club no es suyo."
                     }
                 },
                 "security": [
@@ -285,8 +397,14 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "El usuario no es administrador o el club no es suyo."
+                    },
                     "404": {
                         "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "Se intentó desactivar una cancha con reservas futuras."
                     }
                 },
                 "security": [
@@ -321,8 +439,120 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "El usuario no es administrador o el club no es suyo."
+                    },
                     "404": {
                         "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/canchas/{id}/fotos": {
+            "post": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Subir una foto de la cancha",
+                "description": "Agrega la URL pública de la foto al final del array fotos de la cancha.",
+                "operationId": "344359efcdf8521c2299abeb677471bf",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "foto"
+                                ],
+                                "properties": {
+                                    "foto": {
+                                        "description": "Imagen jpg, png o webp de hasta 4 MB.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Foto subida: devuelve la cancha con el array fotos actualizado."
+                    },
+                    "422": {
+                        "description": "El archivo no es una imagen válida o pesa más de 4 MB.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o el club no es suyo."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/canchas/{id}/fotos/{indice}": {
+            "delete": {
+                "tags": [
+                    "Canchas"
+                ],
+                "summary": "Borrar una foto de la cancha",
+                "description": "Borra la foto que está en esa posición del array fotos (empieza en 0). Las siguientes se corren un lugar.",
+                "operationId": "3752ca5e96135624c8e91428f1b05d31",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "name": "indice",
+                        "in": "path",
+                        "description": "Posición de la foto en el array fotos",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "example": 0
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Foto borrada: devuelve la cancha con el array fotos actualizado."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o el club no es suyo."
+                    },
+                    "404": {
+                        "description": "No existe la cancha o la foto."
                     }
                 },
                 "security": [
@@ -471,6 +701,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador."
                     }
                 },
                 "security": [
@@ -541,6 +774,9 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "El usuario no es administrador."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
@@ -576,6 +812,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador."
                     },
                     "404": {
                         "description": "No encontrado."
@@ -791,6 +1030,63 @@
                         }
                     },
                     {
+                        "name": "cancha_id",
+                        "in": "query",
+                        "description": "Filtrar por cancha del turno",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "fecha",
+                        "in": "query",
+                        "description": "Filtrar por fecha del turno (AAAA-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "desde",
+                        "in": "query",
+                        "description": "Turnos desde esta fecha inclusive (AAAA-MM-DD), por ejemplo el lunes de la semana",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "hasta",
+                        "in": "query",
+                        "description": "Turnos hasta esta fecha inclusive (AAAA-MM-DD), por ejemplo el domingo de la semana",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "mis_clubes",
+                        "in": "query",
+                        "description": "Con token de administrador: solo las reservas de las canchas de sus clubes",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "por_pagina",
+                        "in": "query",
+                        "description": "Reservas por página (de 1 a 100, por defecto 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "description": "Número de página",
@@ -802,7 +1098,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Listado paginado (10 por página)."
+                        "description": "Listado paginado (10 por página salvo que se pida otra cantidad)."
                     }
                 }
             },
@@ -828,7 +1124,7 @@
                         "description": "Creado correctamente."
                     },
                     "422": {
-                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "description": "Datos inválidos (incluye un turno_id que no existe): devuelve un mensaje por cada campo con error.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -840,11 +1136,8 @@
                     "401": {
                         "description": "No autenticado."
                     },
-                    "404": {
-                        "description": "Turno no encontrado."
-                    },
                     "409": {
-                        "description": "Turno no disponible o sin cupo suficiente."
+                        "description": "Turno no disponible, ya pasado, con jugadores anotados o sin cupo suficiente."
                     }
                 },
                 "security": [
@@ -915,8 +1208,14 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "Un jugador intentó cambiar el estado de pago."
+                    },
                     "404": {
                         "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "El turno nuevo no está disponible o no tiene cupo."
                     }
                 },
                 "security": [
@@ -929,8 +1228,8 @@
                 "tags": [
                     "Reservas"
                 ],
-                "summary": "Eliminar reserva",
-                "description": "Remove the specified resource from storage.\n\nCancelar una reserva libera el turno automáticamente.",
+                "summary": "Cancelar reserva",
+                "description": "La reserva queda con estado \"cancelada\" (sigue apareciendo en el historial) y el turno se libera si corresponde.",
                 "operationId": "992ae788935b42ab455ff366e9887ab7",
                 "parameters": [
                     {
@@ -939,7 +1238,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Eliminado correctamente.",
+                        "description": "Cancelada correctamente.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -953,6 +1252,9 @@
                     },
                     "404": {
                         "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "La reserva ya estaba cancelada o está fuera del plazo de cancelación (hasta 2 horas antes del turno)."
                     }
                 },
                 "security": [
@@ -1029,6 +1331,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador."
                     }
                 },
                 "security": [
@@ -1099,6 +1404,9 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "El usuario no es administrador."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
@@ -1135,8 +1443,67 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "El usuario no es administrador."
+                    },
                     "404": {
                         "description": "No encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/turnos/{id}/bloqueo": {
+            "patch": {
+                "tags": [
+                    "Turnos"
+                ],
+                "summary": "Bloquear o desbloquear un turno",
+                "description": "Bloquea un turno libre (por ejemplo, por mantenimiento) para que no se pueda reservar. Al desbloquearlo vuelve a calcularse su estado.",
+                "operationId": "0a360ea1d1a52e20f73b7f92f8173587",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "bloqueado"
+                                ],
+                                "properties": {
+                                    "bloqueado": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Estado del turno actualizado."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o la cancha no es de su club."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "El turno tiene reservas activas."
                     }
                 },
                 "security": [
@@ -1209,6 +1576,19 @@
                         "type": "string",
                         "example": "activa",
                         "maxLength": 20
+                    },
+                    "fotos": {
+                        "description": "URLs públicas de las fotos. Se cargan con POST /api/canchas/{id}/fotos y se borran con DELETE /api/canchas/{id}/fotos/{indice}.",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "readOnly": true,
+                        "example": [
+                            "http://localhost:8000/storage/canchas/1/foto.jpg"
+                        ],
+                        "nullable": true
                     }
                 },
                 "type": "object"

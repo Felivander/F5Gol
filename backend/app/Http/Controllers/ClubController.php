@@ -45,6 +45,7 @@ class ClubController extends Controller
             new OA\Response(response: 201, description: 'Creado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
         ]
     )]
     public function store(ClubRequest $request)
@@ -72,7 +73,11 @@ class ClubController extends Controller
     )]
     public function show(string $id)
     {
-        $club = Club::with('canchas')->findOrFail($id);
+        $club = Club::findOrFail($id);
+
+        // El dueño del club ve también sus canchas inactivas; el público, solo las activas
+        $esDueno = auth('sanctum')->id() === $club->administrador_id;
+        $club->load(['canchas' => fn ($q) => $esDueno ? $q : $q->where('estado', 'activa')]);
 
         return response()->json($club, 200);
     }
@@ -91,6 +96,7 @@ class ClubController extends Controller
             new OA\Response(response: 200, description: 'Actualizado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
@@ -124,6 +130,7 @@ class ClubController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Eliminado correctamente.', content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')),
             new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]

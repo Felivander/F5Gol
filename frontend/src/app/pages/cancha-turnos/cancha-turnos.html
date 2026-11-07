@@ -28,8 +28,21 @@
   </div>
 }
 
+@if (mover()) {
+  <p class="aviso">
+    Elegí el turno nuevo para tu reserva.
+    @if (cancha(); as cancha) {
+      <a [routerLink]="['/clubes', cancha.club_id]" [queryParams]="{ mover: mover() }">Ver otra cancha del club</a>
+    }
+    <a routerLink="/mis-reservas">Cancelar el cambio</a>
+  </p>
+}
+
 @if (error()) {
   <p class="error">{{ error() }}</p>
+}
+@if (aviso()) {
+  <p class="aviso">{{ aviso() }} <a routerLink="/mis-reservas">Ver mis reservas</a></p>
 }
 
 <section class="filtro-turnos">
@@ -38,6 +51,7 @@
   @if (fecha) {
     <button class="btn-reset" (click)="fecha = ''; buscarTurnos()">Ver todas las fechas</button>
   }
+  <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: auto;">El cupo se actualiza solo cada 15 segundos</span>
 </section>
 
 <div class="tabla-contenedor">
@@ -48,12 +62,13 @@
         <th>Horario</th>
         <th>Estado</th>
         <th>Cupo de jugadores</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
       @if (cargando()) {
         <tr>
-          <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+          <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
             ⚽ Buscando turnos disponibles...
           </td>
         </tr>
@@ -74,10 +89,43 @@
                 👥 {{ turno.cupo_actual }} / {{ turno.cupo_maximo }}
               </span>
             </td>
+            <td class="acciones-turno">
+              @if (mover()) {
+                @if (turno.estado === 'disponible' && !yaPaso(turno)) {
+                  <button (click)="moverAca(turno)" [disabled]="reservando() !== null">Mover mi reserva acá</button>
+                }
+              } @else {
+              @if (esDueno() && !yaPaso(turno) && (turno.estado === 'bloqueado' || puedeReservar(turno))) {
+                <button class="btn-secundario" (click)="cambiarBloqueo(turno)" [disabled]="reservando() === turno.id">
+                  {{ turno.estado === 'bloqueado' ? 'Desbloquear' : 'Bloquear por mantenimiento' }}
+                </button>
+              }
+              @if (puedeReservar(turno)) {
+                <button (click)="reservar(turno)" [disabled]="reservando() === turno.id">
+                  {{ reservando() === turno.id ? 'Reservando...' : 'Reservar cancha' }}
+                </button>
+              }
+              @if (yaPaso(turno)) {
+                <span style="color: var(--text-muted); font-size: 0.85rem;">Ya pasó</span>
+              } @else if (turno.estado === 'disponible' && lugaresLibres(turno) > 0) {
+                <input
+                  class="cantidad-jugadores"
+                  type="number"
+                  min="1"
+                  [max]="lugaresLibres(turno)"
+                  [ngModel]="cantidad(turno)"
+                  (ngModelChange)="cambiarCantidad(turno, $event)"
+                  [attr.aria-label]="'Cantidad de jugadores para el turno de las ' + turno.hora_inicio.slice(0, 5)">
+                <button class="btn-secundario" (click)="anotarme(turno)" [disabled]="reservando() === turno.id">
+                  Sumarme al partido
+                </button>
+              }
+              }
+            </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+            <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
               No hay turnos disponibles para la fecha seleccionada.
             </td>
           </tr>

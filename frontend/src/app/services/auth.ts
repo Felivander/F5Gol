@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { finalize, tap } from 'rxjs';
-import { LoginResponse, Usuario } from '../models';
+import { LoginResponse, NuevoUsuario, Usuario } from '../models';
 
 const TOKEN_KEY = 'f5gol_token';
 const USER_KEY = 'f5gol_user';
@@ -16,13 +16,22 @@ export class Auth {
 
   login(email: string, password: string) {
     return this.http.post<LoginResponse>('/api/login', { email, password }).pipe(
-      tap(res => {
-        localStorage.setItem(TOKEN_KEY, res.access_token);
-        localStorage.setItem(USER_KEY, JSON.stringify(res.user));
-        this.token.set(res.access_token);
-        this.usuario.set(res.user);
-      })
+      tap(res => this.guardarSesion(res))
     );
+  }
+
+  // La API devuelve el token igual que el login, así que queda logueado al registrarse
+  register(datos: NuevoUsuario) {
+    return this.http.post<LoginResponse>('/api/register', datos).pipe(
+      tap(res => this.guardarSesion(res))
+    );
+  }
+
+  private guardarSesion(res: LoginResponse) {
+    localStorage.setItem(TOKEN_KEY, res.access_token);
+    localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+    this.token.set(res.access_token);
+    this.usuario.set(res.user);
   }
 
   // Revoca el token en la API y después limpia la sesión local,

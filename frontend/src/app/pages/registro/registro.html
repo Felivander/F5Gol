@@ -1,0 +1,71 @@
+<div class="login-card">
+  <div style="text-align: center; margin-bottom: 1.25rem;">
+    <span style="font-size: 2.5rem; display: inline-block;">⚽</span>
+    <h1 style="font-size: 1.75rem; margin-top: 0.5rem;">Crear cuenta</h1>
+    <p class="login-subtitulo">Registrate para reservar canchas o para gestionar tu club.</p>
+  </div>
+
+  <form class="formulario" (ngSubmit)="registrarme()">
+    <fieldset class="campo selector-rol">
+      <legend>¿Cómo vas a usar F5GOL?</legend>
+      <label>
+        <input type="radio" name="rol" value="jugador" [(ngModel)]="datos.rol">
+        <span><strong>Jugador</strong> · reservo canchas y me sumo a partidos</span>
+      </label>
+      <label>
+        <input type="radio" name="rol" value="administrador" [(ngModel)]="datos.rol">
+        <span><strong>Administrador</strong> · gestiono las canchas de mi club</span>
+      </label>
+      @for (msg of errores()['rol'] ?? []; track msg) {
+        <small class="error-campo">{{ msg }}</small>
+      }
+    </fieldset>
+
+    <div class="campo">
+      <label for="name">Nombre</label>
+      <input id="name" name="name" autocomplete="name" [(ngModel)]="datos.name" required>
+      @for (msg of errores()['name'] ?? []; track msg) {
+        <small class="error-campo">{{ msg }}</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="email">Correo electrónico</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="ejemplo@correo.com" [(ngModel)]="datos.email" required>
+      @for (msg of errores()['email'] ?? []; track msg) {
+        <small class="error-campo">{{ msg }}</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="telefono">Teléfono (opcional)</label>
+      <input id="telefono" name="telefono" type="tel" autocomplete="tel" [(ngModel)]="datos.telefono">
+    </div>
+
+    <div class="campo">
+      <label for="password">Contraseña</label>
+      <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" [(ngModel)]="datos.password" required>
+      <small style="color: var(--text-muted);">Mínimo 8 caracteres.</small>
+      @for (msg of errores()['password'] ?? []; track msg) {
+        <small class="error-campo">{{ msg }}</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="password_confirmation">Repetí la contraseña</label>
+      <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" [(ngModel)]="datos.password_confirmation" required>
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="enviando()" style="width: 100%;">
+      {{ enviando() ? 'Creando cuenta...' : 'Crear cuenta' }}
+    </button>
+  </form>
+
+  <p style="text-align: center; margin-top: 1.25rem; font-size: 0.92rem;">
+    ¿Ya tenés cuenta? <a routerLink="/login">Ingresá</a>
+  </p>
+</div>

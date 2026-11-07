@@ -60,6 +60,7 @@ class TurnoController extends Controller
             new OA\Response(response: 201, description: 'Creado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
         ]
     )]
     public function store(TurnoRequest $request)
@@ -107,6 +108,7 @@ class TurnoController extends Controller
             new OA\Response(response: 200, description: 'Actualizado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
@@ -128,6 +130,66 @@ class TurnoController extends Controller
         ], 200);
     }
 
+    #[OA\Patch(
+        path: '/api/turnos/{id}/bloqueo',
+        summary: 'Bloquear o desbloquear un turno',
+        description: 'Bloquea un turno libre (por ejemplo, por mantenimiento) para que no se pueda reservar. Al desbloquearlo vuelve a calcularse su estado.',
+        tags: ['Turnos'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\Parameter(ref: '#/components/parameters/id')],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
+            required: ['bloqueado'],
+            properties: [new OA\Property(property: 'bloqueado', type: 'boolean', example: true)]
+        )),
+        responses: [
+            new OA\Response(response: 200, description: 'Estado del turno actualizado.'),
+            new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o la cancha no es de su club.'),
+            new OA\Response(response: 404, description: 'No encontrado.'),
+            new OA\Response(response: 409, description: 'El turno tiene reservas activas.'),
+        ]
+    )]
+    public function bloqueo(Request $request, string $id)
+    {
+        $request->validate(['bloqueado' => ['required', 'boolean']], [
+            'bloqueado.required' => 'Indicá si el turno queda bloqueado (true) o no (false).',
+        ]);
+
+        $turno = Turno::with('cancha.club')->find($id);
+
+        if (! $turno) {
+            return response()->json([
+                'message' => 'Turno no encontrado',
+            ], 404);
+        }
+
+        if ($turno->cancha?->club?->administrador_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Solo podés bloquear turnos de las canchas de tus propios clubes.',
+            ], 403);
+        }
+
+        if ($request->boolean('bloqueado')) {
+            $tieneReservas = $turno->reservas()->where('estado', '!=', 'cancelada')->exists();
+            if ($tieneReservas) {
+                return response()->json([
+                    'message' => 'El turno tiene reservas activas: cancelalas antes de bloquearlo.',
+                ], 409);
+            }
+
+            $turno->update(['estado' => 'bloqueado']);
+        } else {
+            // Se saca el bloqueo y el estado vuelve a salir de sus reservas
+            $turno->update(['estado' => 'disponible']);
+            $turno->recalcularEstado();
+        }
+
+        return response()->json([
+            'message' => $request->boolean('bloqueado') ? 'Turno bloqueado' : 'Turno desbloqueado',
+            'turno' => $turno->fresh(),
+        ], 200);
+    }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -140,6 +202,7 @@ class TurnoController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Eliminado correctamente.', content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')),
             new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]

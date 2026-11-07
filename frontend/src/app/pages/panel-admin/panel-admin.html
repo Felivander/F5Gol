@@ -1,0 +1,85 @@
+<h1>Panel del club</h1>
+<p style="color: var(--text-muted); margin-bottom: 1.25rem;">
+  @if (vista() === 'dia') {
+    Reservas del día en las canchas de tus clubes.
+  } @else {
+    Reservas de la semana {{ textoSemana() }}, agrupadas por cancha.
+  }
+</p>
+
+<section class="filtro-turnos">
+  <div class="selector-vista" role="group" aria-label="Vista del panel">
+    <button [class.btn-secundario]="vista() !== 'dia'" [attr.aria-pressed]="vista() === 'dia'" (click)="cambiarVista('dia')">Día</button>
+    <button [class.btn-secundario]="vista() !== 'semana'" [attr.aria-pressed]="vista() === 'semana'" (click)="cambiarVista('semana')">Semana</button>
+  </div>
+  <label for="fecha">📅 {{ vista() === 'dia' ? 'Día' : 'Semana del' }}:</label>
+  <input id="fecha" type="date" [(ngModel)]="fecha" (change)="buscar()">
+  @if (canceladas() > 0) {
+    <span style="color: var(--text-muted); font-size: 0.9rem;">
+      {{ canceladas() }} {{ canceladas() === 1 ? 'reserva cancelada' : 'reservas canceladas' }}
+    </span>
+  }
+</section>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+@if (cargando()) {
+  <p style="text-align: center; padding: 2.5rem; color: var(--text-muted);">⚽ Cargando reservas...</p>
+} @else {
+  @for (grupo of porCancha(); track grupo.cancha.id) {
+    <section class="panel-cancha">
+      <h2>
+        <a [routerLink]="['/canchas', grupo.cancha.id]">{{ grupo.cancha.nombre }}</a>
+        <span class="cupo-badge">{{ grupo.reservas.length }} {{ grupo.reservas.length === 1 ? 'reserva' : 'reservas' }}</span>
+      </h2>
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              @if (vista() === 'semana') {
+                <th>Día</th>
+              }
+              <th>Horario</th>
+              <th>Jugador</th>
+              <th>Tipo</th>
+              <th>Pago</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (reserva of grupo.reservas; track reserva.id) {
+              <tr>
+                @if (vista() === 'semana') {
+                  <td>{{ nombreDia(reserva.turno!.fecha) }}</td>
+                }
+                <td style="font-weight: 700;">{{ reserva.turno?.hora_inicio?.slice(0, 5) }} – {{ reserva.turno?.hora_fin?.slice(0, 5) }}</td>
+                <td>
+                  {{ reserva.usuario?.name }}
+                  @if (reserva.usuario?.email) {
+                    <small style="display: block; color: var(--text-muted);">{{ reserva.usuario?.email }}</small>
+                  }
+                </td>
+                <td>{{ reserva.tipo === 'completa' ? 'Cancha completa' : 'Matchmaking · ' + reserva.cantidad_jugadores }}</td>
+                <td>
+                  <select
+                    [ngModel]="reserva.estado_pago"
+                    (ngModelChange)="cambiarPago(reserva, $event)"
+                    [attr.aria-label]="'Estado de pago de ' + reserva.usuario?.name">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="sena">Seña</option>
+                    <option value="pagado">Pagado</option>
+                  </select>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  } @empty {
+    <p style="background: #ffffff; padding: 2rem; border-radius: var(--radius-md); text-align: center; border: 1px dashed var(--border-color); color: var(--text-muted);">
+      No hay reservas para este día.
+    </p>
+  }
+}

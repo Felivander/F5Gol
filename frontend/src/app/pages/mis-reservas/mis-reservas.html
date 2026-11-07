@@ -1,0 +1,80 @@
+<h1>Mis reservas</h1>
+<p style="color: var(--text-muted); margin-bottom: 1.25rem;">
+  Tus partidos reservados y los turnos a los que te sumaste. Podés cancelar hasta 2 horas antes del turno.
+</p>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+@if (aviso()) {
+  <p class="aviso">{{ aviso() }}</p>
+}
+
+<div class="tabla-contenedor">
+  <table>
+    <thead>
+      <tr>
+        <th>Cancha</th>
+        <th>Fecha y horario</th>
+        <th>Tipo</th>
+        <th>Estado</th>
+        <th>Pago</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (cargando()) {
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">⚽ Cargando tus reservas...</td>
+        </tr>
+      } @else {
+        @for (reserva of reservas(); track reserva.id) {
+          <tr>
+            <td>
+              @if (reserva.turno?.cancha; as cancha) {
+                <a [routerLink]="['/canchas', cancha.id]" style="font-weight: 600;">{{ cancha.nombre }}</a>
+              }
+            </td>
+            <td>
+              {{ reserva.turno?.fecha?.slice(0, 10) }}
+              · {{ reserva.turno?.hora_inicio?.slice(0, 5) }} – {{ reserva.turno?.hora_fin?.slice(0, 5) }}
+            </td>
+            <td>
+              @if (reserva.tipo === 'completa') {
+                Cancha completa
+              } @else {
+                Matchmaking ({{ reserva.cantidad_jugadores }} {{ reserva.cantidad_jugadores === 1 ? 'jugador' : 'jugadores' }})
+              }
+            </td>
+            <td><span class="estado-reserva" [class]="reserva.estado">{{ reserva.estado }}</span></td>
+            <td>{{ reserva.estado_pago === 'sena' ? 'seña' : reserva.estado_pago }}</td>
+            <td>
+              @if (sePuedeCancelar(reserva) && reserva.turno?.cancha; as cancha) {
+                <a class="btn-link" [routerLink]="['/canchas', cancha.id]" [queryParams]="{ mover: reserva.id }">Cambiar turno</a>
+              }
+              @if (sePuedeCancelar(reserva)) {
+                <button class="btn-secundario" (click)="cancelar(reserva)" [disabled]="cancelando() === reserva.id">
+                  {{ cancelando() === reserva.id ? 'Cancelando...' : 'Cancelar' }}
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+              Todavía no tenés reservas. <a routerLink="/clubes">Buscá una cancha</a>.
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (ultimaPagina() > 1) {
+  <nav class="paginado">
+    <button [disabled]="pagina() === 1" (click)="cargar(pagina() - 1)">← Anterior</button>
+    <span>Página {{ pagina() }} de {{ ultimaPagina() }}</span>
+    <button [disabled]="pagina() === ultimaPagina()" (click)="cargar(pagina() + 1)">Siguiente →</button>
+  </nav>
+}

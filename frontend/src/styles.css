@@ -139,6 +139,164 @@ button:disabled {
   font-size: 1rem;
 }
 
+.aviso {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.92rem;
+  margin: 1rem 0;
+}
+
+.aviso a {
+  margin-left: 0.5rem;
+  font-weight: 700;
+}
+
+.acciones-turno {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.acciones-turno button {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.acciones-turno .cantidad-jugadores {
+  width: 4rem;
+  padding: 0.4rem 0.5rem;
+}
+
+.btn-secundario {
+  background: #ffffff;
+  color: var(--dark-navy);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secundario:hover {
+  background: #f1f5f9;
+}
+
+/* Panel del administrador */
+.panel-cancha {
+  margin-bottom: 2rem;
+}
+
+.panel-cancha h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.selector-vista {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.selector-vista button {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.btn-link {
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-right: 0.75rem;
+}
+
+/* Fotos de la cancha */
+.fotos-cancha {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.fotos-cancha figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.fotos-cancha img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  outline: 1px solid rgba(0, 0, 0, 0.1);
+  outline-offset: -1px;
+}
+
+.editar-cancha {
+  display: inline-block;
+  padding: 0.5rem 1rem 0.75rem;
+}
+
+.campo-foto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+/* Registro */
+.selector-rol {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+}
+
+.selector-rol legend {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--dark-navy);
+  padding: 0 0.25rem;
+}
+
+.formulario .selector-rol label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 400;
+  padding: 0.35rem 0;
+  cursor: pointer;
+}
+
+.error-campo {
+  color: #b91c1c;
+  font-size: 0.82rem;
+}
+
+/* Estados de Reserva */
+.estado-reserva {
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.estado-reserva.confirmada {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.estado-reserva.cancelada {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 /* Back Link (Volver) */
 .volver-link {
   display: inline-flex;
