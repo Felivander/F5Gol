@@ -9,8 +9,13 @@ const API = '/api';
 export class Api {
   private http = inject(HttpClient);
 
-  getClubs(page = 1) {
-    return this.http.get<Paginado<Club>>(`${API}/clubs`, { params: { page } });
+  // buscar filtra por nombre o dirección del club
+  getClubs(page = 1, buscar = '') {
+    let params = new HttpParams().set('page', page);
+    if (buscar) {
+      params = params.set('buscar', buscar);
+    }
+    return this.http.get<Paginado<Club>>(`${API}/clubs`, { params });
   }
 
   getClub(id: number) {

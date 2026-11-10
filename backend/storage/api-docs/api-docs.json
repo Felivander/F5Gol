@@ -649,9 +649,20 @@
                     "Clubes"
                 ],
                 "summary": "Listar clubs",
-                "description": "Display a listing of the resource.",
+                "description": "Con buscar, devuelve solo los clubes cuyo nombre o dirección contienen ese texto.",
                 "operationId": "c44731a8866e74bcd14a6b4f0f1f82b6",
                 "parameters": [
+                    {
+                        "name": "buscar",
+                        "in": "query",
+                        "description": "Texto a buscar en el nombre o la dirección del club",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "example": "norte"
+                    },
                     {
                         "name": "page",
                         "in": "query",

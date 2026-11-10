@@ -9,49 +9,79 @@
   <span style="font-size: 0.88rem; color: var(--text-muted);">Disponibilidad en vivo</span>
 </div>
 
-@if (cargando()) {
+<form class="buscador-clubes" role="search" (submit)="$event.preventDefault()">
+  <label for="buscar-club" class="visually-hidden">Buscar club por nombre o dirección</label>
+  <span class="buscador-icono" aria-hidden="true">🔍</span>
+  <input
+    id="buscar-club"
+    type="search"
+    class="form-control"
+    placeholder="Buscar por nombre o dirección"
+    autocomplete="off"
+    maxlength="100"
+    [value]="busqueda()"
+    (input)="buscar($any($event.target).value)">
+  @if (busqueda()) {
+    <button type="button" class="btn btn-link buscador-limpiar" (click)="limpiarBusqueda()">Limpiar</button>
+  }
+</form>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else if (cargando() && clubes().length === 0) {
   <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
     <p style="font-size: 1.1rem; font-weight: 600;">⚽ Cargando clubes...</p>
   </div>
-} @else if (error()) {
-  <p class="error">{{ error() }}</p>
 } @else {
-  <ul class="tarjetas">
+  <p class="lista-clubes-resumen" aria-live="polite">
+    @if (cargando()) {
+      Buscando...
+    } @else if (busquedaMostrada()) {
+      {{ total() }} {{ total() === 1 ? 'club encontrado' : 'clubes encontrados' }} para "{{ busquedaMostrada() }}"
+    } @else {
+      {{ total() }} {{ total() === 1 ? 'club' : 'clubes' }}
+    }
+  </p>
+
+  <ul class="lista-clubes" [class.cargando]="cargando()">
     @for (club of clubes(); track club.id) {
       <li>
         <a [routerLink]="['/clubes', club.id]">
-          <div>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
-              <span class="badge badge-tipo">🏟️ Complejo</span>
-            </div>
-            <h2>{{ club.nombre }}</h2>
+          <span class="lista-clubes-icono" aria-hidden="true">🏟️</span>
+
+          <div class="lista-clubes-datos">
+            <h3>{{ club.nombre }}</h3>
             <p class="tarjeta-meta">
-              <span>📍</span>
-              <span>{{ club.direccion }}</span>
+              <span aria-hidden="true">📍</span>
+              <span>{{ club.direccion || 'Sin dirección cargada' }}</span>
             </p>
             @if (club.telefono) {
               <p class="tarjeta-meta">
-                <span>📞</span>
+                <span aria-hidden="true">📞</span>
                 <span>{{ club.telefono }}</span>
               </p>
             }
           </div>
 
-          <div class="tarjeta-footer-action">
-            <span>Ver canchas y horarios</span>
-            <span class="flecha">→</span>
-          </div>
+          <span class="lista-clubes-accion">
+            <span class="lista-clubes-accion-texto">Ver canchas y horarios</span>
+            <span class="flecha" aria-hidden="true">→</span>
+          </span>
         </a>
       </li>
     } @empty {
-      <li style="grid-column: 1 / -1; background: #ffffff; padding: 2rem; border-radius: var(--radius-md); text-align: center; border: 1px dashed var(--border-color); color: var(--text-muted);">
-        No hay clubes cargados en este momento.
+      <li class="lista-clubes-vacia">
+        @if (busquedaMostrada()) {
+          No encontramos clubes para "{{ busquedaMostrada() }}". Probá con otro nombre o dirección.
+        } @else {
+          No hay clubes cargados en este momento.
+        }
       </li>
     }
   </ul>
 
   @if (ultimaPagina() > 1) {
-    <nav class="paginado">
+    <nav class="paginado" aria-label="Páginas de clubes">
       <button [disabled]="pagina() === 1" (click)="cargar(pagina() - 1)">← Anterior</button>
       <span>Página {{ pagina() }} de {{ ultimaPagina() }}</span>
       <button [disabled]="pagina() === ultimaPagina()" (click)="cargar(pagina() + 1)">Siguiente →</button>

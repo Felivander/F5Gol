@@ -15,19 +15,30 @@ class ClubController extends Controller
     #[OA\Get(
         path: '/api/clubs',
         summary: 'Listar clubs',
+        description: 'Con buscar, devuelve solo los clubes cuyo nombre o dirección contienen ese texto.',
         tags: ['Clubes'],
         parameters: [
+            new OA\Parameter(name: 'buscar', description: 'Texto a buscar en el nombre o la dirección del club', in: 'query', required: false, schema: new OA\Schema(type: 'string', maxLength: 100), example: 'norte'),
             new OA\Parameter(name: 'page', description: 'Número de página', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
             new OA\Response(response: 200, description: 'Listado paginado (10 por página).'),
         ]
     )]
-    public function index()
+    public function index(Request $request)
     {
+        $buscar = mb_substr(trim((string) $request->query('buscar', '')), 0, 100);
+
         $clubs = Club::with('administrador:id,name,email')
+            ->when($buscar !== '', function ($query) use ($buscar) {
+                $query->where(function ($q) use ($buscar) {
+                    $q->where('nombre', 'like', "%{$buscar}%")
+                        ->orWhere('direccion', 'like', "%{$buscar}%");
+                });
+            })
             ->orderBy('nombre')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return response()->json($clubs, 200);
     }
