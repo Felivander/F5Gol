@@ -525,6 +525,166 @@ button:disabled {
   color: var(--text-muted);
 }
 
+/* Buscador y lista de clubes */
+.buscador-clubes {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0.75rem;
+}
+
+.buscador-clubes .buscador-icono {
+  position: absolute;
+  left: 0.9rem;
+  pointer-events: none;
+  font-size: 0.95rem;
+}
+
+.buscador-clubes input {
+  padding: 0.7rem 1rem 0.7rem 2.5rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-color);
+  font-size: 1rem; /* 16px: evita que iOS haga zoom al enfocar */
+  box-shadow: var(--shadow-sm);
+}
+
+.buscador-clubes input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.buscador-clubes .buscador-limpiar {
+  flex-shrink: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.lista-clubes-resumen {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem;
+}
+
+.lista-clubes {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: opacity 0.2s;
+}
+
+.lista-clubes.cargando {
+  opacity: 0.6;
+}
+
+.lista-clubes li + li {
+  border-top: 1px solid var(--border-color);
+}
+
+.lista-clubes li a {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.lista-clubes li a:hover,
+.lista-clubes li a:focus-visible {
+  background: var(--primary-light);
+}
+
+.lista-clubes li a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.lista-clubes-icono {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--primary-light);
+  font-size: 1.3rem;
+}
+
+.lista-clubes-datos {
+  flex: 1;
+  min-width: 0;
+}
+
+.lista-clubes-datos h3 {
+  font-size: 1.05rem;
+  margin: 0 0 0.25rem;
+  color: var(--dark-navy);
+}
+
+.lista-clubes-datos .tarjeta-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.lista-clubes-datos .tarjeta-meta span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lista-clubes-accion {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.lista-clubes-accion .flecha {
+  transition: transform 0.2s;
+}
+
+.lista-clubes li a:hover .lista-clubes-accion .flecha {
+  transform: translateX(4px);
+}
+
+.lista-clubes-vacia {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+@media (max-width: 576px) {
+  .lista-clubes-accion-texto {
+    display: none;
+  }
+
+  .lista-clubes li a {
+    padding: 0.9rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lista-clubes li a:hover .lista-clubes-accion .flecha {
+    transform: none;
+  }
+}
+
 /* Filtro de Turnos */
 .filtro-turnos {
   background: #ffffff;
