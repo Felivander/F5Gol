@@ -838,6 +838,57 @@
                 ]
             }
         },
+        "/api/auth/google/redirect": {
+            "get": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Ingresar con Google",
+                "description": "Redirige el navegador a la pantalla de inicio de sesión de Google. Se abre desde el navegador (no con fetch/XHR): Swagger UI no puede seguir la redirección.",
+                "operationId": "834b00ff528f81d904b6c3a407c3ce11",
+                "responses": {
+                    "302": {
+                        "description": "Redirección a accounts.google.com."
+                    }
+                }
+            }
+        },
+        "/api/auth/google/callback": {
+            "get": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Retorno de Google",
+                "description": "Google llama a esta URL después de que el usuario elige su cuenta. Busca el usuario por su cuenta de Google o por su email (si ya estaba registrado con contraseña, vincula la cuenta); si no existe, lo crea como jugador. Después redirige al front con el token de Sanctum en el fragmento: FRONTEND_URL/auth/google#token=... Si algo falla, redirige a FRONTEND_URL/login?error=google.",
+                "operationId": "8abfc58bd78d4f913e4202410305738e",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Código de autorización que manda Google",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "error",
+                        "in": "query",
+                        "description": "Lo manda Google si el usuario canceló",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "access_denied"
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirección al front: /auth/google#token=... si salió bien, /login?error=google si no."
+                    }
+                }
+            }
+        },
         "/api/jugador-anotados": {
             "get": {
                 "tags": [

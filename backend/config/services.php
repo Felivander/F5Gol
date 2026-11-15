@@ -28,6 +28,19 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Login con Google (Laravel Socialite). Las credenciales se crean en Google Cloud Console
+    // y la URL de retorno tiene que coincidir exactamente con la registrada allá.
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', rtrim(env('APP_URL', 'http://localhost:8000'), '/').'/api/auth/google/callback'),
+    ],
+
+    // Dirección del front de Angular, a donde vuelve el usuario después de Google
+    'frontend' => [
+        'url' => env('FRONTEND_URL', 'http://localhost:4200'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

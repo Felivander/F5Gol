@@ -27,6 +27,22 @@ export class Auth {
     );
   }
 
+  // Login con Google: Laravel devuelve solo el token (en la URL), así que se guarda
+  // y después se piden los datos del usuario a /api/user
+  iniciarConToken(token: string) {
+    localStorage.setItem(TOKEN_KEY, token);
+    this.token.set(token);
+    return this.http.get<Usuario>('/api/user').pipe(
+      tap({
+        next: usuario => {
+          localStorage.setItem(USER_KEY, JSON.stringify(usuario));
+          this.usuario.set(usuario);
+        },
+        error: () => this.limpiarSesion()
+      })
+    );
+  }
+
   private guardarSesion(res: LoginResponse) {
     localStorage.setItem(TOKEN_KEY, res.access_token);
     localStorage.setItem(USER_KEY, JSON.stringify(res.user));

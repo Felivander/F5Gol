@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CanchaController;
 use App\Http\Controllers\ClubController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\JugadorAnotadoController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\TurnoController;
@@ -11,6 +12,10 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/login', [AuthController::class, 'login']);
+
+// Login con Google (Socialite): el navegador entra por redirect y Google vuelve al callback
+Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect']);
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
 
 Route::get('/user', [AuthController::class, 'me'])->middleware('auth:sanctum');
 

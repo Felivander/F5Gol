@@ -49,6 +49,23 @@ cd frontend
 npm install
 ```
 
+### Login con Google (una vez por máquina)
+
+1. En [Google Cloud Console](https://console.cloud.google.com/apis/credentials) crear un proyecto y una credencial **ID de cliente de OAuth** de tipo **Aplicación web** (antes hay que configurar la pantalla de consentimiento en modo *Prueba* y agregar como usuarios de prueba los mails del grupo).
+2. En **URI de redireccionamiento autorizados** poner exactamente `http://localhost:8000/api/auth/google/callback`.
+3. Copiar el ID y el secreto en `backend/.env`:
+
+```env
+GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=xxxxxxxx
+GOOGLE_REDIRECT_URI="${APP_URL}/api/auth/google/callback"
+FRONTEND_URL=http://localhost:4200
+```
+
+4. `php artisan config:clear` y `php artisan migrate` (agrega la columna `google_id`).
+
+Quien entra con Google por primera vez queda registrado como **jugador**. Si ya tenía cuenta con ese mail (por ejemplo un administrador), se vincula a esa cuenta y conserva su rol.
+
 ## Levantar todo
 
 Doble clic en **`iniciar-f5gol.bat`**: arranca MySQL (si no está corriendo), el back y el front, y abre el navegador.
@@ -79,7 +96,8 @@ Usuarios de prueba (seeders): `admin1@f5gol.com` / `password` (administrador) y 
 |---|---|---|
 | `/clubes`, `/clubes/:id` | Todos | Listado de clubes y sus canchas activas |
 | `/canchas/:id` | Todos | Grilla de turnos: **Reservar cancha** (completa) o **Sumarme al partido** (matchmaking) |
-| `/login`, `/registro` | Todos | Ingreso y registro eligiendo rol (jugador o administrador) |
+| `/login`, `/registro` | Todos | Ingreso y registro eligiendo rol (jugador o administrador), o con Google |
+| `/auth/google` | Todos | Pantalla de vuelta de Google: guarda el token y redirige según el rol |
 | `/mis-reservas` | Logueado | Historial de reservas propias, con cancelación hasta 2 horas antes |
 | `/panel` | Administrador | Reservas del día por cancha de sus clubes |
 
@@ -90,6 +108,7 @@ Todos bajo `/api`. Los de escritura piden `Authorization: Bearer <token>`; el de
 | Método y ruta | Notas |
 |---|---|
 | `POST /register`, `POST /login`, `POST /logout`, `GET /user` | Autenticación con Sanctum |
+| `GET /auth/google/redirect`, `GET /auth/google/callback` | Login con Google (Socialite). Se abren desde el navegador; el callback vuelve al front con el token en `#token=` |
 | `GET /clubs`, `GET /clubs/{id}` | El detalle muestra solo canchas activas (el dueño ve todas) |
 | `GET /canchas?club_id=&incluir_inactivas=1` | `incluir_inactivas` solo funciona con token de administrador |
 | `PUT /canchas/{id}` | 409 si se desactiva una cancha con reservas futuras |

@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { BotonGoogle } from '../../components/boton-google/boton-google';
 import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, BotonGoogle],
   templateUrl: './login.html'
 })
 export class Login {
@@ -14,7 +15,12 @@ export class Login {
 
   email = '';
   password = '';
-  error = signal('');
+  // Laravel vuelve a /login?error=google si el ingreso con Google falló o se canceló
+  error = signal(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('error') === 'google'
+      ? 'No se pudo ingresar con Google. Probá de nuevo o usá tu correo y contraseña.'
+      : ''
+  );
   enviando = signal(false);
 
   ingresar() {

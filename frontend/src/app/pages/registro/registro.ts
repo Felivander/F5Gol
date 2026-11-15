@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { BotonGoogle } from '../../components/boton-google/boton-google';
 import { NuevoUsuario } from '../../models';
 import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-registro',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, BotonGoogle],
   templateUrl: './registro.html'
 })
 export class Registro {

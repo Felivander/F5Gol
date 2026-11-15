@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AuthGoogle } from './pages/auth-google/auth-google';
 import { CanchaForm } from './pages/cancha-form/cancha-form';
 import { CanchaTurnos } from './pages/cancha-turnos/cancha-turnos';
 import { ClubDetalle } from './pages/club-detalle/club-detalle';
@@ -20,6 +21,7 @@ export const routes: Routes = [
   { path: 'panel', component: PanelAdmin },
   { path: 'login', component: Login },
   { path: 'registro', component: Registro },
+  { path: 'auth/google', component: AuthGoogle },
   { path: 'practica', component: Practica },
   { path: '**', redirectTo: 'clubes' }
 ];
