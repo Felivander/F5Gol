@@ -1,0 +1,5 @@
+# Configuración local de herramientas del editor
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
