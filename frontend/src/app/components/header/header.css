@@ -135,3 +135,49 @@ nav {
   color: #fecaca;
   box-shadow: none;
 }
+
+.nav-link,
+.btn-salir,
+.btn-login-nav {
+  white-space: nowrap;
+}
+
+/* En el celular el menú ocupa su propia fila y se desliza de costado,
+   así la página nunca tiene scroll horizontal */
+@media (max-width: 640px) {
+  .header-container {
+    padding: 0.65rem 1rem;
+    gap: 0.5rem;
+  }
+
+  nav {
+    flex: 1 1 100%;
+    gap: 0.35rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: 0 -1rem;
+    padding: 0 1rem 0.15rem;
+  }
+
+  nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .usuario-nombre {
+    display: none;
+  }
+
+  .usuario-badge {
+    padding: 0.3rem;
+    flex-shrink: 0;
+  }
+
+  .btn-salir {
+    flex-shrink: 0;
+  }
+}

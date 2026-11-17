@@ -47,7 +47,11 @@
     @for (club of clubes(); track club.id) {
       <li>
         <a [routerLink]="['/clubes', club.id]">
-          <span class="lista-clubes-icono" aria-hidden="true">🏟️</span>
+          @if (club.fotos?.length) {
+            <img class="lista-clubes-foto" [src]="club.fotos![0]" alt="" loading="lazy">
+          } @else {
+            <span class="lista-clubes-icono" aria-hidden="true">🏟️</span>
+          }
 
           <div class="lista-clubes-datos">
             <h3>{{ club.nombre }}</h3>
@@ -59,6 +63,12 @@
               <p class="tarjeta-meta">
                 <span aria-hidden="true">📞</span>
                 <span>{{ club.telefono }}</span>
+              </p>
+            }
+            @if (club.canchas_count) {
+              <p class="tarjeta-meta">
+                <span aria-hidden="true">⚽</span>
+                <span>{{ club.canchas_count }} {{ club.canchas_count === 1 ? 'cancha' : 'canchas' }}</span>
               </p>
             }
           </div>

@@ -14,8 +14,36 @@ export interface Club {
   nombre: string;
   direccion: string | null;
   telefono: string | null;
+  descripcion?: string | null;
+  // URLs públicas de las fotos del complejo
+  fotos?: string[] | null;
+  // Viene en el listado: canchas activas (en "mis clubes", todas)
+  canchas_count?: number;
   administrador?: Usuario;
   canchas?: Cancha[];
+}
+
+// Datos que se envían al crear o editar un club (el dueño lo pone el servidor)
+export interface ClubInput {
+  nombre: string;
+  direccion: string | null;
+  telefono: string | null;
+  descripcion: string | null;
+}
+
+export type Superficie = 'cesped_sintetico' | 'cesped_natural' | 'cemento' | 'parquet' | 'caucho';
+
+// Opciones de superficie con el texto que se muestra en pantalla
+export const SUPERFICIES: { valor: Superficie; texto: string }[] = [
+  { valor: 'cesped_sintetico', texto: 'Césped sintético' },
+  { valor: 'cesped_natural', texto: 'Césped natural' },
+  { valor: 'cemento', texto: 'Cemento' },
+  { valor: 'parquet', texto: 'Parquet' },
+  { valor: 'caucho', texto: 'Caucho / goma' }
+];
+
+export function textoSuperficie(valor: string | null | undefined): string {
+  return SUPERFICIES.find(s => s.valor === valor)?.texto ?? '';
 }
 
 export interface Cancha {
@@ -24,6 +52,10 @@ export interface Cancha {
   nombre: string;
   tipo: string;
   capacidad_jugadores: number;
+  superficie?: Superficie | null;
+  techada?: boolean;
+  iluminacion?: boolean;
+  vestuarios?: boolean;
   descripcion: string | null;
   tarifa: string;
   estado: string;
@@ -59,6 +91,10 @@ export interface CanchaInput {
   nombre: string;
   tipo: string;
   capacidad_jugadores: number;
+  superficie: Superficie | null;
+  techada: boolean;
+  iluminacion: boolean;
+  vestuarios: boolean;
   descripcion: string;
   tarifa: number;
   estado: 'activa' | 'inactiva';
