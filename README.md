@@ -100,6 +100,8 @@ Usuarios de prueba (seeders): `admin1@f5gol.com` / `password` (administrador) y 
 | `/auth/google` | Todos | Pantalla de vuelta de Google: guarda el token y redirige según el rol |
 | `/mis-reservas` | Logueado | Historial de reservas propias, con cancelación hasta 2 horas antes |
 | `/panel` | Administrador | Reservas del día por cancha de sus clubes |
+| `/mis-clubes` | Administrador | Sus clubes con cantidad de canchas y fotos: crear, editar, eliminar |
+| `/clubes/nuevo`, `/clubes/:id/editar` | Administrador dueño | Nombre, dirección, teléfono, descripción y fotos del club |
 
 ## Endpoints principales
 
@@ -109,7 +111,8 @@ Todos bajo `/api`. Los de escritura piden `Authorization: Bearer <token>`; el de
 |---|---|
 | `POST /register`, `POST /login`, `POST /logout`, `GET /user` | Autenticación con Sanctum |
 | `GET /auth/google/redirect`, `GET /auth/google/callback` | Login con Google (Socialite). Se abren desde el navegador; el callback vuelve al front con el token en `#token=` |
-| `GET /clubs`, `GET /clubs/{id}` | El detalle muestra solo canchas activas (el dueño ve todas) |
+| `GET /clubs?buscar=&mios=1`, `GET /clubs/{id}` | `mios=1` con token devuelve los clubes del administrador. Cada club trae `canchas_count`. El detalle muestra solo canchas activas (el dueño ve todas) |
+| `POST/PUT/DELETE /clubs`, `POST /clubs/{id}/fotos`, `DELETE /clubs/{id}/fotos/{indice}` | Solo el dueño (403). El dueño lo pone el servidor. 409 al borrar un club con canchas activas |
 | `GET /canchas?club_id=&incluir_inactivas=1` | `incluir_inactivas` solo funciona con token de administrador |
 | `PUT /canchas/{id}` | 409 si se desactiva una cancha con reservas futuras |
 | `POST /canchas/{id}/fotos`, `DELETE /canchas/{id}/fotos/{indice}` | Fotos de la cancha (solo el dueño del club) |
