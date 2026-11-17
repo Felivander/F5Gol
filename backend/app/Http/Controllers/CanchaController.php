@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Cancha;
 use App\Models\Club;
 use App\Http\Requests\CanchaRequest;
-use App\Http\Requests\FotoCanchaRequest;
+use App\Http\Controllers\Concerns\GestionaFotos;
+use App\Http\Requests\FotoRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use OpenApi\Attributes as OA;
 
 class CanchaController extends Controller
 {
+    use GestionaFotos;
+
     /**
      * Display a listing of the resource.
      */
@@ -217,7 +219,7 @@ class CanchaController extends Controller
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
-    public function subirFoto(FotoCanchaRequest $request, string $id)
+    public function subirFoto(FotoRequest $request, string $id)
     {
         $cancha = Cancha::find($id);
 
@@ -231,11 +233,7 @@ class CanchaController extends Controller
             return $this->respuestaNoEsDueno();
         }
 
-        $ruta = $request->file('foto')->store("canchas/{$cancha->id}", 'public');
-
-        $fotos = $cancha->fotos ?? [];
-        $fotos[] = Storage::disk('public')->url($ruta);
-        $cancha->update(['fotos' => $fotos]);
+        $this->agregarFoto($cancha, $request->file('foto'), 'canchas');
 
         return response()->json([
             'message' => 'Foto subida correctamente',
@@ -274,19 +272,11 @@ class CanchaController extends Controller
             return $this->respuestaNoEsDueno();
         }
 
-        $fotos = $cancha->fotos ?? [];
-
-        if (! array_key_exists($indice, $fotos)) {
+        if (! $this->quitarFoto($cancha, $indice, 'canchas')) {
             return response()->json([
                 'message' => 'Foto no encontrada',
             ], 404);
         }
-
-        $archivo = basename(parse_url($fotos[$indice], PHP_URL_PATH));
-        Storage::disk('public')->delete("canchas/{$cancha->id}/{$archivo}");
-
-        array_splice($fotos, $indice, 1);
-        $cancha->update(['fotos' => $fotos]);
 
         return response()->json([
             'message' => 'Foto borrada correctamente',

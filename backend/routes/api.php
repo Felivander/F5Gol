@@ -37,6 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Gestión del club, sus canchas y sus turnos: solo administradores
     Route::middleware('administrador')->group(function () {
         Route::apiResource('clubs', ClubController::class)->except(['index', 'show']);
+        Route::post('clubs/{id}/fotos', [ClubController::class, 'subirFoto']);
+        Route::delete('clubs/{id}/fotos/{indice}', [ClubController::class, 'borrarFoto'])->whereNumber('indice');
         Route::apiResource('canchas', CanchaController::class)->except(['index', 'show']);
         Route::post('canchas/{id}/fotos', [CanchaController::class, 'subirFoto']);
         Route::put('canchas/{id}/restore', [CanchaController::class, 'restore']);

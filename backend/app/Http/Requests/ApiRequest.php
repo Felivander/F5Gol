@@ -59,6 +59,7 @@ abstract class ApiRequest extends FormRequest
             'date' => 'El campo :attribute tiene que ser una fecha válida.',
             'date_format' => 'El campo :attribute tiene que tener el formato :format.',
             'after' => 'El campo :attribute tiene que ser posterior a :date.',
+            'boolean' => 'El campo :attribute tiene que ser verdadero o falso.',
         ];
     }
 

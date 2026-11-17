@@ -10,24 +10,25 @@ class CanchaSeeder extends Seeder
 {
     /**
      * Canchas que se cargan en cada club, en orden (el primer club recibe la primera lista, etc.).
+     * Cada fila: nombre, tipo, capacidad, descripción, tarifa, estado, superficie, techada, iluminación, vestuarios.
      * Si hay más clubes que listas, se repite la última.
      */
     private const CANCHAS_POR_CLUB = [
         // Complejo Concordia FC
         [
-            ['Cancha 1', 'futbol5', 10, 'Césped sintético, techada, con vestuarios e iluminación LED.', 17000, 'activa'],
-            ['Cancha 2', 'futbol5', 10, 'Césped sintético, techada, con vestuarios e iluminación LED.', 19000, 'activa'],
-            ['Cancha 3', 'futbol5', 10, 'Césped sintético al aire libre, con iluminación LED.', 15000, 'activa'],
-            ['Cancha 7 Costanera', 'futbol7', 14, 'Césped sintético de última generación, al aire libre, con tribuna chica.', 26000, 'activa'],
-            ['Cancha Techada Premium', 'futbol5', 10, 'Techada y climatizada, césped profesional, vestuarios con duchas.', 23000, 'activa'],
+            ['Cancha 1', 'futbol5', 10, 'Césped sintético, techada, con vestuarios e iluminación LED.', 17000, 'activa', 'cesped_sintetico', true, true, true],
+            ['Cancha 2', 'futbol5', 10, 'Césped sintético, techada, con vestuarios e iluminación LED.', 19000, 'activa', 'cesped_sintetico', true, true, true],
+            ['Cancha 3', 'futbol5', 10, 'Césped sintético al aire libre, con iluminación LED.', 15000, 'activa', 'cesped_sintetico', false, true, false],
+            ['Cancha 7 Costanera', 'futbol7', 14, 'Césped sintético de última generación, al aire libre, con tribuna chica.', 26000, 'activa', 'cesped_sintetico', false, true, true],
+            ['Cancha Techada Premium', 'futbol5', 10, 'Techada y climatizada, césped profesional, vestuarios con duchas.', 23000, 'activa', 'cesped_sintetico', true, true, true],
         ],
         // Arena Norte
         [
-            ['Cancha 1', 'futbol5', 10, 'Césped sintético, techada, con vestuarios e iluminación LED.', 17000, 'activa'],
-            ['Cancha 2', 'futbol5', 10, 'Césped sintético, techada, con vestuarios e iluminación LED.', 19000, 'activa'],
-            ['Cancha 3', 'futbol5', 10, 'Piso de goma para fútbol rápido, techada.', 14000, 'activa'],
-            ['Cancha 7 Norte', 'futbol7', 14, 'Césped natural, al aire libre, con iluminación.', 24000, 'activa'],
-            ['Cancha 4', 'futbol5', 10, 'En mantenimiento: cambio de césped.', 15000, 'inactiva'],
+            ['Cancha 1', 'futbol5', 10, 'Césped sintético, techada, con vestuarios e iluminación LED.', 17000, 'activa', 'cesped_sintetico', true, true, true],
+            ['Cancha 2', 'futbol5', 10, 'Césped sintético, techada, con vestuarios e iluminación LED.', 19000, 'activa', 'cesped_sintetico', true, true, true],
+            ['Cancha 3', 'futbol5', 10, 'Piso de goma para fútbol rápido, techada.', 14000, 'activa', 'caucho', true, true, false],
+            ['Cancha 7 Norte', 'futbol7', 14, 'Césped natural, al aire libre, con iluminación.', 24000, 'activa', 'cesped_natural', false, true, true],
+            ['Cancha 4', 'futbol5', 10, 'En mantenimiento: cambio de césped.', 15000, 'inactiva', 'cesped_sintetico', false, false, false],
         ],
     ];
 
@@ -43,12 +44,16 @@ class CanchaSeeder extends Seeder
         foreach (Club::orderBy('id')->get()->values() as $i => $club) {
             $lista = $listas[min($i, count($listas) - 1)];
 
-            foreach ($lista as [$nombre, $tipo, $capacidad, $descripcion, $tarifa, $estado]) {
+            foreach ($lista as [$nombre, $tipo, $capacidad, $descripcion, $tarifa, $estado, $superficie, $techada, $iluminacion, $vestuarios]) {
                 Cancha::firstOrCreate(
                     ['club_id' => $club->id, 'nombre' => $nombre],
                     [
                         'tipo' => $tipo,
                         'capacidad_jugadores' => $capacidad,
+                        'superficie' => $superficie,
+                        'techada' => $techada,
+                        'iluminacion' => $iluminacion,
+                        'vestuarios' => $vestuarios,
                         'descripcion' => $descripcion,
                         'tarifa' => $tarifa,
                         'estado' => $estado,
