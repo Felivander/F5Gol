@@ -171,6 +171,15 @@ php artisan db:seed --class=TurnoSeeder
 php artisan db:seed --class=PartidosDemoSeeder
 ```
 
+Para volver a registrarse con el mismo mail (y ver de nuevo el mail de bienvenida) sin recrear la base, se borran las cuentas creadas en el ensayo. El comando muestra qué va a borrar y pide confirmación; con cada cuenta se van sus clubes, reservas, inscripciones y tokens, y los partidos que quedan incompletos vuelven a estar disponibles:
+
+```bash
+php artisan usuarios:borrar --registrados
+php artisan usuarios:borrar tu@mail.com
+```
+
+`--registrados` borra todas las cuentas que no son del seeder (las que no terminan en `@f5gol.com`); con mails, solo esas.
+
 La lista completa para tildar en la máquina de la presentación está en [docs/pruebas/F5GOL-lista-de-pruebas.docx](docs/pruebas/F5GOL-lista-de-pruebas.docx).
 
 Recorrido sugerido: registrarse (o entrar con Google) → crear un club en **Mis clubes** → agregar una cancha → cargar sus horarios → reservar la cancha entera con un jugador → en **Partidos abiertos**, sumarse al partido 9/10 (se completa y llega el mail) → ver las reservas en el **Panel** y marcar la seña → cancelar una reserva desde **Mis reservas**.
@@ -181,7 +190,7 @@ Recorrido sugerido: registrarse (o entrar con Google) → crear un club en **Mis
 - Se entra de tres formas: **un lugar** (solo o con amigos, en el equipo que elijas), **un equipo completo** (solo si ese equipo está vacío) o **la cancha entera** (solo si no hay nadie anotado).
 - Mientras falten jugadores, el turno se sigue mostrando **disponible**. Cuando se llenan los dos equipos pasa a **ocupado** y les llega un mail a todos.
 - El cupo se actualiza solo cada 15 segundos. No hay doble reserva: se controla en la base con una transacción y bloqueo del turno.
-- Cada jugador puede cancelar hasta **2 horas antes**. El administrador del club puede hacerlo siempre.
+- Cada jugador puede cancelar o cambiar de turno **hasta que empieza el partido**. El administrador del club puede hacerlo siempre.
 
 ## Pantallas del front
 
