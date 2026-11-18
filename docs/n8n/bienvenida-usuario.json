@@ -1,0 +1,459 @@
+{
+  "name": "F5GOL - Mail de bienvenida al crear una cuenta",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "f5gol-usuario-creado",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "fb79594d-65dd-47d8-a7b3-5c357570d83d",
+      "name": "Webhook usuario creado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "5b6791ed-b4f6-4c8c-bdda-e8158f4a0921"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2564664b-0d94-4e6f-9d6d-16d88fe60406",
+              "name": "secreto_esperado",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "7b66dfbf-6185-4f94-b322-cf3e6ef35296",
+              "name": "remitente",
+              "value": "F5GOL <tu-cuenta@gmail.com>",
+              "type": "string"
+            },
+            {
+              "id": "8bb04eb9-f363-4919-8d8a-b307f718a683",
+              "name": "app_nombre",
+              "value": "F5GOL",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "3857dbaf-3e3d-46a3-8de0-9cb6f36ae2af",
+      "name": "Configuración",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Revisa que el pedido venga de F5GOL y que los datos sirvan para mandar el mail.\nconst entrada = $input.first().json;\nconst encabezados = entrada.headers || {};\nconst cuerpo = entrada.body || {};\nconst usuario = cuerpo.usuario || {};\n\nlet codigo = 200;\nlet motivo = '';\n\n// Si en \"Configuración\" hay un secreto, tiene que coincidir con el que manda Laravel\nconst secretoRecibido = encabezados['x-f5gol-secreto'] || '';\nif (entrada.secreto_esperado && secretoRecibido !== entrada.secreto_esperado) {\n  codigo = 401;\n  motivo = 'El secreto del encabezado X-F5GOL-Secreto no es válido.';\n} else if (cuerpo.evento !== 'usuario.creado') {\n  codigo = 422;\n  motivo = 'Evento desconocido: se esperaba usuario.creado.';\n} else if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(usuario.email || '')) {\n  codigo = 422;\n  motivo = 'El usuario no tiene un email válido.';\n}\n\nconst nombreCompleto = String(usuario.nombre || '').trim();\nconst links = cuerpo.links || {};\n\nreturn [{\n  json: {\n    valido: codigo === 200,\n    codigo,\n    motivo,\n    usuario_id: usuario.id,\n    nombre_completo: nombreCompleto,\n    // Para el saludo alcanza con el primer nombre\n    nombre: nombreCompleto.split(/\\s+/)[0] || 'crack',\n    email: String(usuario.email || '').toLowerCase(),\n    rol: usuario.rol === 'administrador' ? 'administrador' : 'jugador',\n    origen: cuerpo.origen === 'google' ? 'tu cuenta de Google' : 'el formulario de registro',\n    link_app: links.app || '',\n    link_login: links.login || '',\n    link_primer_paso: links.primer_paso || links.app || '',\n    remitente: entrada.remitente,\n    app_nombre: entrada.app_nombre,\n  },\n}];\n"
+      },
+      "id": "76776a7b-18fb-4e8b-960c-c0d0720e0c7c",
+      "name": "Validar pedido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "187e8e9e-0e99-4289-9905-519167450e77",
+              "leftValue": "={{ $json.valido }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "3e8e3826-69d2-4088-b72c-e35883b8f047",
+      "name": "¿Pedido válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "889d9f0f-730c-4679-a625-ff7ae9c5e85d",
+              "leftValue": "={{ $json.rol }}",
+              "rightValue": "administrador",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "3d9f348c-7a14-4d4b-a71f-38c4ccbc6047",
+      "name": "¿Es administrador?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "afd20c8b-ded9-4d90-9ade-a39962f54267",
+              "name": "asunto",
+              "value": "=¡Bienvenido a F5GOL, {{ $json.nombre }}! Cargá tu club y empezá a recibir reservas",
+              "type": "string"
+            },
+            {
+              "id": "b7868fa9-d6aa-414a-8dd4-12898f18ff24",
+              "name": "html",
+              "value": "=<div style=\"margin:0;padding:24px 12px;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a;\"><div style=\"max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;\"><div style=\"background:#065f46;padding:20px 24px;color:#ffffff;font-size:22px;font-weight:bold;\">⚽ F5<span style=\"color:#34d399;\">GOL</span></div><div style=\"padding:24px;\"><h1 style=\"margin:0 0 12px;font-size:22px;\">¡Hola, {{ $json.nombre }}! Tu complejo ya puede estar en F5GOL</h1><p style=\"margin:0 0 16px;line-height:1.5;\">Creaste tu cuenta de <strong>administrador</strong>. En tres pasos tus canchas quedan publicadas para que los jugadores reserven online, sin llamadas ni planillas.</p><ol style=\"margin:0 0 20px;padding-left:20px;line-height:1.5;\"><li style=\"margin:0 0 8px;\"><strong>Creá tu club</strong> con nombre, dirección, fotos y descripción.</li><li style=\"margin:0 0 8px;\"><strong>Agregá tus canchas</strong>: superficie, si es techada, iluminación, vestuarios y tarifa.</li><li style=\"margin:0 0 8px;\"><strong>Cargá los horarios</strong> de cada cancha y seguí las reservas desde el panel.</li></ol><p style=\"margin:0 0 24px;\"><a href=\"{{ $json.link_primer_paso }}\" style=\"display:inline-block;background:#059669;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:8px;\">Cargar mi club</a></p><p style=\"margin:0;color:#64748b;font-size:13px;line-height:1.5;\">Te registraste con {{ $json.origen }} usando {{ $json.email }}. Si no fuiste vos, ignorá este mail.</p></div></div></div>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "f76136b6-c797-4489-9532-0bbf73a7d5fc",
+      "name": "Mail para administrador",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1200,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "09b9349b-c0a8-46d4-a975-9f81a3539750",
+              "name": "asunto",
+              "value": "=¡Bienvenido a F5GOL, {{ $json.nombre }}! Tu próximo partido te espera ⚽",
+              "type": "string"
+            },
+            {
+              "id": "18a0a83f-afd9-40d7-8921-3d1c08115eb5",
+              "name": "html",
+              "value": "=<div style=\"margin:0;padding:24px 12px;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a;\"><div style=\"max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;\"><div style=\"background:#065f46;padding:20px 24px;color:#ffffff;font-size:22px;font-weight:bold;\">⚽ F5<span style=\"color:#34d399;\">GOL</span></div><div style=\"padding:24px;\"><h1 style=\"margin:0 0 12px;font-size:22px;\">¡Hola, {{ $json.nombre }}! Ya sos parte de F5GOL</h1><p style=\"margin:0 0 16px;line-height:1.5;\">Desde ahora podés ver qué canchas están libres y reservar en segundos. Y si no llegás a juntar a los cinco, sumate a un partido con otros jugadores.</p><ol style=\"margin:0 0 20px;padding-left:20px;line-height:1.5;\"><li style=\"margin:0 0 8px;\"><strong>Buscá un club</strong> por nombre o dirección.</li><li style=\"margin:0 0 8px;\"><strong>Elegí el horario</strong> en la grilla de la cancha.</li><li style=\"margin:0 0 8px;\"><strong>Reservá la cancha entera</strong> o <strong>sumate al partido</strong> hasta completar el cupo.</li></ol><p style=\"margin:0 0 24px;\"><a href=\"{{ $json.link_primer_paso }}\" style=\"display:inline-block;background:#059669;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:8px;\">Buscar canchas</a></p><p style=\"margin:0;color:#64748b;font-size:13px;line-height:1.5;\">Te registraste con {{ $json.origen }} usando {{ $json.email }}. Si no fuiste vos, ignorá este mail.</p></div></div></div>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6ac4fe70-3301-43aa-a792-a49adbaf49bf",
+      "name": "Mail para jugador",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.remitente }}",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.asunto }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "cdb00901-b246-4f95-9bfd-7a0e02922905",
+      "name": "Enviar bienvenida",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1440,
+        -200
+      ],
+      "webhookId": "136df1a5-0dcd-46f7-913c-ef6fe2c5eb3b",
+      "credentials": {
+        "smtp": {
+          "id": "",
+          "name": "SMTP F5GOL"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": true, \"mensaje\": \"Mail de bienvenida enviado\", \"enviado_a\": $(\"Validar pedido\").first().json.email, \"rol\": $(\"Validar pedido\").first().json.rol } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "a3aa10aa-03af-4a4f-8bb5-572a4c8ce9ee",
+      "name": "Responder OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c3f25881-ab1d-474e-bac0-f36aca93c700",
+              "name": "mensaje",
+              "value": "=No se pudo enviar el mail de bienvenida: {{ $json.error?.message || $json.error || \"error desconocido del servidor de correo\" }}",
+              "type": "string"
+            },
+            {
+              "id": "1395f5f8-7c40-4e6e-84d1-8dcda891fd57",
+              "name": "email",
+              "value": "={{ $(\"Validar pedido\").first().json.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "8fd4f976-8be6-431f-9848-48cd3043cdeb",
+      "name": "Armar error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1680,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": false, \"mensaje\": $json.mensaje, \"email\": $json.email } }}",
+        "options": {
+          "responseCode": 502
+        }
+      },
+      "id": "859c648c-b672-4f10-9349-5d65c65b266f",
+      "name": "Responder error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": false, \"mensaje\": $json.motivo } }}",
+        "options": {
+          "responseCode": "={{ $json.codigo }}"
+        }
+      },
+      "id": "f9da10a5-5859-4d9c-b0a6-34fb5341d21e",
+      "name": "Responder rechazo",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## F5GOL · Mail de bienvenida\nLaravel llama a este webhook cada vez que se crea una cuenta (registro o primera vez con Google).\n\n**Antes de activarlo:**\n1. En *Configuración* poné tu remitente (el mismo mail de la credencial SMTP) y el mismo secreto que `N8N_WEBHOOK_SECRETO` del `.env` de Laravel.\n2. En *Enviar bienvenida* elegí la credencial SMTP.\n3. Activá el flujo (Publish / Active).",
+        "height": 280,
+        "width": 420
+      },
+      "id": "ce02d109-32da-4443-9859-4c5ff11a9af8",
+      "name": "Instrucciones",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -520
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook usuario creado": {
+      "main": [
+        [
+          {
+            "node": "Configuración",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuración": {
+      "main": [
+        [
+          {
+            "node": "Validar pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar pedido": {
+      "main": [
+        [
+          {
+            "node": "¿Pedido válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Pedido válido?": {
+      "main": [
+        [
+          {
+            "node": "¿Es administrador?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder rechazo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es administrador?": {
+      "main": [
+        [
+          {
+            "node": "Mail para administrador",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mail para jugador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mail para administrador": {
+      "main": [
+        [
+          {
+            "node": "Enviar bienvenida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mail para jugador": {
+      "main": [
+        [
+          {
+            "node": "Enviar bienvenida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar bienvenida": {
+      "main": [
+        [
+          {
+            "node": "Responder OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Armar error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar error": {
+      "main": [
+        [
+          {
+            "node": "Responder error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

@@ -36,6 +36,13 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', rtrim(env('APP_URL', 'http://localhost:8000'), '/').'/api/auth/google/callback'),
     ],
 
+    // Automatización con n8n: Laravel avisa a este webhook cada vez que se crea una cuenta.
+    // El secreto viaja en el encabezado X-F5GOL-Secreto y el flujo lo verifica.
+    'n8n' => [
+        'webhook_usuario_creado' => env('N8N_WEBHOOK_USUARIO_CREADO'),
+        'secreto' => env('N8N_WEBHOOK_SECRETO'),
+    ],
+
     // Dirección del front de Angular, a donde vuelve el usuario después de Google
     'frontend' => [
         'url' => env('FRONTEND_URL', 'http://localhost:4200'),

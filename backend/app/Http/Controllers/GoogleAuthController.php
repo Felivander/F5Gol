@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\AvisarUsuarioCreado;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -108,6 +109,9 @@ class GoogleAuthController extends Controller
         $usuario->google_id = $googleId;
         $usuario->email_verified_at = now();
         $usuario->save();
+
+        // Cuenta nueva: n8n manda el mail de bienvenida (igual que en el registro normal)
+        AvisarUsuarioCreado::dispatch($usuario, 'google')->afterResponse();
 
         return $usuario;
     }
