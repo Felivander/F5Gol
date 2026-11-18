@@ -162,6 +162,8 @@ php artisan db:seed --class=TurnoSeeder
 php artisan db:seed --class=PartidosCasiLlenosSeeder
 ```
 
+La lista completa para tildar en la máquina de la presentación está en [docs/pruebas/F5GOL-lista-de-pruebas.docx](docs/pruebas/F5GOL-lista-de-pruebas.docx).
+
 Recorrido sugerido: registrarse (o entrar con Google) → crear un club en **Mis clubes** → agregar una cancha → cargar sus horarios → reservar la cancha entera con un jugador → en **Partidos abiertos**, sumarse a un partido 9/10 (se completa y llega el mail) → ver las reservas en el **Panel** y marcar la seña → cancelar una reserva desde **Mis reservas**.
 
 ## Cómo funciona el matchmaking
