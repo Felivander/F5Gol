@@ -1,0 +1,96 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "estadoPago",
+  "position": {
+    "x": 330,
+    "y": 475,
+    "z": 10000,
+    "height": 230,
+    "width": 300,
+    "tabOrder": 10000
+  },
+  "visual": {
+    "visualType": "hundredPercentStackedBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_turnos"
+                    }
+                  },
+                  "Property": "club"
+                }
+              },
+              "queryRef": "bi_turnos.club",
+              "nativeQueryRef": "club"
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_reservas"
+                    }
+                  },
+                  "Property": "estado_pago"
+                }
+              },
+              "queryRef": "bi_reservas.estado_pago",
+              "nativeQueryRef": "estado_pago"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_reservas"
+                    }
+                  },
+                  "Property": "Facturación"
+                }
+              },
+              "queryRef": "bi_reservas.Facturación",
+              "nativeQueryRef": "Facturación"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Cobro según estado de pago'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

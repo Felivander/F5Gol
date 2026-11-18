@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "kpiCancelacion",
+  "position": {
+    "x": 1012,
+    "y": 105,
+    "z": 6000,
+    "height": 110,
+    "width": 248,
+    "tabOrder": 6000
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_reservas"
+                    }
+                  },
+                  "Property": "% Cancelación"
+                }
+              },
+              "queryRef": "bi_reservas.% Cancelación",
+              "nativeQueryRef": "% Cancelación"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

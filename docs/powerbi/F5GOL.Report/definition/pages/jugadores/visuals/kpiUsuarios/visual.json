@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "kpiUsuarios",
+  "position": {
+    "x": 20,
+    "y": 105,
+    "z": 1000,
+    "height": 110,
+    "width": 300,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_usuarios"
+                    }
+                  },
+                  "Property": "Usuarios nuevos"
+                }
+              },
+              "queryRef": "bi_usuarios.Usuarios nuevos",
+              "nativeQueryRef": "Usuarios nuevos"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

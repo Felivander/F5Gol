@@ -1,0 +1,159 @@
+table bi_turnos
+	lineageTag: 06d01180-c419-41a2-a785-28c33e493571
+
+	measure 'Turnos ofrecidos' = CALCULATE(COUNTROWS(bi_turnos), bi_turnos[estado] <> "bloqueado")
+		formatString: #,0
+		lineageTag: 5b8b6301-f5d8-4e21-ab32-9c979c166897
+
+	measure 'Turnos ocupados' = CALCULATE(COUNTROWS(bi_turnos), bi_turnos[estado] = "ocupado")
+		formatString: #,0
+		lineageTag: 558554cf-8886-47ce-9eda-6d319a4821ea
+
+	measure '% Ocupación' = DIVIDE([Turnos ocupados], [Turnos ofrecidos])
+		formatString: 0.0%
+		lineageTag: f0fdb776-12d3-4229-a8cd-6ab0f25e0729
+
+	measure 'Turnos bloqueados' = CALCULATE(COUNTROWS(bi_turnos), bi_turnos[estado] = "bloqueado")
+		formatString: #,0
+		lineageTag: e2ceed61-2f59-4f49-b42c-cf347526f8c1
+
+	measure '% Ocupación semana anterior' = CALCULATE([% Ocupación], DATEADD(Calendario[Date], -7, DAY))
+		formatString: 0.0%
+		lineageTag: b9a95809-842a-4b0e-93b4-ee91a6904970
+
+	measure 'Variación de ocupación' = [% Ocupación] - [% Ocupación semana anterior]
+		formatString: +0.0%;-0.0%;0.0%
+		lineageTag: bb196a4b-4fcc-4e99-9e8a-14cf36cd4469
+
+	column turno_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 064e6ea2-0766-4cdd-b16c-3107380bb8cf
+		summarizeBy: none
+		sourceColumn: turno_id
+
+	column fecha
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 927fa49e-ff48-4386-a361-ae7dd5f7a94c
+		summarizeBy: none
+		sourceColumn: fecha
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column hora_inicio
+		dataType: dateTime
+		formatString: HH:mm
+		lineageTag: aac52cb9-3156-44d5-afd5-e39e018467f6
+		summarizeBy: none
+		sourceColumn: hora_inicio
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column hora_fin
+		dataType: dateTime
+		formatString: HH:mm
+		lineageTag: 400ef5a2-2afa-4615-b527-fbde505a704c
+		summarizeBy: none
+		sourceColumn: hora_fin
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column estado
+		dataType: string
+		lineageTag: 1654cf05-6d3e-465b-bff8-00e769d88b7c
+		summarizeBy: none
+		sourceColumn: estado
+
+	column cupo_maximo
+		dataType: int64
+		formatString: 0
+		lineageTag: 9aedce0a-0561-4c20-bdb8-2b4da52d12c9
+		summarizeBy: none
+		sourceColumn: cupo_maximo
+
+	column cancha_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 489d16f7-08c3-4cf8-9aeb-e43992c36c32
+		summarizeBy: none
+		sourceColumn: cancha_id
+
+	column cancha
+		dataType: string
+		lineageTag: 60876a4c-0f92-4521-bf80-408833debcc3
+		summarizeBy: none
+		sourceColumn: cancha
+
+	column tipo_cancha
+		dataType: string
+		lineageTag: 79e42459-62dc-41e8-83e3-db716658e5aa
+		summarizeBy: none
+		sourceColumn: tipo_cancha
+
+	column superficie
+		dataType: string
+		lineageTag: 4ea0e1b5-b222-4aa3-bd0b-54e4c1e10b18
+		summarizeBy: none
+		sourceColumn: superficie
+
+	column tarifa
+		dataType: double
+		formatString: $ #,0
+		lineageTag: 5a76e89e-8d22-4594-b9e8-bd49b0b7190e
+		summarizeBy: sum
+		sourceColumn: tarifa
+
+	column cancha_eliminada
+		dataType: int64
+		formatString: 0
+		lineageTag: 52e64c2a-9c05-4c42-9571-68a80ff0e529
+		summarizeBy: none
+		sourceColumn: cancha_eliminada
+
+	column club_id
+		dataType: int64
+		formatString: 0
+		lineageTag: be8e5274-a1bb-4720-b458-1ce750e07aa4
+		summarizeBy: none
+		sourceColumn: club_id
+
+	column club
+		dataType: string
+		lineageTag: 9d00284c-3ba9-45d1-823d-5beff87e68a1
+		summarizeBy: none
+		sourceColumn: club
+
+	column Hora = HOUR(bi_turnos[hora_inicio])
+		dataType: int64
+		formatString: 0
+		lineageTag: 98d38c7f-cefb-4cf8-843b-f08bd607e959
+		summarizeBy: none
+
+	column Franja = SWITCH(TRUE(), bi_turnos[Hora] < 18, "Tarde (antes de 18 hs)", bi_turnos[Hora] < 20, "Previa (18 a 20 hs)", "Noche (desde 20 hs)")
+		dataType: string
+		lineageTag: b75e507c-1ed2-485d-9f0d-7e47aef382ee
+		summarizeBy: none
+
+	column 'Club y cancha' = bi_turnos[club] & " · " & bi_turnos[cancha]
+		dataType: string
+		lineageTag: bbb741c7-9301-40dd-aad0-f897e4f7b815
+		summarizeBy: none
+
+	column 'Tipo de superficie' = SWITCH(bi_turnos[superficie], "cesped_sintetico", "Césped sintético", "cesped_natural", "Césped natural", "cemento", "Cemento", "parquet", "Parquet", "caucho", "Caucho", "Sin especificar")
+		dataType: string
+		lineageTag: d8ebb0ce-27f7-40c1-adab-e7b8e3e3e6d1
+		summarizeBy: none
+
+	partition bi_turnos = m
+		mode: import
+		source =
+				let
+				    // Base f5gol del MySQL de XAMPP (usuario root, sin contraseña)
+				    Origen = MySQL.Database("localhost", "f5gol", [ReturnSingleDatabase = true]),
+				    Vista = Origen{[Schema = "f5gol", Item = "bi_turnos"]}[Data],
+				    Tipos = Table.TransformColumnTypes(Vista, {{"turno_id", Int64.Type}, {"fecha", type date}, {"hora_inicio", type time}, {"hora_fin", type time}, {"estado", type text}, {"cupo_maximo", Int64.Type}, {"cancha_id", Int64.Type}, {"cancha", type text}, {"tipo_cancha", type text}, {"superficie", type text}, {"tarifa", type number}, {"cancha_eliminada", Int64.Type}, {"club_id", Int64.Type}, {"club", type text}})
+				in
+				    Tipos
+
+	annotation PBI_ResultType = Table

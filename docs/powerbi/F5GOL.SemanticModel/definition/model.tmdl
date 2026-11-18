@@ -1,0 +1,12 @@
+model Model
+	culture: es-AR
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: es-AR
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+ref table bi_turnos
+ref table bi_reservas
+ref table bi_usuarios
+ref table Calendario

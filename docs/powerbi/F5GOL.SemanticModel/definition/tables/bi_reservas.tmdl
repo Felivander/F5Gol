@@ -1,0 +1,190 @@
+table bi_reservas
+	lineageTag: 43863286-b893-44e6-9360-cdca9c1d49fa
+
+	measure Reservas = CALCULATE(COUNTROWS(bi_reservas), bi_reservas[estado] <> "cancelada")
+		formatString: #,0
+		lineageTag: c4476738-a34b-4caa-9502-89fd684b4fe1
+
+	measure 'Reservas canceladas' = CALCULATE(COUNTROWS(bi_reservas), bi_reservas[estado] = "cancelada")
+		formatString: #,0
+		lineageTag: 4f2b9563-9937-4aac-b543-d9dafccf8b2c
+
+	measure '% Cancelación' = DIVIDE([Reservas canceladas], COUNTROWS(bi_reservas))
+		formatString: 0.0%
+		lineageTag: 931e3943-0667-45cf-91fe-57526e27b51e
+
+	measure 'Reservas completas' = CALCULATE([Reservas], bi_reservas[tipo] = "completa")
+		formatString: #,0
+		lineageTag: 836e3812-c7fd-408f-a95a-de38a4f899d5
+
+	measure 'Inscripciones de matchmaking' = CALCULATE([Reservas], bi_reservas[tipo] = "individual")
+		formatString: #,0
+		lineageTag: 33e1493e-ca79-4c06-9482-a1ac7a003a10
+
+	measure 'Partidos armados por matchmaking' = CALCULATE(DISTINCTCOUNT(bi_reservas[turno_id]), bi_reservas[tipo] = "individual", bi_reservas[estado] <> "cancelada", bi_turnos[estado] = "ocupado")
+		formatString: #,0
+		lineageTag: 3fba3ae1-6c5c-47a1-85da-718821efffe7
+
+	measure '% Partidos por matchmaking' = DIVIDE([Partidos armados por matchmaking], [Turnos ocupados])
+		formatString: 0.0%
+		lineageTag: c0966f2e-650d-4ed8-a162-af25410417b0
+
+	measure 'Facturación' = CALCULATE(SUM(bi_reservas[monto]), bi_reservas[estado] <> "cancelada")
+		formatString: $ #,0
+		lineageTag: ac488057-e3d6-4dd1-a067-10bcabb2b485
+
+	measure Cobrado = CALCULATE([Facturación], bi_reservas[estado_pago] = "pagado")
+		formatString: $ #,0
+		lineageTag: ad3a19bb-da34-4948-904f-60d0dcb102eb
+
+	measure 'Con seña' = CALCULATE([Facturación], bi_reservas[estado_pago] = "sena")
+		formatString: $ #,0
+		lineageTag: 5fc38b95-e9e7-437f-a289-f0b6fec62549
+
+	measure 'Pendiente de cobro' = CALCULATE([Facturación], bi_reservas[estado_pago] = "pendiente")
+		formatString: $ #,0
+		lineageTag: d2edcb25-6a59-4140-b99d-f2edd9d62272
+
+	measure '% Cobrado' = DIVIDE([Cobrado], [Facturación])
+		formatString: 0.0%
+		lineageTag: ed0a9494-6129-4f17-b64a-51a6705a7e3f
+
+	measure 'Ticket promedio' = DIVIDE([Facturación], [Reservas])
+		formatString: $ #,0
+		lineageTag: f54a9f27-2788-485f-bdf3-c743eec36458
+
+	column reserva_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 3f8df36f-ad9a-4e89-99c9-e36981ff14de
+		summarizeBy: none
+		sourceColumn: reserva_id
+
+	column tipo
+		dataType: string
+		lineageTag: 5528600a-b12b-4fcb-8502-c6b274a99278
+		summarizeBy: none
+		sourceColumn: tipo
+
+	column cantidad_jugadores
+		dataType: int64
+		formatString: 0
+		lineageTag: c7c02c87-ffe9-49ce-a5fd-e32243e7162f
+		summarizeBy: none
+		sourceColumn: cantidad_jugadores
+
+	column estado
+		dataType: string
+		lineageTag: 9e4977b4-5092-47c1-93da-91f9371659d9
+		summarizeBy: none
+		sourceColumn: estado
+
+	column estado_pago
+		dataType: string
+		lineageTag: 1e0f2ef5-f83c-4232-aaca-f90ce531679e
+		summarizeBy: none
+		sourceColumn: estado_pago
+
+	column reservada_en
+		dataType: dateTime
+		formatString: dd/mm/yyyy HH:mm
+		lineageTag: b4f615af-9952-469f-a14f-849e666bbcd8
+		summarizeBy: none
+		sourceColumn: reservada_en
+
+	column usuario_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 8f15f256-bbea-477f-b41c-ce6ef90cc41a
+		summarizeBy: none
+		sourceColumn: usuario_id
+
+	column rol_usuario
+		dataType: string
+		lineageTag: a0373bde-0a9e-4dae-b1d4-24f159df3d89
+		summarizeBy: none
+		sourceColumn: rol_usuario
+
+	column turno_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 115f65ed-e68c-4940-9973-22ef66a2fe1d
+		summarizeBy: none
+		sourceColumn: turno_id
+
+	column fecha
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 427b9c76-ca90-4442-8cca-cafc31d5e400
+		summarizeBy: none
+		sourceColumn: fecha
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column hora_inicio
+		dataType: dateTime
+		formatString: HH:mm
+		lineageTag: e9bfe29d-e038-4851-99ed-59f8b7ecaf21
+		summarizeBy: none
+		sourceColumn: hora_inicio
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column cancha_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 10512dd6-baf6-4237-a9c0-ed674371d54f
+		summarizeBy: none
+		sourceColumn: cancha_id
+
+	column cancha
+		dataType: string
+		lineageTag: 3c4a9ffa-3241-4061-b236-8425107ba263
+		summarizeBy: none
+		sourceColumn: cancha
+
+	column superficie
+		dataType: string
+		lineageTag: 02a2e3b1-4d39-4369-ba5c-5614b9dff985
+		summarizeBy: none
+		sourceColumn: superficie
+
+	column club_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 67e84166-d652-429d-880c-28e9c19b5111
+		summarizeBy: none
+		sourceColumn: club_id
+
+	column club
+		dataType: string
+		lineageTag: 1e6c34fd-22cd-4a35-83f6-942fd6aaa72e
+		summarizeBy: none
+		sourceColumn: club
+
+	column tarifa
+		dataType: double
+		formatString: $ #,0
+		lineageTag: e1bc9b56-309a-4d1d-83b8-1e1ea6d256e3
+		summarizeBy: sum
+		sourceColumn: tarifa
+
+	column monto
+		dataType: double
+		formatString: $ #,0
+		lineageTag: fe777bfd-f0b8-42da-9e1d-4fedac4efa2d
+		summarizeBy: sum
+		sourceColumn: monto
+
+	partition bi_reservas = m
+		mode: import
+		source =
+				let
+				    // Base f5gol del MySQL de XAMPP (usuario root, sin contraseña)
+				    Origen = MySQL.Database("localhost", "f5gol", [ReturnSingleDatabase = true]),
+				    Vista = Origen{[Schema = "f5gol", Item = "bi_reservas"]}[Data],
+				    Tipos = Table.TransformColumnTypes(Vista, {{"reserva_id", Int64.Type}, {"tipo", type text}, {"cantidad_jugadores", Int64.Type}, {"estado", type text}, {"estado_pago", type text}, {"reservada_en", type datetime}, {"usuario_id", Int64.Type}, {"rol_usuario", type text}, {"turno_id", Int64.Type}, {"fecha", type date}, {"hora_inicio", type time}, {"cancha_id", Int64.Type}, {"cancha", type text}, {"superficie", type text}, {"club_id", Int64.Type}, {"club", type text}, {"tarifa", type number}, {"monto", type number}})
+				in
+				    Tipos
+
+	annotation PBI_ResultType = Table
