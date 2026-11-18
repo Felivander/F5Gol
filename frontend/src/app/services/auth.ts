@@ -58,7 +58,8 @@ export class Auth {
     );
   }
 
-  private limpiarSesion() {
+  // También la usa el interceptor cuando la API responde 401 (token vencido o revocado)
+  limpiarSesion() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     this.token.set(null);

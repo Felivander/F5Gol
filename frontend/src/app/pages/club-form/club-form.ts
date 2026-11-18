@@ -1,15 +1,10 @@
 import { Component, OnInit, inject, input, signal } from '@angular/core';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Club, ClubInput } from '../../models';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
-
-// Validador propio: rechaza textos que son solo espacios (Validators.required los deja pasar)
-function noSoloEspacios(control: AbstractControl): ValidationErrors | null {
-  const valor = control.value as string | null;
-  return valor && valor.trim() === '' ? { soloEspacios: true } : null;
-}
+import { PATRON_TELEFONO, noSoloEspacios } from '../../validadores';
 
 // Alta (/clubes/nuevo) y edición (/clubes/:id/editar) del club, con formulario reactivo
 @Component({
@@ -29,7 +24,7 @@ export class ClubForm implements OnInit {
   form = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(150), noSoloEspacios]],
     direccion: ['', [Validators.maxLength(255)]],
-    telefono: ['', [Validators.maxLength(30), Validators.pattern(/^[0-9+\-\s()]*$/)]],
+    telefono: ['', [Validators.maxLength(30), Validators.pattern(PATRON_TELEFONO)]],
     descripcion: ['', [Validators.maxLength(2000)]]
   });
 
