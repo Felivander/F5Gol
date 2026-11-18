@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
             TurnoSeeder::class,
             ReservaSeeder::class,
             JugadorAnotadoSeeder::class,
+            // 8 semanas de turnos y reservas pasadas para el dashboard de Power BI
+            HistorialDemoSeeder::class,
         ]);
     }
 }
