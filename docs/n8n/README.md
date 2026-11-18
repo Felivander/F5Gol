@@ -146,6 +146,25 @@ N8N_WEBHOOK_PARTIDO_COMPLETO=http://localhost:5678/webhook/f5gol-partido-complet
 
 Si n8n no está configurado o no responde, Laravel manda el aviso con su propio mail (`PartidoCompleto`), así nunca se pierde.
 
+## Tercer flujo: aviso de partido incompleto
+
+Archivo: [`partido-incompleto.json`](partido-incompleto.json) (9 nodos, misma estructura que el de partido completo). Cada 5 minutos el programador de Laravel corre `php artisan partidos:avisar-incompletos`: si un partido de matchmaking llegó a su hora sin completar el cupo, marca el turno (para avisar una sola vez) y manda al webhook `/webhook/f5gol-partido-incompleto` el turno, cuántos se anotaron y la lista de jugadores. n8n les manda un mail a todos avisando que el partido no se completó.
+
+Para que funcione tiene que estar corriendo el programador (lo levanta `iniciar-f5gol.bat`):
+
+```bash
+cd backend
+php artisan schedule:work
+```
+
+En `backend/.env`:
+
+```env
+N8N_WEBHOOK_PARTIDO_INCOMPLETO=http://localhost:5678/webhook/f5gol-partido-incompleto
+```
+
+Igual que el otro aviso, si n8n no responde sale el mail de Laravel (`PartidoIncompleto`).
+
 ## Problemas comunes
 
 | Síntoma | Causa |

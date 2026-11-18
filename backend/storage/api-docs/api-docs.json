@@ -1230,6 +1230,107 @@
                 ]
             }
         },
+        "/api/partidos-abiertos": {
+            "get": {
+                "tags": [
+                    "Matchmaking"
+                ],
+                "summary": "Partidos abiertos (lobby de matchmaking)",
+                "description": "Turnos que todavía no empezaron, con al menos un jugador anotado por matchmaking y lugares libres. Ordenados por los que menos les falta, para que se completen primero. No incluye datos de los jugadores.",
+                "operationId": "f4216189684d063b84db3d603222904d",
+                "parameters": [
+                    {
+                        "name": "club_id",
+                        "in": "query",
+                        "description": "Solo los partidos de un club",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "fecha",
+                        "in": "query",
+                        "description": "Solo los partidos de un día (AAAA-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de partidos abiertos.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "turno_id": {
+                                                "type": "integer",
+                                                "example": 42
+                                            },
+                                            "fecha": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2026-11-20"
+                                            },
+                                            "hora_inicio": {
+                                                "type": "string",
+                                                "example": "20:00"
+                                            },
+                                            "hora_fin": {
+                                                "type": "string",
+                                                "example": "21:00"
+                                            },
+                                            "cupo_maximo": {
+                                                "type": "integer",
+                                                "example": 5
+                                            },
+                                            "anotados": {
+                                                "type": "integer",
+                                                "example": 3
+                                            },
+                                            "faltan": {
+                                                "type": "integer",
+                                                "example": 2
+                                            },
+                                            "precio_por_jugador": {
+                                                "type": "number",
+                                                "example": 3400
+                                            },
+                                            "cancha": {
+                                                "type": "object",
+                                                "example": {
+                                                    "id": 1,
+                                                    "nombre": "Cancha 1",
+                                                    "tipo": "futbol5",
+                                                    "superficie": "cesped_sintetico"
+                                                }
+                                            },
+                                            "club": {
+                                                "type": "object",
+                                                "example": {
+                                                    "id": 1,
+                                                    "nombre": "Complejo Concordia FC",
+                                                    "direccion": "Av. Costanera 1200"
+                                                }
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "La fecha no tiene el formato AAAA-MM-DD."
+                    }
+                }
+            }
+        },
         "/api/reservas": {
             "get": {
                 "tags": [
@@ -2198,6 +2299,10 @@
         {
             "name": "Jugadores anotados",
             "description": "Jugadores anotados"
+        },
+        {
+            "name": "Matchmaking",
+            "description": "Matchmaking"
         },
         {
             "name": "Reservas",

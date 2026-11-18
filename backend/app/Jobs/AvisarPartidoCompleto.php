@@ -45,12 +45,28 @@ class AvisarPartidoCompleto
         }
 
         // Respaldo: mail de Laravel (con MAIL_MAILER=log queda en storage/logs/laravel.log)
-        Notification::send($jugadores, new PartidoCompleto($turno));
+        Notification::send($jugadores, $this->notificacion($turno));
+    }
+
+    // Lo que cambia entre el aviso de partido completo y el de partido incompleto (ver AvisarPartidoIncompleto)
+    protected function evento(): string
+    {
+        return 'partido.completo';
+    }
+
+    protected function claveWebhook(): string
+    {
+        return 'webhook_partido_completo';
+    }
+
+    protected function notificacion(Turno $turno): \Illuminate\Notifications\Notification
+    {
+        return new PartidoCompleto($turno);
     }
 
     private function avisarPorN8n(Turno $turno, $reservas): bool
     {
-        $url = config('services.n8n.webhook_partido_completo');
+        $url = config('services.n8n.'.$this->claveWebhook());
 
         if (! $url) {
             return false;
@@ -65,7 +81,7 @@ class AvisarPartidoCompleto
             Http::timeout(10)
                 ->withHeaders(['X-F5GOL-Secreto' => (string) config('services.n8n.secreto')])
                 ->post($url, [
-                    'evento' => 'partido.completo',
+                    'evento' => $this->evento(),
                     'turno' => [
                         'id' => $turno->id,
                         'fecha' => $fecha->toDateString(),
@@ -73,6 +89,7 @@ class AvisarPartidoCompleto
                         'hora_inicio' => substr($turno->hora_inicio, 0, 5),
                         'hora_fin' => substr($turno->hora_fin, 0, 5),
                         'cupo_maximo' => $turno->cupo_maximo,
+                        'anotados' => (int) $reservas->sum('cantidad_jugadores'),
                     ],
                     'cancha' => [
                         'nombre' => $cancha?->nombre,
@@ -94,13 +111,14 @@ class AvisarPartidoCompleto
                     'links' => [
                         'cancha' => $frontend.'/canchas/'.$cancha?->id,
                         'mis_reservas' => $frontend.'/mis-reservas',
+                        'partidos' => $frontend.'/partidos',
                     ],
                 ])
                 ->throw();
 
             return true;
         } catch (Throwable $e) {
-            Log::warning("No se pudo avisar a n8n que se completó el turno {$turno->id}; se usa el mail de Laravel: ".$e->getMessage());
+            Log::warning("No se pudo avisar a n8n el evento {$this->evento()} del turno {$turno->id}; se usa el mail de Laravel: ".$e->getMessage());
 
             return false;
         }

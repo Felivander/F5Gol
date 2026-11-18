@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
     'hora_fin',
     'estado',
     'cupo_maximo',
+    'aviso_incompleto_at',
 ])]
 class Turno extends Model
 {
