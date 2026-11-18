@@ -2,6 +2,14 @@
 
 Tablero con los indicadores del sistema, armado sobre la base MySQL de F5GOL. Cumple el requisito de la cátedra: **extracción de datos desde MySQL, modelado básico, KPIs y diseño del dashboard**.
 
+## Cómo queda
+
+Datos de la base de demo (`migrate:fresh --seed`, con 8 semanas de historial).
+
+![Página 1: resumen del club](captura-resumen.png)
+
+![Página 2: jugadores y matchmaking](captura-jugadores.png)
+
 ## Qué preguntas responde
 
 | Pregunta del dueño del club | Indicador |
