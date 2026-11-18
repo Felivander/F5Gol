@@ -32,7 +32,7 @@ class EditarReservaTest extends TestCase
 
         $this->putJson("/api/reservas/{$reserva->id}", ['cantidad_jugadores' => 3])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'No hay cupo suficiente en este turno');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Queda 1 lugar'));
 
         $this->assertSame(1, $reserva->fresh()->cantidad_jugadores);
         $this->assertSame('disponible', $turno->fresh()->estado);
@@ -74,7 +74,7 @@ class EditarReservaTest extends TestCase
 
         $this->putJson("/api/reservas/{$reserva->id}", ['turno_id' => $nuevo->id])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'El turno nuevo no está disponible');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'ya está reservado'));
 
         $this->assertSame($anterior->id, $reserva->fresh()->turno_id);
         $this->assertSame('ocupado', $anterior->fresh()->estado);
@@ -90,7 +90,7 @@ class EditarReservaTest extends TestCase
 
         $this->putJson("/api/reservas/{$reserva->id}", ['turno_id' => $nuevo->id])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'El turno nuevo ya tiene jugadores anotados');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'no se puede pasar ahí una reserva de cancha entera'));
     }
 
     public function test_no_deja_cambiar_a_un_turno_que_ya_paso(): void
@@ -120,7 +120,7 @@ class EditarReservaTest extends TestCase
 
         $this->putJson("/api/reservas/{$reserva->id}", ['turno_id' => $nuevo->id])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'Las reservas se pueden cambiar de turno hasta 2 horas antes del partido.');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Las reservas se pueden cambiar de turno hasta 2 horas antes del partido'));
 
         $this->assertSame($anterior->id, $reserva->fresh()->turno_id);
     }
@@ -147,7 +147,7 @@ class EditarReservaTest extends TestCase
 
         $this->putJson("/api/reservas/{$reserva->id}", ['estado_pago' => 'pagado'])
             ->assertForbidden()
-            ->assertJsonPath('message', 'Solo el administrador del club puede cambiar el estado de pago');
+            ->assertJsonPath('message', 'Solo el administrador del club puede cambiar el estado de pago.');
 
         $this->assertNotSame('pagado', $reserva->fresh()->estado_pago);
     }

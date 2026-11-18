@@ -74,7 +74,7 @@ class CanchaController extends Controller
         $cancha = Cancha::create($request->validated());
 
         return response()->json([
-            'message' => 'Cancha creada correctamente',
+            'message' => "La cancha {$cancha->nombre} se creó correctamente.",
             'cancha' => $cancha,
         ], 201);
     }
@@ -124,7 +124,7 @@ class CanchaController extends Controller
 
         if (! $cancha) {
             return response()->json([
-                'message' => 'Cancha no encontrada',
+                'message' => "No existe una cancha con el id {$id}.",
             ], 404);
         }
 
@@ -143,7 +143,7 @@ class CanchaController extends Controller
         $cancha->update($request->validated());
 
         return response()->json([
-            'message' => 'Cancha actualizada correctamente',
+            'message' => "Los cambios de la cancha {$cancha->nombre} se guardaron.",
             'cancha' => $cancha->fresh(),
         ], 200);
     }
@@ -170,7 +170,7 @@ class CanchaController extends Controller
 
         if (! $cancha) {
             return response()->json([
-                'message' => 'Cancha no encontrada',
+                'message' => "No existe una cancha con el id {$id}.",
             ], 404);
         }
 
@@ -188,7 +188,7 @@ class CanchaController extends Controller
         $cancha->delete();
 
         return response()->json([
-            'message' => 'Cancha eliminada correctamente',
+            'message' => "La cancha {$cancha->nombre} se eliminó. Podés restaurarla desde Canchas eliminadas.",
         ], 200);
     }
 
@@ -225,7 +225,7 @@ class CanchaController extends Controller
 
         if (! $cancha) {
             return response()->json([
-                'message' => 'Cancha no encontrada',
+                'message' => "No existe una cancha con el id {$id}.",
             ], 404);
         }
 
@@ -236,7 +236,7 @@ class CanchaController extends Controller
         $this->agregarFoto($cancha, $request->file('foto'), 'canchas');
 
         return response()->json([
-            'message' => 'Foto subida correctamente',
+            'message' => 'La foto se subió correctamente.',
             'cancha' => $cancha->fresh(),
         ], 201);
     }
@@ -264,7 +264,7 @@ class CanchaController extends Controller
 
         if (! $cancha) {
             return response()->json([
-                'message' => 'Cancha no encontrada',
+                'message' => "No existe una cancha con el id {$id}.",
             ], 404);
         }
 
@@ -274,12 +274,12 @@ class CanchaController extends Controller
 
         if (! $this->quitarFoto($cancha, $indice, 'canchas')) {
             return response()->json([
-                'message' => 'Foto no encontrada',
+                'message' => "La cancha no tiene una foto en la posición {$indice} (las fotos se cuentan desde 0).",
             ], 404);
         }
 
         return response()->json([
-            'message' => 'Foto borrada correctamente',
+            'message' => 'La foto se borró.',
             'cancha' => $cancha->fresh(),
         ], 200);
     }
@@ -335,7 +335,7 @@ class CanchaController extends Controller
 
         if (! $cancha) {
             return response()->json([
-                'message' => 'Cancha eliminada no encontrada',
+                'message' => "No hay una cancha eliminada con el id {$id}.",
             ], 404);
         }
 
@@ -346,7 +346,7 @@ class CanchaController extends Controller
         $cancha->restore();
 
         return response()->json([
-            'message' => 'Cancha restaurada correctamente',
+            'message' => "La cancha {$cancha->nombre} se restauró y vuelve a estar en el club.",
         ], 200);
     }
 

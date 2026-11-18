@@ -108,6 +108,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "description": "Demasiados intentos: máximo 10 por minuto."
                     }
                 }
             }
@@ -175,10 +178,20 @@
                         }
                     },
                     "401": {
-                        "description": "Credenciales incorrectas."
+                        "description": "El correo o la contraseña son incorrectos."
                     },
                     "422": {
-                        "description": "Datos inválidos."
+                        "description": "Faltan el correo o la contraseña, o el correo no tiene un formato válido.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiados intentos: máximo 10 por minuto."
                     }
                 }
             }
@@ -1020,7 +1033,7 @@
                     "Jugadores anotados"
                 ],
                 "summary": "Listar jugador-anotados",
-                "description": "Display a listing of the resource.",
+                "description": "Requiere sesión. Cada uno ve sus inscripciones y las de sus reservas; el administrador, también las de sus clubes.",
                 "operationId": "0691e70b05fcd3d8fd31f75342bfa4da",
                 "parameters": [
                     {
@@ -1036,8 +1049,16 @@
                 "responses": {
                     "200": {
                         "description": "Listado obtenido correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -1072,6 +1093,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "La reserva no es suya ni de un club suyo."
                     }
                 },
                 "security": [
@@ -1087,7 +1111,7 @@
                     "Jugadores anotados"
                 ],
                 "summary": "Obtener jugador anotado",
-                "description": "Display the specified resource.",
+                "description": "Requiere sesión. Solo lo ve el jugador, el dueño de la reserva o el administrador del club.",
                 "operationId": "a4edeea6d2343edf1140d719db951720",
                 "parameters": [
                     {
@@ -1098,10 +1122,21 @@
                     "200": {
                         "description": "Operación exitosa."
                     },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "No tiene permiso para verlo."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -1142,6 +1177,9 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "No es el jugador anotado, ni quien hizo la reserva, ni el administrador del club."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
@@ -1178,6 +1216,9 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "No es el jugador anotado, ni quien hizo la reserva, ni el administrador del club."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
@@ -1195,7 +1236,7 @@
                     "Reservas"
                 ],
                 "summary": "Listar reservas",
-                "description": "Display a listing of the resource.\n\n\"Mis reservas\": /api/reservas?usuario_id=1",
+                "description": "Requiere sesión. El jugador ve solo sus reservas; el administrador ve las suyas y las de las canchas de sus clubes.",
                 "operationId": "8536ca90a9f5ba3709643c0493395478",
                 "parameters": [
                     {
@@ -1286,8 +1327,16 @@
                 "responses": {
                     "200": {
                         "description": "Listado paginado (10 por página salvo que se pida otra cantidad)."
+                    },
+                    "401": {
+                        "description": "No autenticado."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -1323,8 +1372,11 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "Se intentó reservar a nombre de otro usuario sin ser el administrador del club."
+                    },
                     "409": {
-                        "description": "Turno no disponible, ya pasado, con jugadores anotados o sin cupo suficiente."
+                        "description": "El mensaje dice el motivo: turno bloqueado, ya reservado, ya empezado, con jugadores anotados (para reserva completa) o sin cupo suficiente."
                     }
                 },
                 "security": [
@@ -1340,7 +1392,7 @@
                     "Reservas"
                 ],
                 "summary": "Obtener reserva",
-                "description": "Display the specified resource.",
+                "description": "Requiere sesión. Solo la ve quien la hizo o el administrador del club de la cancha.",
                 "operationId": "12b2a5f422f7abede6bff94de0d990f6",
                 "parameters": [
                     {
@@ -1351,10 +1403,21 @@
                     "200": {
                         "description": "Operación exitosa."
                     },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "La reserva no es suya ni de un club suyo."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -1436,6 +1499,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "La reserva no es suya ni de un club suyo."
                     },
                     "404": {
                         "description": "No encontrado."
@@ -1520,7 +1586,7 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o la cancha no es de su club."
                     }
                 },
                 "security": [
@@ -1592,7 +1658,7 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o la cancha no es de su club."
                     },
                     "404": {
                         "description": "No encontrado."
@@ -1609,7 +1675,7 @@
                     "Turnos"
                 ],
                 "summary": "Eliminar turno",
-                "description": "Remove the specified resource from storage.",
+                "description": "Solo se puede eliminar un turno sin reservas activas.",
                 "operationId": "90a5cffdb27234b86eb4ab2e09bd9c44",
                 "parameters": [
                     {
@@ -1631,10 +1697,13 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o la cancha no es de su club."
                     },
                     "404": {
                         "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "El turno tiene reservas activas."
                     }
                 },
                 "security": [
@@ -1691,6 +1760,140 @@
                     },
                     "409": {
                         "description": "El turno tiene reservas activas."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/turnos/generar": {
+            "post": {
+                "tags": [
+                    "Turnos"
+                ],
+                "summary": "Generar turnos en lote",
+                "description": "Crea los turnos de una cancha para un rango de fechas (hasta 90 días), en los días de la semana elegidos y dentro de una franja horaria, cada uno de la duración indicada. No pisa turnos que ya existen ni que se superponen, y no crea turnos que ya empezaron.",
+                "operationId": "a828b0077400a3e8b8a232e69462b16e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "cancha_id",
+                                    "desde",
+                                    "hasta",
+                                    "hora_desde",
+                                    "hora_hasta",
+                                    "duracion"
+                                ],
+                                "properties": {
+                                    "cancha_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "desde": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-12-01"
+                                    },
+                                    "hasta": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-12-31"
+                                    },
+                                    "dias": {
+                                        "description": "0 = domingo ... 6 = sábado. Si no se manda, todos los días.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "maximum": 6,
+                                            "minimum": 0
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3,
+                                            4,
+                                            5
+                                        ]
+                                    },
+                                    "hora_desde": {
+                                        "type": "string",
+                                        "example": "15:00"
+                                    },
+                                    "hora_hasta": {
+                                        "description": "El último turno termina a esta hora o antes",
+                                        "type": "string",
+                                        "example": "23:00"
+                                    },
+                                    "duracion": {
+                                        "description": "Minutos de cada turno",
+                                        "type": "integer",
+                                        "example": 60,
+                                        "enum": [
+                                            30,
+                                            60,
+                                            90,
+                                            120
+                                        ]
+                                    },
+                                    "cupo_maximo": {
+                                        "description": "Jugadores sueltos para el matchmaking. Por defecto, la mitad de la capacidad de la cancha.",
+                                        "type": "integer",
+                                        "example": 5,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Turnos generados.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Se crearon 40 turnos."
+                                        },
+                                        "creados": {
+                                            "type": "integer",
+                                            "example": 40
+                                        },
+                                        "omitidos": {
+                                            "description": "Ya existían, se superponían con otro turno o ya empezaron",
+                                            "type": "integer",
+                                            "example": 2
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o la cancha no es de su club."
+                    },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [

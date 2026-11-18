@@ -86,7 +86,7 @@ class ClubController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Club creado correctamente',
+            'message' => "El club {$club->nombre} se creó correctamente. Ahora agregale fotos y canchas.",
             'club' => $club->fresh(),
         ], 201);
     }
@@ -138,7 +138,7 @@ class ClubController extends Controller
         $club = Club::find($id);
 
         if (! $club) {
-            return $this->respuestaNoEncontrado();
+            return $this->respuestaNoEncontrado($id);
         }
 
         if (! $this->esDueno($request, $club)) {
@@ -148,7 +148,7 @@ class ClubController extends Controller
         $club->update($request->validated());
 
         return response()->json([
-            'message' => 'Club actualizado correctamente',
+            'message' => "Los cambios del club {$club->nombre} se guardaron.",
             'club' => $club->fresh(),
         ], 200);
     }
@@ -176,7 +176,7 @@ class ClubController extends Controller
         $club = Club::find($id);
 
         if (! $club) {
-            return $this->respuestaNoEncontrado();
+            return $this->respuestaNoEncontrado($id);
         }
 
         if (! $this->esDueno($request, $club)) {
@@ -202,7 +202,7 @@ class ClubController extends Controller
         $club->delete();
 
         return response()->json([
-            'message' => 'Club eliminado correctamente',
+            'message' => "El club {$club->nombre} se eliminó.",
         ], 200);
     }
 
@@ -236,7 +236,7 @@ class ClubController extends Controller
         $club = Club::find($id);
 
         if (! $club) {
-            return $this->respuestaNoEncontrado();
+            return $this->respuestaNoEncontrado($id);
         }
 
         if (! $this->esDueno($request, $club)) {
@@ -246,7 +246,7 @@ class ClubController extends Controller
         $this->agregarFoto($club, $request->file('foto'), 'clubs');
 
         return response()->json([
-            'message' => 'Foto subida correctamente',
+            'message' => 'La foto se subió correctamente.',
             'club' => $club->fresh(),
         ], 201);
     }
@@ -273,7 +273,7 @@ class ClubController extends Controller
         $club = Club::find($id);
 
         if (! $club) {
-            return $this->respuestaNoEncontrado();
+            return $this->respuestaNoEncontrado($id);
         }
 
         if (! $this->esDueno($request, $club)) {
@@ -282,12 +282,12 @@ class ClubController extends Controller
 
         if (! $this->quitarFoto($club, $indice, 'clubs')) {
             return response()->json([
-                'message' => 'Foto no encontrada',
+                'message' => "El club no tiene una foto en la posición {$indice} (las fotos se cuentan desde 0).",
             ], 404);
         }
 
         return response()->json([
-            'message' => 'Foto borrada correctamente',
+            'message' => 'La foto se borró.',
             'club' => $club->fresh(),
         ], 200);
     }
@@ -305,10 +305,10 @@ class ClubController extends Controller
         ], 403);
     }
 
-    private function respuestaNoEncontrado()
+    private function respuestaNoEncontrado(string $id)
     {
         return response()->json([
-            'message' => 'Club no encontrado',
+            'message' => "No existe un club con el id {$id}.",
         ], 404);
     }
 }

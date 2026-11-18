@@ -55,7 +55,7 @@ class CrearReservaTest extends TestCase
 
         $this->reservar($turno, ['tipo' => 'completa'])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'El turno ya no está disponible');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'ya está reservado'));
 
         $this->assertSame(1, $turno->reservas()->count());
     }
@@ -67,7 +67,7 @@ class CrearReservaTest extends TestCase
 
         $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 1])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'El turno ya no está disponible');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'ya está reservado'));
     }
 
     public function test_no_deja_reservar_un_turno_bloqueado(): void
@@ -76,7 +76,7 @@ class CrearReservaTest extends TestCase
 
         $this->reservar($turno, ['tipo' => 'completa'])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'El turno ya no está disponible');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'está bloqueado por mantenimiento'));
         $this->reservar($turno, ['tipo' => 'individual'])->assertStatus(409);
 
         $this->assertSame(0, $turno->reservas()->count());
@@ -89,7 +89,7 @@ class CrearReservaTest extends TestCase
 
         $this->reservar($turno, ['tipo' => 'completa'])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'No se puede reservar un turno que ya pasó');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'ya empezó o terminó'));
         $this->reservar($turno, ['tipo' => 'individual'])->assertStatus(409);
 
         $this->assertSame(0, $turno->reservas()->count());
@@ -115,7 +115,7 @@ class CrearReservaTest extends TestCase
 
         $this->reservar($turno, ['tipo' => 'completa'])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'El turno ya tiene jugadores anotados: solo se puede sumar al partido');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'no se puede reservar la cancha entera, pero podés sumarte al partido'));
 
         $turno->refresh();
         $this->assertSame(1, $turno->reservas()->count());
@@ -139,7 +139,7 @@ class CrearReservaTest extends TestCase
         // Con el cupo lleno ya no entra nadie más
         $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 1])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'El turno ya no está disponible');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'ya está reservado'));
     }
 
     public function test_al_completar_el_cupo_se_avisa_a_todos_los_anotados(): void
@@ -165,7 +165,7 @@ class CrearReservaTest extends TestCase
 
         $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 2])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'No hay cupo suficiente en este turno');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Queda 1 lugar'));
 
         $turno->refresh();
         $this->assertSame(4, $turno->cupoActual());
@@ -178,7 +178,7 @@ class CrearReservaTest extends TestCase
 
         $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 6])
             ->assertStatus(409)
-            ->assertJsonPath('message', 'No hay cupo suficiente en este turno');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Quedan 5 lugares'));
 
         $this->assertSame(0, $turno->reservas()->count());
     }
@@ -189,7 +189,7 @@ class CrearReservaTest extends TestCase
         // al 404 "Turno no encontrado" del controlador.
         $this->reservar($this->crearTurno(), ['turno_id' => 999])
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['turno_id' => 'El turno indicado no existe.']);
+            ->assertJsonValidationErrors(['turno_id' => 'No existe el turno que indicaste.']);
     }
 
     public function test_rechaza_un_tipo_invalido(): void
@@ -199,7 +199,7 @@ class CrearReservaTest extends TestCase
         $this->reservar($turno, ['tipo' => 'grupal'])
             ->assertStatus(422)
             ->assertJsonValidationErrors([
-                'tipo' => 'El campo tipo tiene que ser uno de estos valores: completa, individual.',
+                'tipo' => 'El tipo tiene que ser uno de estos valores: completa, individual.',
             ]);
 
         $this->assertSame('disponible', $turno->fresh()->estado);
@@ -212,19 +212,19 @@ class CrearReservaTest extends TestCase
         $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 0])
             ->assertStatus(422)
             ->assertJsonValidationErrors([
-                'cantidad_jugadores' => 'El campo cantidad de jugadores tiene que ser como mínimo 1.',
+                'cantidad_jugadores' => 'La cantidad de jugadores tiene que ser al menos 1.',
             ]);
 
         $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 23])
             ->assertStatus(422)
             ->assertJsonValidationErrors([
-                'cantidad_jugadores' => 'El campo cantidad de jugadores supera el máximo permitido (22).',
+                'cantidad_jugadores' => 'La cantidad de jugadores no puede ser mayor que 22.',
             ]);
 
         $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 'dos'])
             ->assertStatus(422)
             ->assertJsonValidationErrors([
-                'cantidad_jugadores' => 'El campo cantidad de jugadores tiene que ser un número entero.',
+                'cantidad_jugadores' => 'La cantidad de jugadores tiene que ser un número entero.',
             ]);
 
         $this->assertSame(0, $turno->reservas()->count());

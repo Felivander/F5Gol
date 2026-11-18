@@ -78,7 +78,7 @@ class FotosCanchaTest extends TestCase
 
         $this->deleteJson("/api/canchas/{$cancha->id}/fotos/0")
             ->assertNotFound()
-            ->assertJsonPath('message', 'Foto no encontrada');
+            ->assertJsonPath('message', fn ($m) => str_starts_with($m, 'La cancha no tiene una foto en la posición'));
     }
 
     public function test_un_jugador_no_puede_subir_fotos(): void

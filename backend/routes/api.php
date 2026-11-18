@@ -9,9 +9,11 @@ use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\TurnoController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', [AuthController::class, 'register']);
-
-Route::post('/login', [AuthController::class, 'login']);
+// Máximo 10 intentos por minuto por IP: frena a quien prueba contraseñas al azar (429)
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 // Login con Google (Socialite): el navegador entra por redirect y Google vuelve al callback
 Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect']);
@@ -29,8 +31,6 @@ Route::middleware('auth:sanctum')->get('canchas/eliminadas', [CanchaController::
 Route::apiResource('clubs', ClubController::class)->only(['index', 'show']);
 Route::apiResource('canchas', CanchaController::class)->only(['index', 'show']);
 Route::apiResource('turnos', TurnoController::class)->only(['index', 'show']);
-Route::apiResource('reservas', ReservaController::class)->only(['index', 'show']);
-Route::apiResource('jugador-anotados', JugadorAnotadoController::class)->only(['index', 'show']);
 
 // Rutas protegidas (escritura)
 Route::middleware('auth:sanctum')->group(function () {
@@ -43,10 +43,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('canchas/{id}/fotos', [CanchaController::class, 'subirFoto']);
         Route::put('canchas/{id}/restore', [CanchaController::class, 'restore']);
         Route::delete('canchas/{id}/fotos/{indice}', [CanchaController::class, 'borrarFoto'])->whereNumber('indice');
+        Route::post('turnos/generar', [TurnoController::class, 'generar']);
         Route::apiResource('turnos', TurnoController::class)->except(['index', 'show']);
         Route::patch('turnos/{id}/bloqueo', [TurnoController::class, 'bloqueo']);
     });
 
-    Route::apiResource('reservas', ReservaController::class)->except(['index', 'show']);
-    Route::apiResource('jugador-anotados', JugadorAnotadoController::class)->except(['index', 'show']);
+    // Las reservas y los jugadores anotados tienen nombres y mails: solo con sesión,
+    // y cada uno ve lo suyo (o lo de sus clubes, si es administrador)
+    Route::apiResource('reservas', ReservaController::class);
+    Route::apiResource('jugador-anotados', JugadorAnotadoController::class);
 });
