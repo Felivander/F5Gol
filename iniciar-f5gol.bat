@@ -30,8 +30,11 @@ if errorlevel 1 (
     if errorlevel 1 (
         echo Iniciando n8n...
         start "F5Gol n8n" /min cmd /k "n8n start"
+        rem Espera a que n8n escuche en el 5678 (hasta 2 minutos) y lo abre en el navegador
+        start "" /min powershell -NoProfile -Command "for ($i = 0; $i -lt 60; $i++) { try { (New-Object Net.Sockets.TcpClient('localhost', 5678)).Close(); Start-Process 'http://localhost:5678'; break } catch { Start-Sleep 2 } }"
     ) else (
         echo n8n ya esta corriendo.
+        start "" http://localhost:5678
     )
 )
 
@@ -41,6 +44,7 @@ start "F5Gol Front" cmd /k "cd /d %~dp0frontend && ng serve --open"
 
 echo.
 echo Listo. Se abrieron las ventanas del Back, el Front y n8n (si esta instalado).
+echo n8n se abre en otra pestania del navegador cuando termina de arrancar.
 echo El navegador se abre solo cuando Angular termina de compilar.
 echo Para cerrar todo, cerra esas ventanas (MySQL se apaga desde el panel de XAMPP).
 timeout /t 8 >nul
