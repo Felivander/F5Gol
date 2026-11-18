@@ -40,20 +40,19 @@
     [compacto]="true"
     [seleccionable]="true"
     [miEquipo]="partido().mi_equipo ?? null"
-    [ocupado]="sumando()"
-    (elegir)="sumarseEn($event)" />
+    (elegir)="abrirModal($event)" />
 
   <p class="ayuda partido-ayuda">
     {{ partido().estoy_anotado ? 'Tocá un lugar libre para sumar a un amigo.' : 'Tocá un lugar libre para sumarte a ese equipo.' }}
   </p>
 
-  @if (error()) {
-    <p class="alerta alerta-error" role="alert">{{ error() }}</p>
-  }
-
   <div class="partido-pie">
     <span class="precio">{{ precio() }} <small>por jugador</small></span>
     @if (partido().estoy_anotado) {
+      <button type="button" class="btn btn-fantasma btn-sm" (click)="abrirModal()">
+        <app-icono nombre="mas" [tamano]="16" />
+        Sumar amigos
+      </button>
       <a class="btn btn-primary btn-sm" [routerLink]="['/partidos', partido().turno_id]">
         Ver mi partido
         <app-icono nombre="flecha" [tamano]="16" />
@@ -66,3 +65,5 @@
     }
   </div>
 </article>
+
+<app-modal-sumarse [partido]="modal()" [equipoInicial]="equipoModal()" (cerrado)="modal.set(null)" (sumado)="alSumarse()" />

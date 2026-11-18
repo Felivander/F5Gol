@@ -2,22 +2,21 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { Router, RouterLink } from '@angular/router';
 import { fechaRelativa, partesFecha, pesos } from '../../formato';
 import { Equipo, PartidoAbierto, textoSuperficie } from '../../models';
-import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 import { CanchaLugares, LugarPartido } from '../cancha-lugares/cancha-lugares';
+import { ModalSumarse, PartidoParaSumarse } from '../modal-sumarse/modal-sumarse';
 import { Icono } from '../icono/icono';
 
 // Tarjeta de un partido de matchmaking que se está armando (lobby e inicio).
-// Muestra la cancha con los lugares de cada equipo: tocando uno libre, el jugador se suma ahí.
+// Muestra la cancha con los lugares de cada equipo: tocando uno libre se abre el modal para sumarse ahí.
 @Component({
   selector: 'app-tarjeta-partido',
-  imports: [RouterLink, Icono, CanchaLugares],
+  imports: [RouterLink, Icono, CanchaLugares, ModalSumarse],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './tarjeta-partido.html',
   styleUrl: './tarjeta-partido.css'
 })
 export class TarjetaPartido {
-  private api = inject(Api);
   private router = inject(Router);
   protected auth = inject(Auth);
 
@@ -33,8 +32,9 @@ export class TarjetaPartido {
   protected equipoA = computed(() => this.lugares('A'));
   protected equipoB = computed(() => this.lugares('B'));
 
-  sumando = signal(false);
-  error = signal('');
+  // Datos para el modal de sumarse (null = cerrado) y el equipo que se tocó
+  modal = signal<PartidoParaSumarse | null>(null);
+  equipoModal = signal<Equipo>('A');
 
   private lugares(equipo: Equipo): LugarPartido[] {
     const p = this.partido();
@@ -49,27 +49,30 @@ export class TarjetaPartido {
     });
   }
 
-  // Tocar un lugar libre: si ya está anotado, suma un amigo; si no, se suma él
-  sumarseEn(equipo: Equipo) {
-    const usuario = this.auth.usuario();
-    if (!usuario) {
+  // Tocar un lugar libre (o "Sumar amigos"): abre el modal con ese equipo elegido
+  abrirModal(equipo?: Equipo) {
+    if (!this.auth.usuario()) {
       this.router.navigate(['/login']);
       return;
     }
     const p = this.partido();
-    const quien = p.estoy_anotado ? 'un amigo' : 'vos';
-    if (!confirm(`¿Sumar a ${quien} al Equipo ${equipo} del partido de ${this.cuando().toLowerCase()} a las ${p.hora_inicio}? Son ${this.precio()} en el club.`)) {
-      return;
-    }
-    this.sumando.set(true);
-    this.error.set('');
-    this.api.crearReserva({ turno_id: p.turno_id, usuario_id: usuario.id, tipo: 'individual', equipo, cantidad_jugadores: 1 }).subscribe({
-      next: () => this.router.navigate(['/partidos', p.turno_id]),
-      error: err => {
-        // 409: el lugar se ocupó mientras tanto o el partido ya empezó
-        this.error.set(err.error?.message ?? 'No se pudo sumar al partido.');
-        this.sumando.set(false);
-      }
+    this.equipoModal.set(equipo ?? p.mi_equipo ?? (p.equipos.B.faltan > p.equipos.A.faltan ? 'B' : 'A'));
+    this.modal.set({
+      turnoId: p.turno_id,
+      canchaId: p.cancha.id,
+      fecha: p.fecha,
+      cuando: this.cuando(),
+      horaInicio: p.hora_inicio,
+      equipos: p.equipos,
+      precioPorJugador: p.precio_por_jugador,
+      yaAnotado: p.estoy_anotado
     });
+  }
+
+  // Después de reservar se va a la sala del partido
+  alSumarse() {
+    const id = this.partido().turno_id;
+    this.modal.set(null);
+    this.router.navigate(['/partidos', id]);
   }
 }

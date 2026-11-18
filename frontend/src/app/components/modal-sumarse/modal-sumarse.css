@@ -1,0 +1,233 @@
+.hoja {
+  width: min(440px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-grande);
+  background: var(--superficie);
+  color: var(--tinta);
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.3);
+}
+
+.hoja:focus {
+  outline: none;
+}
+
+.hoja::backdrop {
+  background: rgb(21 23 26 / 0.55);
+}
+
+/* En el celular sale desde abajo, pegado al borde */
+@media (max-width: 560px) {
+  .hoja {
+    width: 100%;
+    max-width: 100%;
+    margin: auto 0 0;
+    border-radius: var(--r-grande) var(--r-grande) 0 0;
+  }
+}
+
+.modal-caja {
+  display: grid;
+  gap: 18px;
+  padding: 22px 20px 20px;
+}
+
+.modal-cabeza {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-cabeza h2 {
+  font-size: 1.6rem;
+}
+
+.modal-sub {
+  margin-top: 2px;
+  color: var(--tinta-2);
+  font-weight: 600;
+}
+
+.modal-cerrar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--papel);
+  color: var(--tinta-2);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-cerrar:hover {
+  background: var(--papel-hundido);
+  color: var(--tinta);
+}
+
+.modal-bloque {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.modal-bloque legend {
+  float: none;
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.modal-equipos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.modal-equipo {
+  display: grid;
+  gap: 2px;
+  min-height: 56px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--r-chico);
+  background: var(--superficie);
+  box-shadow: inset 0 0 0 1px var(--linea-fuerte);
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition-property: background-color, color, box-shadow, scale;
+  transition-duration: 150ms;
+}
+
+.modal-equipo span {
+  color: var(--tinta-3);
+  font-size: 0.82rem;
+}
+
+.modal-equipo:active:not(:disabled) {
+  scale: 0.96;
+}
+
+.modal-equipo.activo {
+  background: var(--tinta);
+  box-shadow: none;
+  color: #fff;
+}
+
+.modal-equipo.activo span {
+  color: var(--lima);
+}
+
+.modal-equipo:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.modal-equipo:focus-visible,
+.modal-paso:focus-visible,
+.modal-cerrar:focus-visible {
+  outline: 2px solid var(--cancha);
+  outline-offset: 2px;
+}
+
+/* Contador − 1 + */
+.modal-contador {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--papel);
+  box-shadow: inset 0 0 0 1px var(--linea);
+}
+
+.modal-paso {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+  color: var(--tinta);
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition-property: scale, opacity;
+  transition-duration: 150ms;
+}
+
+.modal-paso:active:not(:disabled) {
+  scale: 0.92;
+}
+
+.modal-paso:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.modal-cantidad {
+  min-width: 48px;
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-stretch: 75%;
+  text-align: center;
+}
+
+.modal-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-chico);
+  background: var(--cancha-suave);
+  color: var(--cancha-oscura);
+  font-weight: 600;
+}
+
+.modal-total strong {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+
+.modal-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modal-acciones .btn-primary {
+  flex: 1;
+}
+
+.modal-caja .alerta {
+  margin: 0;
+}
+
+.modal-invitar {
+  display: grid;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--linea-fuerte);
+  color: var(--tinta-2);
+  font-size: 0.9rem;
+}
+
+.modal-invitar .btn {
+  justify-self: start;
+}

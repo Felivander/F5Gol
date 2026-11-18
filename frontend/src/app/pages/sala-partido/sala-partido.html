@@ -23,7 +23,15 @@
       <div class="cabecera-cuenta" aria-live="polite">
         <span class="cabecera-numero num">{{ s.anotados }}<small>/{{ s.cupo_maximo }}</small></span>
         <span class="cabecera-estado" [class.listo]="s.estado === 'completo'">
-          @switch (s.estado) {
+          @if (aviso()) {
+      <p class="alerta alerta-ok" role="status">
+        <app-icono nombre="ok" [tamano]="20" />
+        {{ aviso() }}
+        <button type="button" class="cerrar" aria-label="Cerrar aviso" (click)="aviso.set('')">×</button>
+      </p>
+    }
+
+    @switch (s.estado) {
             @case ('completo') { Partido completo }
             @case ('ya_empezo') { Ya empezó }
             @default { {{ s.faltan === 1 ? 'Falta 1 jugador' : 'Faltan ' + s.faltan + ' jugadores' }} }
@@ -63,8 +71,7 @@
         [equipoB]="equipoB()"
         [miEquipo]="s.mi_reserva?.equipo ?? null"
         [seleccionable]="!!s.mi_reserva && s.estado === 'armandose'"
-        [ocupado]="sumando()"
-        (elegir)="sumarAmigo($event)" />
+        (elegir)="abrirModal($event)" />
 
       <div class="planteles">
         @for (plantel of planteles(); track plantel.letra) {
@@ -109,9 +116,9 @@
         </p>
         <div class="mia-acciones">
           @if (s.estado === 'armandose') {
-            <button type="button" class="btn btn-lima" (click)="copiarInvitacion()">
+            <button type="button" class="btn btn-lima" (click)="abrirModal()">
               <app-icono nombre="jugadores" [tamano]="16" />
-              {{ copiado() ? 'Link copiado' : 'Invitar a alguien' }}
+              Sumar amigos
             </button>
           }
           @if (mia.puede_cancelar && s.estado !== 'ya_empezo') {
@@ -175,3 +182,5 @@
     </div>
   }
 </div>
+
+<app-modal-sumarse [partido]="modal()" [equipoInicial]="equipoModal()" (cerrado)="modal.set(null)" (sumado)="alSumar($event)" />
