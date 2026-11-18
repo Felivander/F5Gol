@@ -3,7 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { CanchaLugares, LugarPartido } from '../../components/cancha-lugares/cancha-lugares';
 import { Icono } from '../../components/icono/icono';
 import { fechaRelativa, partesFecha, pesos, textoTipo } from '../../formato';
-import { SalaPartido as Sala, textoSuperficie } from '../../models';
+import { Equipo, SalaPartido as Sala, textoSuperficie } from '../../models';
 import { Api } from '../../services/api';
 
 const REFRESCO_MS = 15_000;
@@ -37,23 +37,45 @@ export class SalaPartido implements OnInit {
     return s ? { ...partesFecha(s.fecha), relativa: fechaRelativa(s.fecha) } : null;
   });
 
-  // Un casillero por lugar: primero cada jugador, después sus amigos, después los libres
-  protected lugares = computed<LugarPartido[]>(() => {
+  // Lugares de cada equipo: primero cada jugador, después sus amigos, después los libres
+  protected equipoA = computed(() => this.lugaresDe('A'));
+  protected equipoB = computed(() => this.lugaresDe('B'));
+
+  private lugaresDe(equipo: Equipo): LugarPartido[] {
     const s = this.sala();
     if (!s) {
       return [];
     }
     const lista: LugarPartido[] = [];
-    for (const j of s.jugadores) {
+    for (const j of s.jugadores.filter(j => j.equipo === equipo)) {
       lista.push({ nombre: j.nombre, soyYo: j.soy_yo, amigo: false });
       for (let i = 1; i < j.cantidad; i++) {
-        lista.push({ nombre: `Amigo de ${j.soy_yo ? 'vos' : j.nombre}`, soyYo: j.soy_yo, amigo: true });
+        // En la cancha la etiqueta tiene que ser corta: "de Martín"
+        lista.push({ nombre: `de ${j.soy_yo ? 'vos' : j.nombre.split(' ')[0]}`, soyYo: j.soy_yo, amigo: true });
       }
     }
-    while (lista.length < s.cupo_maximo) {
+    while (lista.length < s.equipos[equipo].cupo) {
       lista.push({ nombre: null, soyYo: false, amigo: false });
     }
     return lista;
+  }
+
+  // Lista de cada equipo debajo de la cancha: una línea por reserva y cuántos lugares quedan
+  protected planteles = computed(() => {
+    const s = this.sala();
+    if (!s) {
+      return [];
+    }
+    return (['A', 'B'] as Equipo[]).map(letra => ({
+      letra,
+      libres: s.equipos[letra].faltan,
+      lineas: s.jugadores.filter(j => j.equipo === letra).map(j => ({
+        yo: j.soy_yo,
+        texto: (j.soy_yo ? 'Vos' : j.nombre) + (j.tipo === 'equipo'
+          ? ` · equipo completo (${j.cantidad})`
+          : j.cantidad > 1 ? ` + ${j.cantidad - 1} ${j.cantidad === 2 ? 'amigo' : 'amigos'}` : '')
+      }))
+    }));
   });
 
   // "20/11 a las 18:00", para avisar hasta cuándo se puede cancelar

@@ -3,6 +3,7 @@
   grid-template-columns: auto 1fr auto;
   grid-template-areas:
     'fecha info cupo'
+    'equipos equipos equipos'
     'pie pie pie';
   gap: 16px;
   height: 100%;
@@ -10,6 +11,11 @@
   background: var(--superficie);
   border-radius: var(--r);
   box-shadow: var(--sombra-1);
+}
+
+/* Un partido en el que ya estoy anotado */
+.partido.mio {
+  box-shadow: 0 0 0 2px var(--cancha), var(--sombra-1);
 }
 
 /* El que está a un jugador de completarse se destaca */
@@ -109,6 +115,7 @@
     grid-template-areas:
       'fecha info'
       'cupo cupo'
+      'equipos equipos'
       'pie pie';
   }
 
@@ -120,7 +127,47 @@
     text-align: left;
   }
 
-  .partido-cupo .pips {
-    justify-self: end;
-  }
+}
+
+.partido-equipos {
+  grid-area: equipos;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.partido-equipo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.partido-equipo-letra {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--tinta);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.partido-equipo.lleno .partido-equipo-letra {
+  background: var(--cancha);
+}
+
+.partido-equipo.lleno .partido-equipo-texto {
+  color: var(--cancha);
+}
+
+.partido-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
 }

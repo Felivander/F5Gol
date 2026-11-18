@@ -145,7 +145,8 @@
   grid-template-columns: 76px 1fr;
   grid-template-areas:
     'hora estado'
-    'acciones acciones';
+    'acciones acciones'
+    'opciones opciones';
   align-items: center;
   gap: 12px 16px;
   padding: 14px 16px;
@@ -157,7 +158,9 @@
 @media (min-width: 768px) {
   .turno {
     grid-template-columns: 96px 1fr auto;
-    grid-template-areas: 'hora estado acciones';
+    grid-template-areas:
+      'hora estado acciones'
+      'opciones opciones opciones';
   }
 }
 
@@ -239,4 +242,174 @@
   min-height: 36px;
   padding: 4px 8px;
   text-align: center;
+}
+
+/* Lugares de cada equipo en la fila del turno */
+.turno-equipos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+
+.turno-equipo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.turno-equipo-letra {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--tinta);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.turno-equipo.lleno .turno-equipo-letra {
+  background: var(--cancha);
+}
+
+.turno-equipo.lleno .turno-equipo-texto {
+  color: var(--cancha);
+}
+
+/* Panel con las tres formas de entrar */
+.opciones-turno {
+  grid-area: opciones;
+  display: grid;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--linea-fuerte);
+}
+
+.opciones-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.opciones-lista legend {
+  grid-column: 1 / -1;
+  float: none;
+  margin-bottom: 4px;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.opcion-turno {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 12px 14px 12px 42px;
+  border-radius: var(--r-chico);
+  box-shadow: inset 0 0 0 1px var(--linea-fuerte);
+  cursor: pointer;
+  transition-property: background-color, box-shadow;
+  transition-duration: 150ms;
+}
+
+.opcion-turno input {
+  position: absolute;
+  left: 14px;
+  top: 15px;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--cancha);
+}
+
+.opcion-turno:has(input:checked) {
+  background: var(--cancha-suave);
+  box-shadow: inset 0 0 0 2px var(--cancha);
+}
+
+.opcion-turno.deshabilitada {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.opcion-titulo {
+  font-weight: 800;
+}
+
+.opcion-texto {
+  color: var(--tinta-2);
+  font-size: 0.86rem;
+}
+
+.opcion-precio {
+  margin-top: 2px;
+  font-weight: 800;
+  font-stretch: 75%;
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.opciones-equipo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.equipo-boton {
+  display: grid;
+  min-width: 120px;
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: var(--r-chico);
+  background: var(--superficie);
+  box-shadow: inset 0 0 0 1px var(--linea-fuerte);
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition-property: background-color, color, box-shadow, scale;
+  transition-duration: 150ms;
+}
+
+.equipo-boton span {
+  color: var(--tinta-3);
+  font-size: 0.8rem;
+}
+
+.equipo-boton:active:not(:disabled) {
+  scale: 0.96;
+}
+
+.equipo-boton.activo {
+  background: var(--tinta);
+  box-shadow: none;
+  color: #fff;
+}
+
+.equipo-boton.activo span {
+  color: var(--lima);
+}
+
+.equipo-boton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.equipo-boton:focus-visible {
+  outline: 2px solid var(--cancha);
+  outline-offset: 2px;
+}
+
+.opciones-confirmar {
+  justify-self: start;
 }

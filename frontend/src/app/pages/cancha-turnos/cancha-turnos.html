@@ -144,14 +144,19 @@
               }
 
               @if (turno.estado !== 'bloqueado' && turno.cupo_actual > 0) {
-                <span class="turno-cupo">
-                  <span class="pips" role="img" [attr.aria-label]="turno.cupo_actual + ' de ' + turno.cupo_maximo + ' jugadores'">
-                    @for (lleno of lugares(turno); track $index) {
-                      <span class="pip" [class.lleno]="lleno"></span>
-                    }
-                  </span>
-                  @if (turno.estado === 'disponible') {
-                    <span class="num">faltan {{ lugaresLibres(turno) }}</span>
+                @let e = equipos(turno);
+                <span class="turno-equipos">
+                  @for (letra of ['A', 'B']; track letra) {
+                    @let cupo = letra === 'A' ? e.A : e.B;
+                    <span class="turno-equipo" [class.lleno]="cupo.faltan === 0">
+                      <span class="turno-equipo-letra">{{ letra }}</span>
+                      <span class="pips" role="img" [attr.aria-label]="'Equipo ' + letra + ': ' + cupo.anotados + ' de ' + cupo.cupo">
+                        @for (lleno of puntos(cupo); track $index) {
+                          <span class="pip" [class.lleno]="lleno"></span>
+                        }
+                      </span>
+                      <span class="turno-equipo-texto">{{ cupo.faltan === 0 ? 'completo' : 'faltan ' + cupo.faltan }}</span>
+                    </span>
                   }
                 </span>
               }
@@ -163,26 +168,11 @@
                   <button type="button" class="btn btn-primary btn-sm" (click)="moverAca(turno)" [disabled]="reservando() !== null">Mover acá</button>
                 }
               } @else if (!yaPaso(turno)) {
-                @if (puedeReservar(turno)) {
-                  <button type="button" class="btn btn-primary btn-sm" (click)="reservar(turno)" [disabled]="reservando() === turno.id">
-                    {{ reservando() === turno.id ? 'Reservando…' : 'Reservar cancha' }}
+                @if (turno.estado === 'disponible') {
+                  <button type="button" class="btn btn-sm" [class.btn-lima]="abierto() !== turno.id" [class.btn-outline-primary]="abierto() === turno.id"
+                    [attr.aria-expanded]="abierto() === turno.id" [attr.aria-controls]="'opciones-' + turno.id" (click)="abrirOpciones(turno)">
+                    {{ abierto() === turno.id ? 'Cerrar' : (turno.cupo_actual > 0 ? 'Sumarme' : 'Reservar') }}
                   </button>
-                }
-                @if (turno.estado === 'disponible' && lugaresLibres(turno) > 0) {
-                  <span class="sumarme">
-                    <label class="visually-hidden" [for]="'cantidad-' + turno.id">Cantidad de jugadores</label>
-                    <input
-                      class="control cantidad"
-                      type="number"
-                      min="1"
-                      [id]="'cantidad-' + turno.id"
-                      [max]="lugaresLibres(turno)"
-                      [ngModel]="cantidad(turno)"
-                      (ngModelChange)="cambiarCantidad(turno, $event)">
-                    <button type="button" class="btn btn-lima btn-sm" (click)="anotarme(turno)" [disabled]="reservando() === turno.id">
-                      {{ cantidad(turno) === 1 ? 'Sumarme' : 'Sumarnos' }}
-                    </button>
-                  </span>
                 }
                 @if (esDueno() && (turno.estado === 'bloqueado' || puedeReservar(turno))) {
                   <button type="button" class="btn btn-fantasma btn-sm" (click)="cambiarBloqueo(turno)" [disabled]="reservando() === turno.id">
@@ -197,6 +187,74 @@
                 }
               }
             </div>
+
+            @if (abierto() === turno.id) {
+              <div class="opciones-turno" [id]="'opciones-' + turno.id">
+                <fieldset class="opciones-lista">
+                  <legend>¿Cómo querés jugar?</legend>
+
+                  <label class="opcion-turno" [class.deshabilitada]="!opcionDisponible(turno, 'lugar')">
+                    <input type="radio" [name]="'opcion-' + turno.id" [checked]="opcion() === 'lugar'"
+                      [disabled]="!opcionDisponible(turno, 'lugar')" (change)="elegirOpcion(turno, 'lugar')">
+                    <span class="opcion-titulo">Un lugar</span>
+                    <span class="opcion-texto">Te sumás solo y esperás a que se llene la cancha.</span>
+                    <span class="opcion-precio">{{ precioOpcion(turno, 'lugar') }}</span>
+                  </label>
+
+                  <label class="opcion-turno" [class.deshabilitada]="!opcionDisponible(turno, 'equipo')">
+                    <input type="radio" [name]="'opcion-' + turno.id" [checked]="opcion() === 'equipo'"
+                      [disabled]="!opcionDisponible(turno, 'equipo')" (change)="elegirOpcion(turno, 'equipo')">
+                    <span class="opcion-titulo">Un equipo completo</span>
+                    <span class="opcion-texto">
+                      @if (opcionDisponible(turno, 'equipo')) {
+                        Vos y {{ equipos(turno)[equiposVacios(turno)[0]].cupo - 1 }} amigos. El otro equipo lo completan otros.
+                      } @else {
+                        Los dos equipos ya tienen jugadores.
+                      }
+                    </span>
+                    <span class="opcion-precio">{{ precioOpcion(turno, 'equipo') }}</span>
+                  </label>
+
+                  <label class="opcion-turno" [class.deshabilitada]="!opcionDisponible(turno, 'cancha')">
+                    <input type="radio" [name]="'opcion-' + turno.id" [checked]="opcion() === 'cancha'"
+                      [disabled]="!opcionDisponible(turno, 'cancha')" (change)="elegirOpcion(turno, 'cancha')">
+                    <span class="opcion-titulo">La cancha entera</span>
+                    <span class="opcion-texto">
+                      {{ opcionDisponible(turno, 'cancha') ? 'Los ' + turno.cupo_maximo + ' lugares para tu grupo.' : 'Ya hay jugadores anotados en este turno.' }}
+                    </span>
+                    <span class="opcion-precio">{{ precioOpcion(turno, 'cancha') }}</span>
+                  </label>
+                </fieldset>
+
+                @if (opcion() !== 'cancha') {
+                  <div class="opciones-equipo" role="group" aria-label="Elegir equipo">
+                    <span class="etiqueta">Equipo</span>
+                    @for (letra of ['A', 'B']; track letra) {
+                      @let cupo = letra === 'A' ? equipos(turno).A : equipos(turno).B;
+                      <button type="button" class="equipo-boton" [class.activo]="equipoElegido() === letra"
+                        [attr.aria-pressed]="equipoElegido() === letra"
+                        [disabled]="!equipoDisponible(turno, $any(letra))" (click)="equipoElegido.set($any(letra))">
+                        <strong>Equipo {{ letra }}</strong>
+                        <span>{{ cupo.anotados === 0 ? 'vacío' : cupo.faltan === 0 ? 'completo' : 'faltan ' + cupo.faltan }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+
+                <button type="button" class="btn btn-primary opciones-confirmar" (click)="confirmar(turno)"
+                  [disabled]="reservando() === turno.id || !opcionDisponible(turno, opcion())">
+                  @if (reservando() === turno.id) {
+                    Reservando…
+                  } @else {
+                    @switch (opcion()) {
+                      @case ('lugar') { Sumarme al Equipo {{ equipoElegido() }} }
+                      @case ('equipo') { Reservar el Equipo {{ equipoElegido() }} }
+                      @case ('cancha') { Reservar la cancha entera }
+                    }
+                  }
+                </button>
+              </div>
+            }
           </li>
         } @empty {
           <li class="vacio">

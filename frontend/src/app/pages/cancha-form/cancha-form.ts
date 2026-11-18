@@ -9,7 +9,7 @@ import { Auth } from '../../services/auth';
 import { noSoloEspacios } from '../../validadores';
 
 // Capacidad sugerida según el tipo de cancha (dos equipos completos)
-const CAPACIDAD_POR_TIPO: Record<string, number> = { futbol5: 10, futbol7: 14, futbol11: 22 };
+const CAPACIDAD_POR_TIPO: Record<string, number> = { futbol5: 10, futbol6: 12, futbol7: 14, futbol8: 16, futbol9: 18, futbol11: 22 };
 
 type Campo = 'nombre' | 'capacidad_jugadores' | 'superficie' | 'tarifa' | 'descripcion';
 

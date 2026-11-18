@@ -55,7 +55,25 @@
         </p>
       </div>
 
-      <app-cancha-lugares class="cupo-campo" [lugares]="lugares()" [faltan]="s.faltan" />
+      <app-cancha-lugares class="cupo-campo" [equipoA]="equipoA()" [equipoB]="equipoB()" />
+
+      <div class="planteles">
+        @for (plantel of planteles(); track plantel.letra) {
+          <div class="plantel">
+            <h3>Equipo {{ plantel.letra }}</h3>
+            <ul>
+              @for (linea of plantel.lineas; track $index) {
+                <li [class.yo]="linea.yo">{{ linea.texto }}</li>
+              }
+              @if (plantel.libres > 0) {
+                <li class="libre">{{ plantel.libres === 1 ? '1 lugar libre' : plantel.libres + ' lugares libres' }}</li>
+              } @else {
+                <li class="completo">Equipo completo</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
 
       @if (s.estado === 'armandose') {
         <p class="ayuda">Se actualiza solo. Cuando se completen los {{ s.cupo_maximo }} lugares, la cancha queda reservada y les llega un mail a todos.</p>
@@ -66,7 +84,11 @@
       <section class="tarjeta mia" aria-labelledby="titulo-mia">
         <h2 id="titulo-mia">Tu lugar</h2>
         <p>
-          Te anotaste {{ mia.cantidad_jugadores === 1 ? 'solo' : 'con ' + (mia.cantidad_jugadores - 1) + (mia.cantidad_jugadores === 2 ? ' amigo' : ' amigos') }}.
+          @if (mia.tipo === 'equipo') {
+            Reservaste el <strong>Equipo {{ mia.equipo }}</strong> entero ({{ mia.cantidad_jugadores }} lugares) para vos y tus amigos.
+          } @else {
+            Jugás en el <strong>Equipo {{ mia.equipo }}</strong>{{ mia.cantidad_jugadores === 1 ? '' : ', con ' + (mia.cantidad_jugadores - 1) + (mia.cantidad_jugadores === 2 ? ' amigo' : ' amigos') }}.
+          }
           Pagás <strong>{{ pesos(s.precio_por_jugador * mia.cantidad_jugadores) }}</strong> en el club.
         </p>
         <div class="mia-acciones">

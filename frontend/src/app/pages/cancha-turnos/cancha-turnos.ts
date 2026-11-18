@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Cancha, Turno } from '../../models';
+import { Cancha, CupoEquipo, Equipo, Equipos, NuevaReserva, Turno } from '../../models';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 
@@ -11,6 +11,9 @@ import { fechaRelativa, partesFecha, pesos, textoTipo } from '../../formato';
 import { textoSuperficie } from '../../models';
 
 const REFRESCO_MS = 15_000;
+
+// Formas de entrar a un turno: un lugar suelto, un equipo entero o la cancha entera
+type Opcion = 'lugar' | 'equipo' | 'cancha';
 
 // Fecha de hoy en formato AAAA-MM-DD, en la zona horaria del usuario
 function hoy(): string {
@@ -136,26 +139,113 @@ export class CanchaTurnos implements OnInit {
     this.buscarTurnos();
   }
 
-  // Un punto por lugar del partido: lleno si ya está ocupado
-  lugares(turno: Turno) {
-    return Array.from({ length: turno.cupo_maximo }, (_, i) => i < turno.cupo_actual);
+  // ---------- Equipos y formas de entrar al partido ----------
+
+  // Lugares de cada equipo (si la API no los manda, se reparte el cupo en dos)
+  equipos(turno: Turno): Equipos {
+    if (turno.equipos) {
+      return turno.equipos;
+    }
+    const a = Math.ceil(turno.cupo_maximo / 2);
+    return {
+      A: { cupo: a, anotados: 0, faltan: a },
+      B: { cupo: turno.cupo_maximo - a, anotados: 0, faltan: turno.cupo_maximo - a }
+    };
   }
 
-  // Lugares libres para sumarse al partido por matchmaking
+  // Un punto por lugar del equipo: lleno si ya está ocupado
+  puntos(cupo: CupoEquipo) {
+    return Array.from({ length: cupo.cupo }, (_, i) => i < cupo.anotados);
+  }
+
+  // Lugares libres sumando los dos equipos
   lugaresLibres(turno: Turno) {
     return turno.cupo_maximo - turno.cupo_actual;
   }
 
-  // Cuántos jugadores anota cada uno al sumarse (por turno, arranca en 1)
-  private cantidades = signal<Record<number, number>>({});
-
-  cantidad(turno: Turno) {
-    return this.cantidades()[turno.id] ?? 1;
+  // Equipos que se pueden reservar enteros (los que no tienen a nadie)
+  equiposVacios(turno: Turno): Equipo[] {
+    const e = this.equipos(turno);
+    return (['A', 'B'] as Equipo[]).filter(x => e[x].anotados === 0);
   }
 
-  cambiarCantidad(turno: Turno, valor: number) {
-    const acotado = Math.min(Math.max(1, Number(valor) || 1), this.lugaresLibres(turno));
-    this.cantidades.update(c => ({ ...c, [turno.id]: acotado }));
+  // Equipo con más lugares libres (si empatan, el A)
+  private equipoSugerido(turno: Turno): Equipo {
+    const e = this.equipos(turno);
+    return e.B.faltan > e.A.faltan ? 'B' : 'A';
+  }
+
+  // Panel de opciones abierto (uno por vez) y lo que el jugador va eligiendo
+  abierto = signal<number | null>(null);
+  opcion = signal<Opcion>('lugar');
+  equipoElegido = signal<Equipo>('A');
+
+  abrirOpciones(turno: Turno) {
+    if (!this.auth.usuario()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    if (this.abierto() === turno.id) {
+      this.abierto.set(null);
+      return;
+    }
+    this.abierto.set(turno.id);
+    this.opcion.set('lugar');
+    this.equipoElegido.set(this.equipoSugerido(turno));
+    this.error.set('');
+  }
+
+  elegirOpcion(turno: Turno, opcion: Opcion) {
+    this.opcion.set(opcion);
+    if (opcion === 'equipo') {
+      const vacios = this.equiposVacios(turno);
+      if (!vacios.includes(this.equipoElegido())) {
+        this.equipoElegido.set(vacios[0] ?? 'A');
+      }
+    } else if (opcion === 'lugar' && this.equipos(turno)[this.equipoElegido()].faltan === 0) {
+      this.equipoElegido.set(this.equipoSugerido(turno));
+    }
+  }
+
+  // Si la opción elegida se puede usar en ese turno
+  opcionDisponible(turno: Turno, opcion: Opcion): boolean {
+    switch (opcion) {
+      case 'lugar':
+        return this.lugaresLibres(turno) > 0;
+      case 'equipo':
+        return this.equiposVacios(turno).length > 0;
+      case 'cancha':
+        return turno.cupo_actual === 0;
+    }
+  }
+
+  // Si el equipo se puede elegir para la opción actual
+  equipoDisponible(turno: Turno, equipo: Equipo): boolean {
+    const e = this.equipos(turno)[equipo];
+    return this.opcion() === 'equipo' ? e.anotados === 0 : e.faltan > 0;
+  }
+
+  precioOpcion(turno: Turno, opcion: Opcion): string {
+    const tarifa = Number(this.cancha()?.tarifa ?? 0);
+    switch (opcion) {
+      case 'lugar':
+        return pesos(tarifa / Math.max(1, turno.cupo_maximo));
+      case 'equipo':
+        return pesos(tarifa / 2);
+      case 'cancha':
+        return pesos(tarifa);
+    }
+  }
+
+  confirmar(turno: Turno) {
+    const opcion = this.opcion();
+    if (!this.opcionDisponible(turno, opcion)) {
+      return;
+    }
+    const datos: Pick<NuevaReserva, 'tipo' | 'equipo'> = opcion === 'cancha'
+      ? { tipo: 'completa' }
+      : { tipo: opcion === 'equipo' ? 'equipo' : 'individual', equipo: this.equipoElegido() };
+    this.enviarReserva(turno, datos);
   }
 
   moverAca(turno: Turno) {
@@ -172,15 +262,7 @@ export class CanchaTurnos implements OnInit {
     });
   }
 
-  reservar(turno: Turno) {
-    this.enviarReserva(turno, 'completa');
-  }
-
-  anotarme(turno: Turno) {
-    this.enviarReserva(turno, 'individual', this.cantidad(turno));
-  }
-
-  private enviarReserva(turno: Turno, tipo: 'completa' | 'individual', cantidad = 1) {
+  private enviarReserva(turno: Turno, datos: Pick<NuevaReserva, 'tipo' | 'equipo'>) {
     const usuario = this.auth.usuario();
     if (!usuario) {
       this.router.navigate(['/login']);
@@ -191,18 +273,17 @@ export class CanchaTurnos implements OnInit {
     this.error.set('');
     this.aviso.set('');
     this.salaTurno.set(null);
-    this.api.crearReserva({ turno_id: turno.id, usuario_id: usuario.id, tipo, cantidad_jugadores: cantidad }).subscribe({
-      next: () => {
-        const horario = `las ${turno.hora_inicio.slice(0, 5)} del ${turno.fecha}`;
-        this.aviso.set(tipo === 'completa'
-          ? `¡Listo! Reservaste el turno de ${horario}.`
-          : `¡Listo! Te anotaste ${cantidad === 1 ? '' : `con ${cantidad} jugadores `}al partido de ${horario}.`);
-        this.salaTurno.set(tipo === 'individual' ? turno.id : null);
+    this.api.crearReserva({ turno_id: turno.id, usuario_id: usuario.id, cantidad_jugadores: 1, ...datos }).subscribe({
+      next: res => {
+        // El mensaje de la API ya dice qué se reservó, en qué equipo y cuánto falta
+        this.aviso.set(res.message);
+        this.salaTurno.set(datos.tipo === 'completa' ? null : turno.id);
+        this.abierto.set(null);
         this.reservando.set(null);
         this.buscarTurnos();
       },
       error: err => {
-        // 409: el turno se ocupó mientras tanto o ya pasó
+        // 409: el turno o el equipo se ocupó mientras tanto, o ya pasó
         this.error.set(err.error?.message ?? 'No se pudo hacer la reserva.');
         this.reservando.set(null);
         this.buscarTurnos();

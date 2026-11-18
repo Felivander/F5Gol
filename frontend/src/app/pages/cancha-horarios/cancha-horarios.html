@@ -90,8 +90,8 @@
         </div>
         <div class="campo">
           <label for="cupo">Cupo de matchmaking</label>
-          <input id="cupo" type="number" min="1" max="11" formControlName="cupo_maximo" aria-describedby="ayuda-cupo">
-          <small id="ayuda-cupo" class="ayuda">Jugadores sueltos que se pueden anotar.</small>
+          <input id="cupo" type="number" min="2" max="22" formControlName="cupo_maximo" aria-describedby="ayuda-cupo">
+          <small id="ayuda-cupo" class="ayuda">Los dos equipos juntos (en fútbol 5, 10).</small>
           @if (errorDe('cupo_maximo')) {
             <small class="error-campo">{{ errorDe('cupo_maximo') }}</small>
           }

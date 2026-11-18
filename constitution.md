@@ -86,7 +86,7 @@ F5GOL es una app web de gestión de turnos y matchmaking para canchas de fútbol
 - Registro y login con rol (jugador / administrador).
 - Grilla de disponibilidad por cancha, fecha y horario.
 - Reserva de cancha completa.
-- Matchmaking: inscripción individual hasta completar el cupo de 5, con confirmación y aviso automático al completarse.
+- Matchmaking con dos equipos (A y B, cada uno con la mitad de la capacidad de la cancha: 5 en F5, 6 en F6, 7 en F7, 9 en F9). Se entra de tres formas: **un lugar** (te sumás solo a un equipo y esperás a que se llene), **un equipo completo** (lo reservás para vos y tus amigos) o **la cancha entera**. Aviso automático al completarse.
 - "Mis reservas": historial, edición y cancelación dentro del plazo permitido.
 - Estado de pago manual: pendiente / seña / pagado.
 - Panel del administrador: reservas del día y de la semana por cancha.
@@ -104,7 +104,7 @@ F5GOL es una app web de gestión de turnos y matchmaking para canchas de fútbol
 
 1. **No hay doble reserva:** un turno reservado no puede tomarlo otro usuario. Se controla en la base de datos (transacción / bloqueo), no solo en el front.
 2. Un turno con matchmaking **incompleto nunca se muestra como "Ocupado"**.
-3. Al llegar a 5 jugadores, el turno pasa a "Ocupado" y se notifica a los 5.
+3. Cuando los dos equipos están completos (en F5, 10 jugadores), el turno pasa a "Ocupado" y se notifica a todos. Un equipo entero solo se reserva si ese equipo está vacío; la cancha entera, solo si no hay nadie anotado.
 4. El cupo de anotados **se actualiza sin recargar la página**.
 5. Una cancelación dentro de la ventana permitida **libera el turno automáticamente**.
 6. **Cada administrador solo gestiona sus propios clubes y canchas.**
@@ -244,11 +244,12 @@ Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, 
 - Seguridad de clubes: el dueño lo asigna el servidor (no se acepta `administrador_id` del cliente) y solo el dueño edita, borra o sube fotos (403).
 - Lobby de matchmaking: `GET /api/partidos-abiertos` (público, sin datos de los jugadores) y pantalla `/partidos` con los partidos que se están armando, cuántos lugares faltan, filtros por día y club y refresco cada 15 s. El inicio muestra los tres más cerca de completarse.
 - Sala de cada partido: `GET /api/partidos/{id}` y pantalla `/partidos/:id`, solo para los anotados y el dueño del club (403 para el resto). Muestra los lugares ocupados y libres con el nombre y la inicial del apellido de cada jugador (sin mails), tu reserva, hasta cuándo te podés bajar y un link para invitar. Se abre desde Mis reservas y después de sumarse en la grilla. No tiene chat: queda fuera del alcance (2.2) (`SalaPartidoTest`).
+- Dos equipos por partido: columna `reservas.equipo` (A/B) y tipo de reserva `equipo` (un equipo entero). El cupo del turno es el de los dos equipos (la capacidad de la cancha). La grilla ofrece las tres formas de entrar como opciones (un lugar, un equipo completo, la cancha entera) con su precio y la elección de equipo; la sala dibuja la cancha horizontal con cada equipo en su mitad y dice si está completo; el lobby muestra los dos equipos y, si ya estás anotado, "Ver mi partido" y "Sumar a un amigo" (`EquiposPartidoTest`). Tipos de cancha: F5, F6, F7, F8, F9 y F11.
 - Aviso de partido incompleto: el comando `partidos:avisar-incompletos` corre cada 5 minutos con el programador de Laravel (`schedule:work`, lo levanta `iniciar-f5gol.bat`); cuando un partido llega a su hora sin completarse, avisa una sola vez a los anotados por n8n (`docs/n8n/partido-incompleto.json`) o, si n8n no responde, por el mail de Laravel (`LobbyMatchmakingTest`).
 - Zona horaria: Laravel corre en `America/Argentina/Buenos_Aires` (`APP_TIMEZONE`). Antes estaba en UTC y tomaba como empezados turnos a los que les faltaban 3 horas (lobby, plazo de cancelación y aviso de incompleto).
 - Interfaz rediseñada: sistema visual propio en `styles.css` (tipografía Archivo, verde cancha y lima, sin emojis), íconos SVG (`components/icono`), tarjeta de partido reutilizable, grilla de turnos con tira de días y pantallas pensadas primero para el celular. Revisado a 375 px sin desbordes.
 - Seeders idempotentes: `db:seed` se puede correr varias veces sin duplicar clubes, usuarios, reservas ni inscripciones (`SeedersTest`).
-- Tests: 174 tests del backend y 4 del frontend (`formato.spec.ts`), pasan todos (con la extensión **GD** de PHP activa; sin GD fallan los de fotos). `ng build` compila sin advertencias.
+- Tests: 181 tests del backend y 6 del frontend (`formato.spec.ts`), pasan todos (con la extensión **GD** de PHP activa; sin GD fallan los de fotos). `ng build` compila sin advertencias.
 
 ### 8.2 Pendiente — requisitos obligatorios de la cátedra
 

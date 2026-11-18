@@ -26,7 +26,10 @@
           <label for="tipo">Tipo</label>
           <select id="tipo" formControlName="tipo">
             <option value="futbol5">Fútbol 5</option>
+            <option value="futbol6">Fútbol 6</option>
             <option value="futbol7">Fútbol 7</option>
+            <option value="futbol8">Fútbol 8</option>
+            <option value="futbol9">Fútbol 9</option>
             <option value="futbol11">Fútbol 11</option>
           </select>
         </div>
@@ -34,7 +37,7 @@
         <div class="campo">
           <label for="capacidad">Jugadores</label>
           <input id="capacidad" type="number" min="2" max="22" formControlName="capacidad_jugadores" aria-describedby="ayuda-capacidad">
-          <small id="ayuda-capacidad" class="ayuda">Se completa según el tipo.</small>
+          <small id="ayuda-capacidad" class="ayuda">Los dos equipos juntos. Se completa según el tipo.</small>
           @if (errorDe('capacidad_jugadores')) {
             <small class="error-campo">{{ errorDe('capacidad_jugadores') }}</small>
           }

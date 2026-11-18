@@ -19,9 +19,12 @@ export class TarjetaPartido {
   protected cuando = computed(() => fechaRelativa(this.partido().fecha));
   protected superficie = computed(() => textoSuperficie(this.partido().cancha.superficie));
   protected precio = computed(() => pesos(this.partido().precio_por_jugador));
-  // Un punto por lugar: lleno si ya hay alguien anotado
-  protected lugares = computed(() =>
-    Array.from({ length: this.partido().cupo_maximo }, (_, i) => i < this.partido().anotados)
+  // Cada equipo con un punto por lugar: lleno si ya hay alguien anotado
+  protected equipos = computed(() =>
+    (['A', 'B'] as const).map(letra => {
+      const e = this.partido().equipos[letra];
+      return { letra, ...e, puntos: Array.from({ length: e.cupo }, (_, i) => i < e.anotados) };
+    })
   );
   protected casiCompleto = computed(() => this.partido().faltan === 1);
 }

@@ -40,7 +40,14 @@ export function pesos(valor: number | string): string {
   return PESOS.format(Number(valor));
 }
 
-const TIPOS: Record<string, string> = { futbol5: 'Fútbol 5', futbol7: 'Fútbol 7', futbol11: 'Fútbol 11' };
+const TIPOS: Record<string, string> = {
+  futbol5: 'Fútbol 5',
+  futbol6: 'Fútbol 6',
+  futbol7: 'Fútbol 7',
+  futbol8: 'Fútbol 8',
+  futbol9: 'Fútbol 9',
+  futbol11: 'Fútbol 11'
+};
 
 // "futbol5" -> "Fútbol 5" (si llega otro texto, se muestra tal cual)
 export function textoTipo(tipo: string | null | undefined): string {

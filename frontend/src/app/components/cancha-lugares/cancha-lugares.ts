@@ -7,7 +7,7 @@ export interface LugarPartido {
   amigo: boolean;
 }
 
-// Posición de un lugar sobre la media cancha, en % del ancho y del alto
+// Posición de un lugar sobre la cancha, en % del ancho y del alto
 interface Ubicado extends LugarPartido {
   x: number;
   y: number;
@@ -15,15 +15,22 @@ interface Ubicado extends LugarPartido {
   inicial: string;
 }
 
+interface Lado {
+  letra: 'A' | 'B';
+  lugares: Ubicado[];
+  faltan: number;
+}
+
 /**
- * Ubica n jugadores como una formación sobre media cancha (el arco abajo):
- * uno al arco y el resto repartido en líneas de hasta 3, del fondo hacia el medio.
+ * Ubica n jugadores de un equipo en su mitad de la cancha (el Equipo A ataca hacia la derecha):
+ * uno al arco y el resto en líneas de hasta 3, del fondo hacia el medio.
+ * Devuelve x e y en % de la cancha entera.
  */
-export function formacion(n: number): { x: number; y: number }[] {
+export function formacion(n: number, lado: 'A' | 'B' = 'A'): { x: number; y: number }[] {
   if (n <= 0) {
     return [];
   }
-  const posiciones = [{ x: 50, y: 83 }];
+  const posiciones = [{ x: 7, y: 50 }];
   const resto = n - 1;
   const lineas = Math.ceil(resto / 3);
   let pendientes = resto;
@@ -31,16 +38,16 @@ export function formacion(n: number): { x: number; y: number }[] {
     // Reparte lo más parejo posible entre las líneas que quedan
     const enLinea = Math.ceil(pendientes / (lineas - l));
     pendientes -= enLinea;
-    // De la línea del fondo (64%) hacia la mitad de la cancha (30%, o 22% si son muchas líneas)
-    const arriba = lineas >= 3 ? 22 : 30;
-    const y = lineas === 1 ? 50 : 64 - (l * (64 - arriba)) / (lineas - 1);
+    // De la defensa (20%) hacia la mitad de la cancha (42%)
+    const x = lineas === 1 ? 30 : 20 + (l * 22) / (lineas - 1);
     for (let i = 0; i < enLinea; i++) {
-      posiciones.push({ x: ((i + 1) * 100) / (enLinea + 1), y });
+      posiciones.push({ x, y: 12 + ((i + 1) * 76) / (enLinea + 1) });
     }
   }
-  return posiciones;
+  return lado === 'A' ? posiciones : posiciones.map(p => ({ x: 100 - p.x, y: p.y }));
 }
 
+// Dibujo horizontal de la cancha con los dos equipos del partido
 @Component({
   selector: 'app-cancha-lugares',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,17 +55,22 @@ export function formacion(n: number): { x: number; y: number }[] {
   styleUrl: './cancha-lugares.css'
 })
 export class CanchaLugares {
-  lugares = input.required<LugarPartido[]>();
-  faltan = input(0);
+  equipoA = input.required<LugarPartido[]>();
+  equipoB = input.required<LugarPartido[]>();
 
-  protected ubicados = computed<Ubicado[]>(() => {
-    const lista = this.lugares();
-    const posiciones = formacion(lista.length);
-    return lista.map((lugar, i) => ({
-      ...lugar,
-      ...posiciones[i],
-      numero: i + 1,
-      inicial: lugar.nombre && !lugar.amigo ? lugar.nombre.charAt(0).toUpperCase() : ''
-    }));
-  });
+  protected lados = computed<Lado[]>(() => [this.ubicar('A', this.equipoA()), this.ubicar('B', this.equipoB())]);
+
+  private ubicar(letra: 'A' | 'B', lista: LugarPartido[]): Lado {
+    const posiciones = formacion(lista.length, letra);
+    return {
+      letra,
+      faltan: lista.filter(l => !l.nombre).length,
+      lugares: lista.map((lugar, i) => ({
+        ...lugar,
+        ...posiciones[i],
+        numero: i + 1,
+        inicial: lugar.nombre && !lugar.amigo ? lugar.nombre.charAt(0).toUpperCase() : ''
+      }))
+    };
+  }
 }

@@ -1,13 +1,47 @@
 :host {
   display: block;
+  container-type: inline-size;
+}
+
+/* Estado de cada equipo, arriba de su mitad */
+.marcador {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.marcador-equipo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  padding: 8px 12px;
+  border-radius: var(--r-chico);
+  background: var(--lima-suave);
+  color: var(--tinta);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.marcador-equipo.derecha {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.marcador-equipo strong {
+  font-weight: 800;
+}
+
+.marcador-equipo.completo {
+  background: var(--cancha);
+  color: #fff;
 }
 
 .campo {
   position: relative;
   width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-  aspect-ratio: 300 / 380;
+  aspect-ratio: 400 / 250;
   border-radius: var(--r);
   overflow: hidden;
 }
@@ -39,32 +73,6 @@
   fill: rgb(255 255 255 / 0.7);
 }
 
-/* Cartel de lugares libres, en la esquina de arriba a la derecha (al costado del círculo central) */
-.faltan {
-  position: absolute;
-  top: 22px;
-  right: 22px;
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--lima);
-  color: var(--tinta);
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-.faltan .num {
-  font-size: 1.1rem;
-  font-weight: 800;
-}
-
-.faltan.completo {
-  background: #fff;
-  color: var(--cancha-oscura);
-}
-
 /* Fichas de los jugadores, centradas en su posición */
 .fichas {
   position: absolute;
@@ -78,27 +86,33 @@
   position: absolute;
   display: grid;
   justify-items: center;
-  gap: 4px;
-  width: 96px;
+  gap: 3px;
+  width: 84px;
   translate: -50% -50%;
 }
 
 .ficha-circulo {
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 46px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: #fff;
   color: var(--cancha-oscura);
-  font-size: 1.15rem;
+  font-size: 0.85rem;
   font-weight: 800;
   box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
 }
 
+/* El Equipo B con camiseta oscura */
+.ficha.b .ficha-circulo {
+  background: var(--tinta);
+  color: #fff;
+}
+
 .ficha.amigo .ficha-circulo {
-  background: var(--cancha-suave);
-  font-size: 0.95rem;
+  opacity: 0.85;
+  font-size: 0.75rem;
 }
 
 .ficha.yo .ficha-circulo {
@@ -115,25 +129,46 @@
   box-shadow: none;
 }
 
+/* En el celular la cancha es chica: solo los círculos (los nombres van en la lista de abajo) */
 .ficha-nombre {
-  max-width: 100%;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgb(0 0 0 / 0.45);
-  color: #fff;
-  font-size: 0.76rem;
-  font-weight: 700;
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
-.ficha.libre .ficha-nombre {
-  background: transparent;
-  color: rgb(255 255 255 / 0.85);
-}
+@container (min-width: 560px) {
+  .ficha-circulo {
+    width: 42px;
+    height: 42px;
+    font-size: 1.05rem;
+  }
 
-.ficha.yo .ficha-nombre {
-  background: var(--tinta);
-  color: var(--lima);
+  .ficha-nombre {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+    max-width: 100%;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.45);
+    color: #fff;
+    font-size: 0.74rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ficha.libre .ficha-nombre {
+    background: transparent;
+    color: rgb(255 255 255 / 0.85);
+  }
+
+  .ficha.yo .ficha-nombre {
+    background: var(--tinta);
+    color: var(--lima);
+  }
 }

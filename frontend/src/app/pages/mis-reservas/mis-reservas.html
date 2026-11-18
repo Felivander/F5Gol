@@ -43,8 +43,10 @@
             <div class="chips">
               @if (reserva.tipo === 'completa') {
                 <span class="chip chip-verde">Cancha completa</span>
+              } @else if (reserva.tipo === 'equipo') {
+                <span class="chip chip-lima">Equipo {{ reserva.equipo }} entero · {{ reserva.cantidad_jugadores }} jugadores</span>
               } @else {
-                <span class="chip chip-lima">Partido · {{ reserva.cantidad_jugadores }} {{ reserva.cantidad_jugadores === 1 ? 'jugador' : 'jugadores' }}</span>
+                <span class="chip chip-lima">Partido · Equipo {{ reserva.equipo ?? 'A' }}{{ reserva.cantidad_jugadores > 1 ? ' · ' + reserva.cantidad_jugadores + ' jugadores' : '' }}</span>
               }
               @switch (reserva.estado) {
                 @case ('cancelada') { <span class="chip chip-rojo">Cancelada</span> }
@@ -63,7 +65,7 @@
 
           @if (sePuedeCancelar(reserva)) {
             <div class="reserva-acciones">
-              @if (reserva.tipo === 'individual') {
+              @if (reserva.tipo !== 'completa') {
                 <a class="btn btn-lima btn-sm" [routerLink]="['/partidos', reserva.turno_id]">
                   <app-icono nombre="jugadores" [tamano]="16" />
                   Ver el partido

@@ -88,7 +88,7 @@ export class CanchaHorarios implements OnInit {
     hora_desde: ['15:00', Validators.required],
     hora_hasta: ['23:00', Validators.required],
     duracion: [60, Validators.required],
-    cupo_maximo: [5, [Validators.required, Validators.min(1), Validators.max(11)]]
+    cupo_maximo: [10, [Validators.required, Validators.min(2), Validators.max(22)]]
   }, { validators: [rangoDeFechas, rangoDeHoras] });
 
   private valores = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
@@ -139,7 +139,7 @@ export class CanchaHorarios implements OnInit {
           return;
         }
         this.cancha.set(cancha);
-        this.form.controls.cupo_maximo.setValue(Math.max(1, Math.floor(cancha.capacidad_jugadores / 2)));
+        this.form.controls.cupo_maximo.setValue(Math.max(2, cancha.capacidad_jugadores));
       },
       error: () => this.error.set('No se encontró la cancha.')
     });
@@ -173,7 +173,7 @@ export class CanchaHorarios implements OnInit {
       case 'hora_hasta':
         return this.form.hasError('horaFinAntes') ? 'La hora de fin tiene que ser posterior a la de inicio.' : '';
       case 'cupo_maximo':
-        return this.form.controls.cupo_maximo.invalid ? 'El cupo tiene que ser entre 1 y 11 jugadores.' : '';
+        return this.form.controls.cupo_maximo.invalid ? 'El cupo tiene que ser entre 2 y 22 jugadores.' : '';
     }
   }
 
