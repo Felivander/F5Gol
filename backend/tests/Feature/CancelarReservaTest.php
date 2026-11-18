@@ -102,33 +102,36 @@ class CancelarReservaTest extends TestCase
         $this->assertSame('disponible', $turno->fresh()->estado);
     }
 
-    public function test_no_deja_cancelar_a_menos_de_dos_horas(): void
+    public function test_se_puede_cancelar_poco_antes_de_que_empiece(): void
     {
         $jugador = $this->crearJugador();
-        $turno = $this->turnoQueEmpiezaEn(90);
+        $turno = $this->turnoQueEmpiezaEn(30);
+        $reserva = $this->reservaDe($jugador, $turno);
+        Sanctum::actingAs($jugador);
+
+        $this->deleteJson("/api/reservas/{$reserva->id}")->assertOk();
+
+        $this->assertSame('cancelada', $reserva->fresh()->estado);
+    }
+
+    public function test_no_deja_cancelar_un_turno_que_ya_empezo(): void
+    {
+        $jugador = $this->crearJugador();
+        $turno = $this->turnoQueEmpiezaEn(-30);
         $reserva = $this->reservaDe($jugador, $turno);
         Sanctum::actingAs($jugador);
 
         $this->deleteJson("/api/reservas/{$reserva->id}")
             ->assertConflict()
-            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Las reservas se pueden cancelar hasta 2 horas antes del turno'));
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Las reservas se pueden cancelar hasta que empieza el turno'));
 
-        $this->assertDatabaseHas('reservas', ['id' => $reserva->id]);
+        $this->assertDatabaseHas('reservas', ['id' => $reserva->id, 'estado' => 'confirmada']);
         $this->assertSame('ocupado', $turno->fresh()->estado);
-    }
-
-    public function test_justo_en_el_limite_todavia_se_puede_cancelar(): void
-    {
-        $jugador = $this->crearJugador();
-        $reserva = $this->reservaDe($jugador, $this->turnoQueEmpiezaEn(120));
-        Sanctum::actingAs($jugador);
-
-        $this->deleteJson("/api/reservas/{$reserva->id}")->assertOk();
     }
 
     public function test_el_administrador_del_club_puede_cancelar_fuera_de_plazo(): void
     {
-        $reserva = $this->reservaDe($this->crearJugador(), $this->turnoQueEmpiezaEn(30));
+        $reserva = $this->reservaDe($this->crearJugador(), $this->turnoQueEmpiezaEn(-30));
         Sanctum::actingAs($reserva->turno->cancha->club->administrador);
 
         $this->deleteJson("/api/reservas/{$reserva->id}")->assertOk();

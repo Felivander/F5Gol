@@ -1811,7 +1811,7 @@
                         "description": "No encontrado."
                     },
                     "409": {
-                        "description": "La reserva ya estaba cancelada o está fuera del plazo de cancelación (hasta 2 horas antes del turno)."
+                        "description": "La reserva ya estaba cancelada o el turno ya empezó (se puede cancelar hasta que empieza)."
                     }
                 },
                 "security": [

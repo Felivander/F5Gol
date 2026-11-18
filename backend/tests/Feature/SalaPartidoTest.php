@@ -113,9 +113,9 @@ class SalaPartidoTest extends TestCase
         $this->anotar($turno, $this->crearJugador());
         $this->getJson("/api/partidos/{$turno->id}")->assertJsonPath('estado', 'completo');
 
-        // A una hora del partido ya no se puede cancelar; después de la hora, ya empezó
+        // A una hora del partido todavía se puede bajar; una vez que empezó, ya no
         Carbon::setTestNow(Carbon::parse($turno->fecha.' 19:00'));
-        $this->getJson("/api/partidos/{$turno->id}")->assertJsonPath('mi_reserva.puede_cancelar', false);
+        $this->getJson("/api/partidos/{$turno->id}")->assertJsonPath('mi_reserva.puede_cancelar', true);
 
         Carbon::setTestNow(Carbon::parse($turno->fecha.' 20:30'));
         $this->getJson("/api/partidos/{$turno->id}")->assertJsonPath('estado', 'ya_empezo');

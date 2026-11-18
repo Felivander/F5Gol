@@ -160,7 +160,8 @@ class PartidoController extends Controller
         }
 
         $anotados = (int) $turno->reservas->sum('cantidad_jugadores');
-        $limiteCancelacion = $turno->inicio()->subHours(Reserva::HORAS_MINIMAS_PARA_CANCELAR);
+        // El jugador se puede bajar hasta que empieza el partido
+        $limiteCancelacion = $turno->inicio();
 
         return response()->json([
             'turno_id' => $turno->id,

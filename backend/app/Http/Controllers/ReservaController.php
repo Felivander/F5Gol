@@ -321,12 +321,11 @@ class ReservaController extends Controller
 
         // Cambio de turno: el nuevo tiene que estar libre y no haber pasado
         if ($nuevoTurnoId && (int) $nuevoTurnoId !== $reserva->turno_id) {
-            // Mismo plazo que para cancelar: el jugador no puede mover un turno que empieza en menos de 2 horas
-            $limite = $turnoAnterior?->inicio()->subHours(Reserva::HORAS_MINIMAS_PARA_CANCELAR);
-            if (! $esAdministradorDelClub && $limite && now()->greaterThan($limite)) {
+            // Mismo plazo que para cancelar: el jugador puede mover su reserva hasta que empieza el partido
+            if (! $esAdministradorDelClub && $turnoAnterior && now()->greaterThan($turnoAnterior->inicio())) {
                 return response()->json([
-                    'message' => 'Las reservas se pueden cambiar de turno hasta '.Reserva::HORAS_MINIMAS_PARA_CANCELAR.' horas antes del partido, '
-                        .'y el turno '.$turnoAnterior->textoHorario().' empieza antes de eso.',
+                    'message' => 'Las reservas se pueden cambiar de turno hasta que empieza el partido, '
+                        .'y el turno '.$turnoAnterior->textoHorario().' ya empezó.',
                 ], 409);
             }
 
@@ -426,7 +425,7 @@ class ReservaController extends Controller
             new OA\Response(response: 401, description: 'No autenticado.'),
             new OA\Response(response: 403, description: 'La reserva no es suya ni de un club suyo.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
-            new OA\Response(response: 409, description: 'La reserva ya estaba cancelada o está fuera del plazo de cancelación (hasta 2 horas antes del turno).'),
+            new OA\Response(response: 409, description: 'La reserva ya estaba cancelada o el turno ya empezó (se puede cancelar hasta que empieza).'),
         ]
     )]
     public function destroy(Request $request, string $id)
@@ -456,12 +455,11 @@ class ReservaController extends Controller
             ], 409);
         }
 
-        // El administrador del club puede cancelar siempre; el jugador, solo dentro del plazo
-        $limite = $turno?->inicio()->subHours(Reserva::HORAS_MINIMAS_PARA_CANCELAR);
-        if (! $esAdministradorDelClub && $limite && now()->greaterThan($limite)) {
+        // El administrador del club puede cancelar siempre; el jugador, hasta que empieza el turno
+        if (! $esAdministradorDelClub && $turno && now()->greaterThan($turno->inicio())) {
             return response()->json([
-                'message' => 'Las reservas se pueden cancelar hasta '.Reserva::HORAS_MINIMAS_PARA_CANCELAR.' horas antes del turno, '
-                    .'y el turno '.$turno->textoHorario().' empieza antes de eso. Si no podés ir, avisale al club.',
+                'message' => 'Las reservas se pueden cancelar hasta que empieza el turno, '
+                    .'y el turno '.$turno->textoHorario().' ya empezó. Si no podés ir, avisale al club.',
             ], 409);
         }
 
