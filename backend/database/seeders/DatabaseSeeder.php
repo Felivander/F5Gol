@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             JugadorAnotadoSeeder::class,
             // 8 semanas de turnos y reservas pasadas para el dashboard de Power BI
             HistorialDemoSeeder::class,
+            // 5 partidos a los que les falta un jugador: al sumarse uno se completa y llega el aviso
+            PartidosCasiLlenosSeeder::class,
         ]);
     }
 }
