@@ -76,7 +76,8 @@ class HistorialDemoSeeder extends Seeder
 
         DB::table('users')->insert($filas);
 
-        return User::where('rol', 'jugador')->pluck('id')->all();
+        // Solo jugadores de prueba (@f5gol.com): nunca se cargan reservas de demo a cuentas reales
+        return User::where('rol', 'jugador')->where('email', 'like', '%@f5gol.com')->pluck('id')->all();
     }
 
     private function cargarCancha(Cancha $cancha, array $jugadores, Carbon $inicio, Carbon $hoy): void

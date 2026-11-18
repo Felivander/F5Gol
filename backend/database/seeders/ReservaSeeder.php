@@ -19,13 +19,21 @@ class ReservaSeeder extends Seeder
      */
     public function run(): void
     {
-        $jugadores = User::where('rol', 'jugador')->orderBy('id')->get();
+        // Solo jugadores de prueba: nunca se cargan reservas a cuentas reales
+        $jugadores = User::where('rol', 'jugador')->where('email', 'like', '%@f5gol.com')->orderBy('id')->get();
 
         $primeraCancha = Cancha::orderBy('id')->first();
+        // Turnos de hoy en adelante (los pasados son del historial de demo)
         $turnos = Turno::where('cancha_id', $primeraCancha->id)
+            ->whereDate('fecha', '>=', now()->toDateString())
             ->orderBy('fecha')
             ->orderBy('hora_inicio')
             ->get();
+
+        // Si los escenarios de ejemplo ya están cargados, no se repiten
+        if ($turnos->isEmpty() || Reserva::whereIn('turno_id', $turnos->take(2)->pluck('id'))->exists()) {
+            return;
+        }
 
         // Escenario 1: reserva completa del primer turno disponible
         $turnoCompleto = $turnos[0];

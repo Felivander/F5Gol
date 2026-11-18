@@ -45,7 +45,7 @@ class CanchaSeeder extends Seeder
             $lista = $listas[min($i, count($listas) - 1)];
 
             foreach ($lista as [$nombre, $tipo, $capacidad, $descripcion, $tarifa, $estado, $superficie, $techada, $iluminacion, $vestuarios]) {
-                Cancha::firstOrCreate(
+                $cancha = Cancha::firstOrCreate(
                     ['club_id' => $club->id, 'nombre' => $nombre],
                     [
                         'tipo' => $tipo,
@@ -59,6 +59,11 @@ class CanchaSeeder extends Seeder
                         'estado' => $estado,
                     ]
                 );
+
+                // Canchas creadas antes de que existieran estos campos: se completan sin pisar lo que ya tengan
+                if ($cancha->superficie === null) {
+                    $cancha->update(compact('superficie', 'techada', 'iluminacion', 'vestuarios'));
+                }
             }
         }
     }

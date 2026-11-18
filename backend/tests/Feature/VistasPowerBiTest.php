@@ -74,4 +74,14 @@ class VistasPowerBiTest extends TestCase
         $this->seed(HistorialDemoSeeder::class);
         $this->assertSame($turnos, DB::table('turnos')->count());
     }
+
+    public function test_el_historial_de_demo_no_carga_reservas_a_cuentas_reales(): void
+    {
+        $this->crearCancha();
+        $real = User::factory()->create(['email' => 'alguien@gmail.com', 'rol' => 'jugador']);
+
+        $this->seed(HistorialDemoSeeder::class);
+
+        $this->assertSame(0, DB::table('reservas')->where('usuario_id', $real->id)->count());
+    }
 }
