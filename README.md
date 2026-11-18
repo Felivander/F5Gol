@@ -82,6 +82,11 @@ cd frontend
 ng serve
 ```
 
+## Automatización y reportes
+
+- **n8n** (mail de bienvenida al crear una cuenta): ver [docs/n8n/README.md](docs/n8n/README.md).
+- **Power BI** (dashboard de ocupación, reservas e ingresos): ver [docs/powerbi/README.md](docs/powerbi/README.md).
+
 ## Direcciones
 
 - Front: http://localhost:4200
@@ -102,6 +107,7 @@ Usuarios de prueba (seeders): `admin1@f5gol.com` / `password` (administrador) y 
 | `/panel` | Administrador | Reservas del día por cancha de sus clubes |
 | `/mis-clubes` | Administrador | Sus clubes con cantidad de canchas y fotos: crear, editar, eliminar |
 | `/clubes/nuevo`, `/clubes/:id/editar` | Administrador dueño | Nombre, dirección, teléfono, descripción y fotos del club |
+| `/canchas/:id/horarios` | Administrador dueño | Carga en lote de turnos: período, días de la semana, franja horaria, duración y cupo |
 
 ## Endpoints principales
 
@@ -117,6 +123,8 @@ Todos bajo `/api`. Los de escritura piden `Authorization: Bearer <token>`; el de
 | `PUT /canchas/{id}` | 409 si se desactiva una cancha con reservas futuras |
 | `POST /canchas/{id}/fotos`, `DELETE /canchas/{id}/fotos/{indice}` | Fotos de la cancha (solo el dueño del club) |
 | `GET /turnos?cancha_id=&fecha=` | Grilla de disponibilidad con `cupo_actual` |
+| `POST /turnos/generar` | Crea en lote los turnos de una cancha (hasta 90 días). No duplica ni superpone. Devuelve `creados` y `omitidos`. Solo el dueño (403) |
+| `DELETE /turnos/{id}` | Solo el dueño y sin reservas activas (409) |
 | `GET /reservas?usuario_id=&cancha_id=&fecha=&desde=&hasta=&mis_clubes=1&por_pagina=` | `mis_clubes` filtra por los clubes del administrador logueado; `por_pagina` hasta 100 |
 | `POST /reservas` | `tipo` completa o individual. 409 si el turno está ocupado, bloqueado, ya pasó, tiene jugadores anotados (para completa) o no tiene cupo. 422 si el turno no existe |
 | `PUT /reservas/{id}` | Cambiar de turno libera el anterior y ocupa el nuevo. Solo el administrador cambia `estado_pago` (403) |

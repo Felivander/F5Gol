@@ -19,11 +19,11 @@ La app tiene que tener, como mínimo:
 | 3 | Frontend en **Angular** (última versión) | `frontend/` (Angular 22) |
 | 4 | Base de datos **relacional** | MySQL / MariaDB (XAMPP) |
 | 5 | Protección con **Laravel Sanctum** | middleware `auth:sanctum` |
-| 6 | **Al menos un método externo de autenticación** (OAuth 2.0 con Laravel Socialite: Google, GitHub, Microsoft, Facebook u otro) | Google con Socialite: `GoogleAuthController`, `/login` y `/registro` (falta cargar credenciales reales y probarlo de punta a punta) |
+| 6 | **Al menos un método externo de autenticación** (OAuth 2.0 con Laravel Socialite: Google, GitHub, Microsoft, Facebook u otro) | Google con Socialite: `GoogleAuthController`, `/login` y `/registro`. Probado con una cuenta real |
 | 7 | **Git** para control de versiones | este repo |
 | 8 | **Angular consume la API** de Laravel | `frontend/src/app/services/` |
-| 9 | Automatización con **n8n**: flujo completo y funcional de **al menos 10 nodos**. Lo pedido en clase (semana 13): mandar un **mail de bienvenida al crear un usuario** | pendiente |
-| 10 | **Dashboard en Power BI** con indicadores (KPIs) del sistema, sacados de MySQL (extracción, modelado básico, KPIs, diseño del tablero) | pendiente |
+| 9 | Automatización con **n8n**: flujo completo y funcional de **al menos 10 nodos**. Lo pedido en clase (semana 13): mandar un **mail de bienvenida al crear un usuario** | Flujo de 12 nodos en `docs/n8n/` + aviso desde Laravel (`AvisarUsuarioCreado`). Probado de punta a punta en n8n 2.48 (registro → webhook → mail según el rol, y las respuestas 401, 422 y 502) con un SMTP local, y después con Gmail real (el mail llega). En cada máquina hay que importar el flujo y cargar la credencial SMTP (`docs/n8n/README.md`) |
+| 10 | **Dashboard en Power BI** con indicadores (KPIs) del sistema, sacados de MySQL (extracción, modelado básico, KPIs, diseño del tablero) | Datos listos: vistas `bi_*` en MySQL, historial de demo, medidas DAX, tema y guía en `docs/powerbi/`. Falta armar el `.pbix` en Power BI Desktop |
 | 11 | **Presentación técnica y funcional** del proyecto | semana 16 |
 
 Laravel **y** Angular son obligatorios, sin excepción. No se reemplaza el frontend por Blade/Livewire ni el backend por otra cosa, aunque la propuesta original los mencione.
@@ -154,11 +154,13 @@ Extensiones de PHP necesarias: BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Toke
 - Al crear, editar o borrar se devuelve `message` y, si corresponde, el recurso: `['message' => 'Cancha creada correctamente', 'cancha' => $cancha]`. Al editar, el recurso con `->fresh()`.
 - Si un registro no existe: `find()` + respuesta `404` con `message`, o `findOrFail()`.
 - Los listados se **paginan desde el backend** (`->paginate(10)`), y solo se devuelven los campos necesarios (`select()`, `with('relacion:id,nombre')`).
-- Los mensajes para el usuario van en español.
+- Los mensajes para el usuario van en español, con punto final, y dicen **qué pasó y por qué**: qué recurso y con qué id ("No existe una cancha con el id 7."), qué turno ("El turno del 19/11 a las 20:00 en Cancha 1 ya está reservado. Elegí otro horario."), cuántos lugares quedan, etc. Nunca un genérico tipo "Error" o "No disponible".
+- Los errores generales se arman en un solo lugar, `bootstrap/app.php`: 401 (distingue sin token de token vencido), 403, 404 (con el recurso y el id, o la ruta), 405 (con los métodos aceptados), 413, 429 y 500 (sin detalles internos si `APP_DEBUG=false`). Un JSON mal escrito responde 400 (`RechazarJsonInvalido`).
+- En un 422, `message` es el error si hay uno solo, o "Hay N datos para corregir…" si hay varios; el detalle va en `errors`.
 
 ### 4.3 Validación
 
-- La validación va en clases **FormRequest** (`app/Http/Requests`), con mensajes personalizados en español.
+- La validación va en clases **FormRequest** (`app/Http/Requests`). Los mensajes generales y los nombres legibles de los campos están en `lang/es/validation.php` (`APP_LOCALE=es`); cada request agrega mensajes propios solo cuando hace falta algo más claro.
 - Nunca `Model::create($request->all())` sin validar: se usa `$request->validated()` y `$fillable` en el modelo.
 
 ### 4.4 Base de datos
@@ -174,7 +176,8 @@ Extensiones de PHP necesarias: BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Toke
 ### 4.5 Seguridad
 
 - El modelo `User` usa `HasApiTokens`. Login devuelve el token de Sanctum; logout lo revoca.
-- Autorización por rol y por dueño en cada acción de escritura (políticas o chequeo en el controlador).
+- Autorización por rol y por dueño en cada acción de escritura (políticas o chequeo en el controlador). "Administrador" no alcanza: tiene que ser el administrador **de ese club**.
+- Login y registro tienen límite de 10 intentos por minuto (429).
 - El archivo `.env` **nunca** se sube al repo. Se mantiene `.env.example` actualizado.
 
 ### 4.6 Swagger
@@ -236,29 +239,31 @@ Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, 
 - Validación con FormRequest y mensajes en español; soft delete y restauración de canchas; fotos de canchas.
 - Reglas de negocio: sin doble reserva, matchmaking con cierre a 5 y mail (`PartidoCompleto`), cupo refrescado cada 15 s, cancelación hasta 2 h antes, bloqueo por mantenimiento, estado de pago solo por el administrador.
 - Front Angular 22: clubes (buscador), detalle de club (descripción y galería de fotos), Mis clubes (alta, edición, fotos y baja del club con formulario reactivo), grilla de turnos, reserva completa e individual, Mis reservas (cancelar y cambiar turno), alta/edición/baja/restauración de canchas (con superficie, techada, iluminación y vestuarios), panel del administrador (día y semana, estado de pago), login, registro, interceptor con el token.
+- Permisos de reservas e inscripciones: nadie reserva a nombre de otro (salvo el administrador del club), nadie cancela ni edita reservas ajenas, el plazo de 2 horas solo lo saltea el administrador **de ese club**, y las inscripciones de jugadores solo las tocan el jugador, el dueño de la reserva o el administrador del club (`MensajesApiTest`, `CancelarReservaTest`).
+- Privacidad: `GET /api/reservas` y `/api/jugador-anotados` eran públicos y exponían nombres y mails de todos los usuarios. Ahora piden sesión; el jugador ve solo lo suyo y el administrador, además, lo de sus clubes (`ReservasPrivadasTest`).
 - Seguridad de clubes: el dueño lo asigna el servidor (no se acepta `administrador_id` del cliente) y solo el dueño edita, borra o sube fotos (403).
-- Tests: 117 tests de Feature; pasan 108. Los 8 de `FotosCanchaTest` fallan y 1 de `GestionClubesTest` se saltea solo porque falta la extensión **GD** en el PHP local (no es un bug del código). `ng build` compila.
+- Tests: 154 tests; pasan 145. Los 8 de `FotosCanchaTest` fallan y 1 de `GestionClubesTest` se saltea solo porque falta la extensión **GD** en el PHP local (no es un bug del código). `ng build` compila.
 
 ### 8.2 Pendiente — requisitos obligatorios de la cátedra
 
-1. **Login con Google (Socialite).** Código hecho en la rama `login-con-google`: migración `google_id`, `GoogleAuthController` (redirect + callback stateless, token de Sanctum en `#token=`), Swagger, 7 tests en `LoginGoogleTest`, botón en `/login` y `/registro` y pantalla `/auth/google`. **Falta:** crear las credenciales OAuth en Google Cloud (ver README), cargarlas en `.env`, probar el ingreso real con una cuenta de Google y commitear.
-2. **Flujo n8n de al menos 10 nodos.** Webhook disparado por Laravel al registrar un usuario (también desde Google) → mail de bienvenida. Para llegar a 10 nodos, que sea un flujo completo (validar datos, ramificar por rol, armar mail distinto para jugador y administrador, registrar el envío, manejar errores, responder al webhook). Exportar el JSON del flujo al repo (por ejemplo `docs/n8n/`) y documentar cómo importarlo. La URL del webhook va en `.env` (`N8N_WEBHOOK_URL`), y si n8n no responde el registro no tiene que fallar.
-3. **Dashboard de Power BI** conectado a MySQL con KPIs: ocupación de canchas por semana, reservas por club/cancha, turnos completados por matchmaking vs. reserva completa, ingresos por estado de pago, cancelaciones, horarios pico. Guardar el `.pbix` y capturas en `docs/powerbi/`.
-4. **Guards en Angular** (semana 14): hechos en `guards/auth.guard.ts` (`sesionGuard` en `/mis-reservas`, `administradorGuard` en `/panel`, `/mis-clubes`, `/clubes/nuevo`, `/clubes/:id/editar`, `/canchas/nueva` y `/canchas/:id/editar`). **Falta:** que el interceptor limpie la sesión y mande a `/login` si la API responde `401`.
-5. **Formularios reactivos** (semana 13 del plan anual): login, registro y alta/edición de cancha usan `FormsModule` + `ngModel`, que es lo que muestran las guías de clase, pero el plan pide formularios reactivos con validaciones personalizadas. Como mínimo, hacer reactivos los formularios nuevos (club, turnos) y el de registro, con un validador propio y los errores `422` de Laravel por campo.
+1. ~~Login con Google (Socialite).~~ Hecho y probado con una cuenta real (app de Google Cloud en modo *Testing*: los mails que entren tienen que estar como test users, incluido el del docente si lo prueba).
+2. **Flujo n8n de al menos 10 nodos.** Hecho: `docs/n8n/bienvenida-usuario.json` (12 nodos: webhook, validación con secreto, mail distinto por rol, SMTP, respuestas 200/401/422/502) y `AvisarUsuarioCreado` en Laravel, que avisa después de responder y nunca hace fallar el registro (7 tests en `AvisoN8nTest`). **Falta:** en cada máquina, importar el flujo, crear la credencial SMTP y activar (ver `docs/n8n/README.md`).
+3. **Dashboard de Power BI.** Hecho del lado de los datos: vistas `bi_turnos`, `bi_reservas` y `bi_usuarios` (sin datos personales), `HistorialDemoSeeder` con 8 semanas de historial, medidas DAX, tema y diseño de páginas en `docs/powerbi/`. **Falta:** instalar MySQL Connector/NET, armar el tablero en Power BI Desktop siguiendo `docs/powerbi/README.md` y guardar el `.pbix` y las capturas.
+4. **Guards en Angular** (semana 14): hechos en `guards/auth.guard.ts` (`sesionGuard` en `/mis-reservas`, `administradorGuard` en `/panel`, `/mis-clubes`, `/clubes/nuevo`, `/clubes/:id/editar`, `/canchas/nueva` y `/canchas/:id/editar`). El interceptor, además, cierra la sesión y manda a `/login?sesion=vencida` si la API responde `401` a un pedido con token. ✅
+5. **Formularios reactivos** (semana 13 del plan anual): hechos en login, registro, club y carga de horarios, con validadores propios en `validadores.ts` (`noSoloEspacios`, `camposIguales`) y los errores `422` de Laravel por campo. Queda con `ngModel` el formulario de cancha (opcional pasarlo).
 5b. **Registro con rol administrador abierto.** La guía de Swagger (punto 27) recomienda que el registro público **no** deje que el cliente elija ser administrador: el rol inicial lo asigna el servidor y la creación de administradores queda restringida. Hoy `POST /register` acepta `rol: administrador` de cualquiera, lo que además contradice la regla 2.3.8. La historia del backlog pide "registro eligiendo rol", así que hay que decidir: (a) dejarlo y poder justificarlo en la presentación, o (b) registrar siempre como jugador y que un administrador existente (o un super administrador) habilite nuevos administradores.
 
 ### 8.3 Pendiente — para que ningún módulo quede "a medias"
 
 6. ~~Alta y edición de clubes desde el front.~~ Hecho: pantalla **Mis clubes** (`/mis-clubes`), formulario reactivo del club con fotos y descripción, y detalles de cancha (superficie y comodidades).
-7. **Alta de turnos (horarios y tarifas) desde el front.** La API tiene `POST/PUT/DELETE /turnos`, pero hoy los turnos salen solo del seeder. El administrador tiene que poder generar los turnos de su cancha (por ejemplo, rango de fechas y horarios con tarifa) para que una cancha nueva sea reservable.
-8. **Mails reales en la demo.** `.env.example` usa `MAIL_MAILER=log`: la confirmación de partido completo solo queda en el log. Configurar un SMTP de prueba (Mailtrap o Gmail con contraseña de aplicación) o mandar esos avisos también por n8n.
+7. ~~Alta de turnos desde el front.~~ Hecho: `POST /api/turnos/generar` crea en lote los turnos de un rango de fechas (hasta 90 días), días de la semana y franja horaria, sin duplicar ni superponer; pantalla `/canchas/:id/horarios` con vista previa; el dueño puede eliminar turnos libres desde la grilla. Además, crear, editar y borrar turnos ahora exige ser dueño de la cancha (403). Queda pendiente la tarifa diferencial por horario pico (opcional).
+8. **Mails reales en la demo.** La bienvenida ya sale por n8n. La confirmación de partido completo (`PartidoCompleto`) sigue usando `MAIL_MAILER=log` y solo queda en el log: configurar el SMTP de Laravel (Gmail con contraseña de aplicación) o mandarla también por n8n.
 9. **Probar la demo de punta a punta** con la base recién creada (`migrate:fresh --seed`): registro → (Google) → crear club → crear cancha y turnos → reservar → matchmaking hasta 5 → mail → panel → cambiar pago → cancelar. Instalar GD en el PHP de la máquina de la presentación.
 
 ### 8.4 Limpieza antes de entregar
 
 9b. Factories: solo existe `UserFactory`. La guía de Seeders muestra seeder + factory; agregar factories de `Club`, `Cancha`, `Turno` y `Reserva` simplificaría los tests y los seeders (opcional, suma en "calidad del código").
-10. Sacar la página de práctica de clase (`frontend/src/app/pages/practica` y su ruta `/practica`) y los `ExampleTest` de Laravel.
+10. ~~Sacar la página de práctica y los `ExampleTest`.~~ Hecho.
 11. Revisar el aviso de `ng build` por el bundle inicial (710 kB contra 500 kB de presupuesto): cargar las páginas con `loadComponent` (lazy loading) o subir el presupuesto en `angular.json` con una justificación.
 12. Unificar el número de grupo (`idea_de_proyecto_F5GOL.md` dice "Grupo 4", la propuesta entregada es `Grupo5.docx`) y actualizar el README con Google, n8n y Power BI.
 13. Revisar que el reparto de commits sea parejo entre los cuatro integrantes (`git shortlog -sn --all`) y que cada uno pueda explicar su parte.
