@@ -249,7 +249,8 @@ Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, 
 - Zona horaria: Laravel corre en `America/Argentina/Buenos_Aires` (`APP_TIMEZONE`). Antes estaba en UTC y tomaba como empezados turnos a los que les faltaban 3 horas (lobby, plazo de cancelación y aviso de incompleto).
 - Interfaz rediseñada: sistema visual propio en `styles.css` (tipografía Archivo, verde cancha y lima, sin emojis), íconos SVG (`components/icono`), tarjeta de partido reutilizable, grilla de turnos con tira de días y pantallas pensadas primero para el celular. Revisado a 375 px sin desbordes.
 - Seeders idempotentes: `db:seed` se puede correr varias veces sin duplicar clubes, usuarios, reservas ni inscripciones (`SeedersTest`).
-- Tests: 183 tests del backend y 6 del frontend (`formato.spec.ts`), pasan todos (con la extensión **GD** de PHP activa; sin GD fallan los de fotos). `ng build` compila sin advertencias.
+- Partidos para la demo: `PartidosCasiLlenosSeeder` (corre con `db:seed`) deja 5 partidos a un jugador de completarse, en canchas y horarios distintos que empiezan dentro de al menos una hora, armados con los jugadores `demoN`. Al sumarse uno, el partido pasa a "ocupado" y se dispara el aviso de partido completo por n8n. Si ya hay 5, no agrega más; si se completó alguno, arma los que falten (`PartidosCasiLlenosTest`).
+- Tests: 189 tests del backend y 6 del frontend (`formato.spec.ts`), pasan todos (con la extensión **GD** de PHP activa; sin GD fallan los de fotos). `ng build` compila sin advertencias.
 
 ### 8.2 Pendiente — requisitos obligatorios de la cátedra
 

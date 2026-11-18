@@ -144,17 +144,25 @@ Los carga `php artisan migrate --seed`. Todos tienen la contraseña **`password`
 
 ## Preparar la demo
 
-Antes de presentar, dejar la base limpia y con turnos para hoy y mañana:
+El mismo día de la presentación, a la mañana, dejar la base limpia y con turnos para hoy y mañana:
 
 ```bash
 cd backend
 php artisan migrate:fresh --seed
-php artisan db:seed --class=TurnoSeeder
 ```
 
 `migrate:fresh` **borra todos los datos** de la base `f5gol` y la vuelve a crear. `HistorialDemoSeeder` carga 8 semanas de reservas para que el tablero de Power BI tenga datos (tarda unos 40 segundos).
 
-Recorrido sugerido: registrarse (o entrar con Google) → crear un club en **Mis clubes** → agregar una cancha → cargar sus horarios → reservar la cancha entera con un jugador → sumar jugadores a un partido desde **Partidos abiertos** hasta completar los dos equipos (llega el mail) → ver las reservas en el **Panel** y marcar la seña → cancelar una reserva desde **Mis reservas**.
+El seed deja **5 partidos a los que les falta un solo jugador** (`PartidosCasiLlenosSeeder`), en canchas y horarios distintos que empiezan dentro de al menos una hora. Al sumarse uno, el partido se completa y se dispara el aviso de partido completo de n8n. Los arma con los jugadores `demoN@f5gol.com`, así `jugador1@f5gol.com` … `jugador8@f5gol.com` (o una cuenta de Google) quedan libres para sumarse en vivo.
+
+Si la base se recreó otro día, o si en la prueba ya se completaron algunos, se pueden volver a armar sin borrar nada (solo agrega los que falten para llegar a 5):
+
+```bash
+php artisan db:seed --class=TurnoSeeder
+php artisan db:seed --class=PartidosCasiLlenosSeeder
+```
+
+Recorrido sugerido: registrarse (o entrar con Google) → crear un club en **Mis clubes** → agregar una cancha → cargar sus horarios → reservar la cancha entera con un jugador → en **Partidos abiertos**, sumarse a un partido 9/10 (se completa y llega el mail) → ver las reservas en el **Panel** y marcar la seña → cancelar una reserva desde **Mis reservas**.
 
 ## Cómo funciona el matchmaking
 
