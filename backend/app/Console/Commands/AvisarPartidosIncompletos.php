@@ -30,7 +30,7 @@ class AvisarPartidosIncompletos extends Command
             ->whereNull('aviso_incompleto_at')
             ->where('estado', 'disponible')
             ->whereBetween('fecha', [$desde->toDateString(), $ahora->toDateString()])
-            ->whereHas('reservas', fn ($q) => $q->where('tipo', 'individual')->where('estado', '!=', 'cancelada'))
+            ->whereHas('reservas', fn ($q) => $q->delPartido())
             ->get();
 
         $avisados = 0;

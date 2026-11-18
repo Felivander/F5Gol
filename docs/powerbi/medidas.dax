@@ -71,13 +71,13 @@ Reservas completas =
 CALCULATE ( [Reservas], bi_reservas[tipo] = "completa" )
 
 Inscripciones de matchmaking =
-CALCULATE ( [Reservas], bi_reservas[tipo] = "individual" )
+CALCULATE ( [Reservas], bi_reservas[tipo] <> "completa" )
 
 // Turnos que se llenaron con jugadores sueltos (el módulo distintivo de F5GOL)
 Partidos armados por matchmaking =
 CALCULATE (
     DISTINCTCOUNT ( bi_reservas[turno_id] ),
-    bi_reservas[tipo] = "individual",
+    bi_reservas[tipo] <> "completa",
     bi_reservas[estado] <> "cancelada",
     bi_turnos[estado] = "ocupado"
 )

@@ -20,6 +20,11 @@ class Turno extends Model
 {
     use HasFactory;
 
+    // Un partido de fútbol 5 completo: los dos equipos juntos
+    protected $attributes = [
+        'cupo_maximo' => 10,
+    ];
+
     // Un turno pertenece a una cancha
     public function cancha()
     {
@@ -74,9 +79,36 @@ class Turno extends Model
     // Cantidad de jugadores anotados actualmente vía matchmaking en este turno
     public function cupoActual(): int
     {
-        return $this->reservas()
-            ->where('tipo', 'individual')
-            ->where('estado', '!=', 'cancelada')
-            ->sum('cantidad_jugadores');
+        return (int) $this->reservas()->delPartido()->sum('cantidad_jugadores');
+    }
+
+    // ---------- Equipos del partido ----------
+    // El cupo del turno es el de los dos equipos juntos; el A se queda con el lugar extra si es impar
+
+    public function cupoEquipo(string $equipo): int
+    {
+        return $equipo === 'A' ? (int) ceil($this->cupo_maximo / 2) : intdiv($this->cupo_maximo, 2);
+    }
+
+    public function anotadosEquipo(string $equipo): int
+    {
+        return (int) $this->reservas()->delPartido()->where('equipo', $equipo)->sum('cantidad_jugadores');
+    }
+
+    public function libresEquipo(string $equipo): int
+    {
+        return max(0, $this->cupoEquipo($equipo) - $this->anotadosEquipo($equipo));
+    }
+
+    // Equipo con más lugares libres (si empatan, el A)
+    public function equipoConMasLugares(): string
+    {
+        return $this->libresEquipo('B') > $this->libresEquipo('A') ? 'B' : 'A';
+    }
+
+    // "Equipo A"
+    public static function nombreEquipo(string $equipo): string
+    {
+        return "Equipo {$equipo}";
     }
 }

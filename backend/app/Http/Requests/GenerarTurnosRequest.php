@@ -26,7 +26,7 @@ class GenerarTurnosRequest extends ApiRequest
             'hora_desde' => ['required', 'date_format:H:i'],
             'hora_hasta' => ['required', 'date_format:H:i', $this->despuesDeHoraDesde()],
             'duracion' => ['required', 'integer', 'in:30,60,90,120'],
-            'cupo_maximo' => ['nullable', 'integer', 'min:1', 'max:11'],
+            'cupo_maximo' => ['nullable', 'integer', 'min:2', 'max:22'],
         ];
     }
 

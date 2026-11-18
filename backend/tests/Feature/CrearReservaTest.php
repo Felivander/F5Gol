@@ -124,16 +124,20 @@ class CrearReservaTest extends TestCase
 
     public function test_al_completar_el_cupo_el_turno_queda_ocupado(): void
     {
+        // Fútbol 5: dos equipos de 5, el partido se completa con 10
         $turno = $this->crearTurno();
-        $this->assertSame(5, $turno->fresh()->cupo_maximo);
+        $this->assertSame(10, $turno->fresh()->cupo_maximo);
 
-        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 3])->assertCreated();
+        $this->reservar($turno, ['tipo' => 'equipo', 'equipo' => 'A'])->assertCreated();
+        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 3])
+            ->assertCreated()
+            ->assertJsonPath('reserva.equipo', 'B');
         $this->assertSame('disponible', $turno->fresh()->estado);
 
         $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 2])->assertCreated();
 
         $turno->refresh();
-        $this->assertSame(5, $turno->cupoActual());
+        $this->assertSame(10, $turno->cupoActual());
         $this->assertSame('ocupado', $turno->estado);
 
         // Con el cupo lleno ya no entra nadie más
@@ -149,10 +153,10 @@ class CrearReservaTest extends TestCase
         $primero = $this->crearJugador();
         $segundo = $this->crearJugador();
 
-        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 3], $primero)->assertCreated();
+        $this->reservar($turno, ['tipo' => 'equipo'], $primero)->assertCreated();
         Notification::assertNothingSent();
 
-        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 2], $segundo)->assertCreated();
+        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 5], $segundo)->assertCreated();
 
         Notification::assertSentTo([$primero, $segundo], PartidoCompleto::class);
         Notification::assertCount(2);
@@ -161,11 +165,11 @@ class CrearReservaTest extends TestCase
     public function test_no_deja_anotar_mas_jugadores_que_el_cupo_disponible(): void
     {
         $turno = $this->crearTurno();
-        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 4])->assertCreated();
+        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 4, 'equipo' => 'A'])->assertCreated();
 
-        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 2])
+        $this->reservar($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 2, 'equipo' => 'A'])
             ->assertStatus(409)
-            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Queda 1 lugar'));
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Queda 1 lugar en el Equipo A'));
 
         $turno->refresh();
         $this->assertSame(4, $turno->cupoActual());
@@ -199,7 +203,7 @@ class CrearReservaTest extends TestCase
         $this->reservar($turno, ['tipo' => 'grupal'])
             ->assertStatus(422)
             ->assertJsonValidationErrors([
-                'tipo' => 'El tipo tiene que ser uno de estos valores: completa, individual.',
+                'tipo' => 'El tipo tiene que ser uno de estos valores: completa, individual, equipo.',
             ]);
 
         $this->assertSame('disponible', $turno->fresh()->estado);

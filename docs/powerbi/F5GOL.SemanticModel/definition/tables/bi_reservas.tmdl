@@ -17,11 +17,11 @@ table bi_reservas
 		formatString: #,0
 		lineageTag: 836e3812-c7fd-408f-a95a-de38a4f899d5
 
-	measure 'Inscripciones de matchmaking' = CALCULATE([Reservas], bi_reservas[tipo] = "individual")
+	measure 'Inscripciones de matchmaking' = CALCULATE([Reservas], bi_reservas[tipo] <> "completa")
 		formatString: #,0
 		lineageTag: 33e1493e-ca79-4c06-9482-a1ac7a003a10
 
-	measure 'Partidos armados por matchmaking' = CALCULATE(DISTINCTCOUNT(bi_reservas[turno_id]), bi_reservas[tipo] = "individual", bi_reservas[estado] <> "cancelada", bi_turnos[estado] = "ocupado")
+	measure 'Partidos armados por matchmaking' = CALCULATE(DISTINCTCOUNT(bi_reservas[turno_id]), bi_reservas[tipo] <> "completa", bi_reservas[estado] <> "cancelada", bi_turnos[estado] = "ocupado")
 		formatString: #,0
 		lineageTag: 3fba3ae1-6c5c-47a1-85da-718821efffe7
 

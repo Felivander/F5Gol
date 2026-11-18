@@ -165,17 +165,39 @@ class ReservaController extends Controller
                 ], 409);
             }
 
-            if ($tipo === 'individual') {
-                $cupoDisponible = $turno->cupo_maximo - $anotados;
+            $equipo = $request->input('equipo');
 
-                if ($cantidad > $cupoDisponible) {
+            // Un equipo entero: la mitad de la cancha, y ese equipo tiene que estar vacío
+            if ($tipo === 'equipo') {
+                $equipo ??= collect(['A', 'B'])->first(fn ($e) => $turno->anotadosEquipo($e) === 0);
+                if (! $equipo || $turno->anotadosEquipo($equipo) > 0) {
+                    $ocupados = $equipo ? $turno->anotadosEquipo($equipo) : null;
+
                     return response()->json([
-                        'message' => $this->textoSinCupo($cupoDisponible, $cantidad, 'en el turno '.$turno->textoHorario()),
+                        'message' => $equipo
+                            ? 'El '.Turno::nombreEquipo($equipo).' del turno '.$turno->textoHorario()." ya tiene {$ocupados} "
+                                .($ocupados === 1 ? 'jugador' : 'jugadores').': no se puede reservar entero, pero podés sumarte a un lugar.'
+                            : 'Los dos equipos del turno '.$turno->textoHorario().' ya tienen jugadores: no se puede reservar un equipo entero, pero podés sumarte a un lugar.',
+                    ], 409);
+                }
+                $cantidad = $turno->cupoEquipo($equipo);
+            }
+
+            // Lugares sueltos: entran en el equipo elegido, o en el que tenga más lugares libres
+            if ($tipo === 'individual') {
+                $equipo ??= $turno->equipoConMasLugares();
+                $libres = $turno->libresEquipo($equipo);
+
+                if ($cantidad > $libres) {
+                    return response()->json([
+                        'message' => $this->textoSinCupo($libres, $cantidad, 'en el '.Turno::nombreEquipo($equipo).' del turno '.$turno->textoHorario()),
                     ], 409);
                 }
             }
 
             $datos = $request->validated();
+            $datos['cantidad_jugadores'] = $cantidad;
+            $datos['equipo'] = $tipo === 'completa' ? null : $equipo;
             // Un jugador no elige el estado de pago: arranca pendiente hasta que el club lo marque
             if (! $esAdministradorDelClub) {
                 unset($datos['estado_pago']);
@@ -196,12 +218,15 @@ class ReservaController extends Controller
 
             $horario = $turno->textoHorario();
             $completo = $turno->fresh()->estado === 'ocupado';
+            $donde = $equipo ? 'en el '.Turno::nombreEquipo($equipo).' ' : '';
 
             return response()->json([
                 'message' => match (true) {
                     $tipo === 'completa' => "Listo: reservaste la cancha entera para el turno {$horario}.",
-                    $completo => "Te anotaste y se completó el partido del turno {$horario}. Les mandamos un mail a todos los jugadores.",
-                    default => "Te anotaste al partido del turno {$horario}. Van {$turno->cupoActual()} de {$turno->cupo_maximo} jugadores.",
+                    $completo => "Te anotaste {$donde}y se completó el partido del turno {$horario}. Les mandamos un mail a todos los jugadores.",
+                    $tipo === 'equipo' => 'Reservaste el '.Turno::nombreEquipo($equipo)." entero ({$cantidad} jugadores) para el partido del turno {$horario}. "
+                        .'Falta que se complete el otro equipo.',
+                    default => "Te anotaste {$donde}del partido del turno {$horario}. Van {$turno->cupoActual()} de {$turno->cupo_maximo} jugadores.",
                 },
                 'reserva' => $reserva->fresh(),
             ], 201);
@@ -328,25 +353,44 @@ class ReservaController extends Controller
             }
 
             $cantidad = (int) $request->input('cantidad_jugadores', $reserva->cantidad_jugadores);
-            $libresNuevo = $nuevoTurno->cupo_maximo - $anotadosNuevo;
-            if ($request->input('tipo', $reserva->tipo) === 'individual' && $cantidad > $libresNuevo) {
-                return response()->json([
-                    'message' => $this->textoSinCupo($libresNuevo, $cantidad, 'en el turno '.$nuevoTurno->textoHorario()),
-                ], 409);
+            $tipoNuevo = $request->input('tipo', $reserva->tipo);
+
+            // En el turno nuevo, la reserva va al mismo equipo si entra; si no, al otro
+            if ($tipoNuevo === 'equipo') {
+                $equipoNuevo = collect([$reserva->equipo ?? 'A', $reserva->equipo === 'B' ? 'A' : 'B'])
+                    ->first(fn ($e) => $nuevoTurno->anotadosEquipo($e) === 0);
+                if (! $equipoNuevo) {
+                    return response()->json([
+                        'message' => 'Los dos equipos del turno '.$nuevoTurno->textoHorario().' ya tienen jugadores: no se puede pasar ahí un equipo entero.',
+                    ], 409);
+                }
+                $cambiosDeEquipo = ['equipo' => $equipoNuevo, 'cantidad_jugadores' => $nuevoTurno->cupoEquipo($equipoNuevo)];
+            } elseif ($tipoNuevo === 'individual') {
+                $equipoNuevo = collect([$reserva->equipo ?? 'A', $reserva->equipo === 'B' ? 'A' : 'B'])
+                    ->first(fn ($e) => $nuevoTurno->libresEquipo($e) >= $cantidad);
+                if (! $equipoNuevo) {
+                    $libresNuevo = max($nuevoTurno->libresEquipo('A'), $nuevoTurno->libresEquipo('B'));
+
+                    return response()->json([
+                        'message' => $this->textoSinCupo($libresNuevo, $cantidad, 'en ningún equipo del turno '.$nuevoTurno->textoHorario()),
+                    ], 409);
+                }
+                $cambiosDeEquipo = ['equipo' => $equipoNuevo];
             }
         } elseif ($reserva->tipo === 'individual' && $reserva->estado !== 'cancelada' && $request->has('cantidad_jugadores')) {
-            // Mismo turno: los jugadores extra tienen que entrar en el cupo que queda libre
+            // Mismo turno: los jugadores extra tienen que entrar en los lugares libres de su equipo
             $extra = (int) $request->input('cantidad_jugadores') - $reserva->cantidad_jugadores;
-            $libre = $turnoAnterior->cupo_maximo - $turnoAnterior->cupoActual();
+            $equipo = $reserva->equipo ?? 'A';
+            $libre = $turnoAnterior->libresEquipo($equipo);
 
             if ($extra > $libre) {
                 return response()->json([
-                    'message' => $this->textoSinCupo($libre, $extra, 'en el turno '.$turnoAnterior->textoHorario()),
+                    'message' => $this->textoSinCupo($libre, $extra, 'en el '.Turno::nombreEquipo($equipo).' del turno '.$turnoAnterior->textoHorario()),
                 ], 409);
             }
         }
 
-        $reserva->update(collect($request->validated())->except('usuario_id')->all());
+        $reserva->update(array_merge(collect($request->validated())->except('usuario_id', 'equipo')->all(), $cambiosDeEquipo ?? []));
 
         // Al cambiar la cantidad de jugadores, el estado o el turno,
         // el cupo puede llenarse o liberarse: se recalculan el turno anterior y el actual

@@ -17,7 +17,7 @@ class PartidoController extends Controller
     #[OA\Get(
         path: '/api/partidos-abiertos',
         summary: 'Partidos abiertos (lobby de matchmaking)',
-        description: 'Turnos que todavía no empezaron, con al menos un jugador anotado por matchmaking y lugares libres. Ordenados por los que menos les falta, para que se completen primero. No incluye datos de los jugadores.',
+        description: 'Turnos que todavía no empezaron, con al menos un jugador anotado por matchmaking y lugares libres. Ordenados por los que menos les falta, para que se completen primero. No incluye datos de los jugadores. Si se manda el token (opcional), cada partido dice si el usuario ya está anotado.',
         tags: ['Matchmaking'],
         parameters: [
             new OA\Parameter(name: 'club_id', description: 'Solo los partidos de un club', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
@@ -32,7 +32,9 @@ class PartidoController extends Controller
                 new OA\Property(property: 'cupo_maximo', type: 'integer', example: 5),
                 new OA\Property(property: 'anotados', type: 'integer', example: 3),
                 new OA\Property(property: 'faltan', type: 'integer', example: 2),
-                new OA\Property(property: 'precio_por_jugador', type: 'number', example: 3400),
+                new OA\Property(property: 'precio_por_jugador', type: 'number', example: 1700),
+                new OA\Property(property: 'equipos', type: 'object', example: ['A' => ['cupo' => 5, 'anotados' => 5, 'faltan' => 0], 'B' => ['cupo' => 5, 'anotados' => 1, 'faltan' => 4]]),
+                new OA\Property(property: 'estoy_anotado', type: 'boolean', example: false),
                 new OA\Property(property: 'cancha', type: 'object', example: ['id' => 1, 'nombre' => 'Cancha 1', 'tipo' => 'futbol5', 'superficie' => 'cesped_sintetico']),
                 new OA\Property(property: 'club', type: 'object', example: ['id' => 1, 'nombre' => 'Complejo Concordia FC', 'direccion' => 'Av. Costanera 1200']),
             ]))),
@@ -52,13 +54,17 @@ class PartidoController extends Controller
             ->when($request->query('fecha'), fn ($q, $fecha) => $q->whereDate('fecha', $fecha))
             ->whereHas('cancha', fn ($q) => $q->where('estado', 'activa')
                 ->when($request->query('club_id'), fn ($c, $club) => $c->where('club_id', $club)))
-            ->whereHas('reservas', fn ($q) => $q->where('tipo', 'individual')->where('estado', '!=', 'cancelada'))
-            ->withSum(['reservas as anotados' => fn ($q) => $q->where('tipo', 'individual')->where('estado', '!=', 'cancelada')], 'cantidad_jugadores')
+            ->whereHas('reservas', fn ($q) => $q->delPartido())
+            ->withSum(['reservas as anotados' => fn ($q) => $q->delPartido()], 'cantidad_jugadores')
             ->with('cancha:id,club_id,nombre,tipo,superficie,tarifa', 'cancha.club:id,nombre,direccion')
+            ->with(['reservas' => fn ($q) => $q->delPartido()->select('id', 'turno_id', 'usuario_id', 'equipo', 'cantidad_jugadores')])
             ->orderBy('fecha')
             ->orderBy('hora_inicio')
             ->limit(100)
             ->get();
+
+        // La ruta es pública, pero si viene el token se marca en qué partidos ya está anotado
+        $usuario = auth('sanctum')->user();
 
         $partidos = $turnos
             ->filter(fn (Turno $t) => ! $t->yaPaso() && (int) $t->anotados < $t->cupo_maximo)
@@ -71,6 +77,8 @@ class PartidoController extends Controller
                 'anotados' => (int) $t->anotados,
                 'faltan' => $t->cupo_maximo - (int) $t->anotados,
                 'precio_por_jugador' => round((float) $t->cancha->tarifa / max(1, $t->cupo_maximo), 2),
+                'equipos' => $this->equipos($t),
+                'estoy_anotado' => $usuario !== null && $t->reservas->contains('usuario_id', $usuario->id),
                 'cancha' => $t->cancha->only('id', 'nombre', 'tipo', 'superficie'),
                 'club' => $t->cancha->club?->only('id', 'nombre', 'direccion'),
             ])
@@ -103,8 +111,11 @@ class PartidoController extends Controller
                 new OA\Property(property: 'precio_por_jugador', type: 'number', example: 3400),
                 new OA\Property(property: 'cancha', type: 'object', example: ['id' => 1, 'nombre' => 'Cancha 1', 'tipo' => 'futbol5', 'superficie' => 'cesped_sintetico', 'techada' => true, 'iluminacion' => true, 'vestuarios' => false]),
                 new OA\Property(property: 'club', type: 'object', example: ['id' => 1, 'nombre' => 'Complejo Concordia FC', 'direccion' => 'Av. Costanera 1200', 'telefono' => '3454111111']),
+                new OA\Property(property: 'equipos', type: 'object', example: ['A' => ['cupo' => 5, 'anotados' => 5, 'faltan' => 0], 'B' => ['cupo' => 5, 'anotados' => 1, 'faltan' => 4]]),
                 new OA\Property(property: 'jugadores', type: 'array', items: new OA\Items(properties: [
                     new OA\Property(property: 'nombre', type: 'string', example: 'Lautaro M.'),
+                    new OA\Property(property: 'equipo', type: 'string', enum: ['A', 'B'], example: 'A'),
+                    new OA\Property(property: 'tipo', type: 'string', enum: ['individual', 'equipo'], example: 'individual'),
                     new OA\Property(property: 'cantidad', type: 'integer', example: 2, description: 'Lugares que ocupa (él y sus amigos)'),
                     new OA\Property(property: 'soy_yo', type: 'boolean', example: false),
                 ])),
@@ -120,7 +131,7 @@ class PartidoController extends Controller
         $turno = Turno::with([
             'cancha:id,club_id,nombre,tipo,superficie,techada,iluminacion,vestuarios,tarifa',
             'cancha.club:id,administrador_id,nombre,direccion,telefono',
-            'reservas' => fn ($q) => $q->where('tipo', 'individual')->where('estado', '!=', 'cancelada')->orderBy('created_at'),
+            'reservas' => fn ($q) => $q->delPartido()->orderBy('created_at'),
             'reservas.usuario:id,name',
         ])->find($id);
 
@@ -163,20 +174,38 @@ class PartidoController extends Controller
             'anotados' => $anotados,
             'faltan' => max(0, $turno->cupo_maximo - $anotados),
             'precio_por_jugador' => round((float) $turno->cancha->tarifa / max(1, $turno->cupo_maximo), 2),
+            'equipos' => $this->equipos($turno),
             'cancha' => $turno->cancha->only('id', 'nombre', 'tipo', 'superficie', 'techada', 'iluminacion', 'vestuarios'),
             'club' => $turno->cancha->club?->only('id', 'nombre', 'direccion', 'telefono'),
             'jugadores' => $turno->reservas->map(fn (Reserva $r) => [
                 'nombre' => $this->nombreCorto($r->usuario?->name),
                 'cantidad' => $r->cantidad_jugadores,
+                'equipo' => $r->equipo ?? 'A',
+                'tipo' => $r->tipo,
                 'soy_yo' => $r->usuario_id === $usuario->id,
             ])->values(),
             'mi_reserva' => $miReserva ? [
                 'id' => $miReserva->id,
                 'cantidad_jugadores' => $miReserva->cantidad_jugadores,
+                'equipo' => $miReserva->equipo ?? 'A',
+                'tipo' => $miReserva->tipo,
                 'puede_cancelar' => now()->lessThanOrEqualTo($limiteCancelacion),
                 'cancelar_hasta' => $limiteCancelacion->format('Y-m-d H:i'),
             ] : null,
         ], 200);
+    }
+
+    // Cupo, anotados y lugares libres de cada equipo, con las reservas ya cargadas del turno
+    private function equipos(Turno $turno): array
+    {
+        $equipos = [];
+        foreach (['A', 'B'] as $equipo) {
+            $cupo = $turno->cupoEquipo($equipo);
+            $anotados = (int) $turno->reservas->filter(fn ($r) => ($r->equipo ?? 'A') === $equipo)->sum('cantidad_jugadores');
+            $equipos[$equipo] = ['cupo' => $cupo, 'anotados' => $anotados, 'faltan' => max(0, $cupo - $anotados)];
+        }
+
+        return $equipos;
     }
 
     // "Lautaro Meza" -> "Lautaro M.": alcanza para reconocerse sin mostrar el nombre completo

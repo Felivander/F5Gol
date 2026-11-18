@@ -9,7 +9,8 @@ class ReservaRequest extends ApiRequest
         return [
             'turno_id' => ['required', 'integer', 'exists:turnos,id'],
             'usuario_id' => ['required', 'integer', 'exists:users,id'],
-            'tipo' => ['nullable', 'in:completa,individual'],
+            'tipo' => ['nullable', 'in:completa,individual,equipo'],
+            'equipo' => ['nullable', 'in:A,B'],
             'cantidad_jugadores' => ['nullable', 'integer', 'min:1', 'max:22'],
             'estado' => ['nullable', 'in:pendiente,confirmada,cancelada'],
             'estado_pago' => ['nullable', 'in:pendiente,sena,pagado'],

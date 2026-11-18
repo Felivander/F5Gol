@@ -30,8 +30,7 @@ class AvisarPartidoCompleto
         $turno = $this->turno->loadMissing('cancha.club');
 
         $reservas = $turno->reservas()
-            ->where('tipo', 'individual')
-            ->where('estado', '!=', 'cancelada')
+            ->delPartido()
             ->with('usuario:id,name,email')
             ->get();
         $jugadores = $reservas->pluck('usuario')->filter()->unique('id')->values();

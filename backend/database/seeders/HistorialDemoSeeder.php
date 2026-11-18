@@ -82,7 +82,8 @@ class HistorialDemoSeeder extends Seeder
 
     private function cargarCancha(Cancha $cancha, array $jugadores, Carbon $inicio, Carbon $hoy): void
     {
-        $cupo = max(1, intdiv($cancha->capacidad_jugadores, 2));
+        // El partido de matchmaking: los dos equipos juntos
+        $cupo = max(2, $cancha->capacidad_jugadores);
 
         // Turnos que ya existen en el período, para no repetirlos (una sola consulta)
         $existentes = DB::table('turnos')
@@ -150,22 +151,29 @@ class HistorialDemoSeeder extends Seeder
         return $cancelada ? 'disponible' : 'ocupado';
     }
 
-    // Jugadores sueltos que se anotan; a veces completan el cupo y a veces no
+    // Partido de dos equipos: un grupo reserva un equipo entero y el otro se arma con jugadores sueltos.
+    // A veces se completa y a veces no.
     private function partidoMatchmaking(int $turnoId, array $jugadores, Carbon $fecha, int $hora, int $cupo): string
     {
-        $anotados = mt_rand(1, 100) <= 70 ? $cupo : mt_rand(1, max(1, $cupo - 1));
-        $filas = [];
+        $cupoA = (int) ceil($cupo / 2);
+        $cupoB = intdiv($cupo, 2);
+        $sueltos = mt_rand(1, 100) <= 70 ? $cupoB : mt_rand(1, max(1, $cupoB - 1));
 
-        foreach ((array) array_rand(array_flip($jugadores), min($anotados, count($jugadores))) as $usuarioId) {
-            $filas[] = $this->fila($turnoId, [$usuarioId], $fecha, $hora, 'individual', 1, false);
+        $filas = [$this->fila($turnoId, $jugadores, $fecha, $hora, 'equipo', $cupoA, false, 'A')];
+        // Los sueltos del Equipo B: algunos se anotan con amigos
+        $pendientes = $sueltos;
+        while ($pendientes > 0) {
+            $cantidad = min($pendientes, mt_rand(1, 3));
+            $filas[] = $this->fila($turnoId, $jugadores, $fecha, $hora, 'individual', $cantidad, false, 'B');
+            $pendientes -= $cantidad;
         }
 
         DB::table('reservas')->insert($filas);
 
-        return $anotados >= $cupo ? 'ocupado' : 'disponible';
+        return $sueltos >= $cupoB ? 'ocupado' : 'disponible';
     }
 
-    private function fila(int $turnoId, array $jugadores, Carbon $fecha, int $hora, string $tipo, int $cantidad, bool $cancelada): array
+    private function fila(int $turnoId, array $jugadores, Carbon $fecha, int $hora, string $tipo, int $cantidad, bool $cancelada, ?string $equipo = null): array
     {
         // Se reserva entre 0 y 5 días antes del partido
         $reservada = $fecha->copy()->setTime($hora, 0)->subHours(mt_rand(2, 120));
@@ -176,6 +184,7 @@ class HistorialDemoSeeder extends Seeder
             'usuario_id' => $jugadores[array_rand($jugadores)],
             'tipo' => $tipo,
             'cantidad_jugadores' => $cantidad,
+            'equipo' => $equipo,
             'estado' => $cancelada ? 'cancelada' : 'confirmada',
             'estado_pago' => $cancelada ? 'pendiente' : ($sorteo <= 80 ? 'pagado' : ($sorteo <= 95 ? 'sena' : 'pendiente')),
             'created_at' => $reservada,

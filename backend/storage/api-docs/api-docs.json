@@ -1236,7 +1236,7 @@
                     "Matchmaking"
                 ],
                 "summary": "Partidos abiertos (lobby de matchmaking)",
-                "description": "Turnos que todavía no empezaron, con al menos un jugador anotado por matchmaking y lugares libres. Ordenados por los que menos les falta, para que se completen primero. No incluye datos de los jugadores.",
+                "description": "Turnos que todavía no empezaron, con al menos un jugador anotado por matchmaking y lugares libres. Ordenados por los que menos les falta, para que se completen primero. No incluye datos de los jugadores. Si se manda el token (opcional), cada partido dice si el usuario ya está anotado.",
                 "operationId": "f4216189684d063b84db3d603222904d",
                 "parameters": [
                     {
@@ -1299,7 +1299,26 @@
                                             },
                                             "precio_por_jugador": {
                                                 "type": "number",
-                                                "example": 3400
+                                                "example": 1700
+                                            },
+                                            "equipos": {
+                                                "type": "object",
+                                                "example": {
+                                                    "A": {
+                                                        "cupo": 5,
+                                                        "anotados": 5,
+                                                        "faltan": 0
+                                                    },
+                                                    "B": {
+                                                        "cupo": 5,
+                                                        "anotados": 1,
+                                                        "faltan": 4
+                                                    }
+                                                }
+                                            },
+                                            "estoy_anotado": {
+                                                "type": "boolean",
+                                                "example": false
                                             },
                                             "cancha": {
                                                 "type": "object",
@@ -1420,6 +1439,21 @@
                                                 "telefono": "3454111111"
                                             }
                                         },
+                                        "equipos": {
+                                            "type": "object",
+                                            "example": {
+                                                "A": {
+                                                    "cupo": 5,
+                                                    "anotados": 5,
+                                                    "faltan": 0
+                                                },
+                                                "B": {
+                                                    "cupo": 5,
+                                                    "anotados": 1,
+                                                    "faltan": 4
+                                                }
+                                            }
+                                        },
                                         "jugadores": {
                                             "type": "array",
                                             "items": {
@@ -1427,6 +1461,22 @@
                                                     "nombre": {
                                                         "type": "string",
                                                         "example": "Lautaro M."
+                                                    },
+                                                    "equipo": {
+                                                        "type": "string",
+                                                        "example": "A",
+                                                        "enum": [
+                                                            "A",
+                                                            "B"
+                                                        ]
+                                                    },
+                                                    "tipo": {
+                                                        "type": "string",
+                                                        "example": "individual",
+                                                        "enum": [
+                                                            "individual",
+                                                            "equipo"
+                                                        ]
                                                     },
                                                     "cantidad": {
                                                         "description": "Lugares que ocupa (él y sus amigos)",
@@ -2086,9 +2136,9 @@
                                         ]
                                     },
                                     "cupo_maximo": {
-                                        "description": "Jugadores sueltos para el matchmaking. Por defecto, la mitad de la capacidad de la cancha.",
+                                        "description": "Lugares del partido de matchmaking, sumando los dos equipos. Por defecto, la capacidad de la cancha.",
                                         "type": "integer",
-                                        "example": 5,
+                                        "example": 10,
                                         "nullable": true
                                     }
                                 },
@@ -2313,11 +2363,23 @@
                         "example": 1
                     },
                     "tipo": {
+                        "description": "completa: la cancha entera · individual: lugares sueltos en un equipo · equipo: un equipo entero (la mitad de la cancha)",
                         "type": "string",
-                        "example": "completa",
+                        "example": "individual",
                         "enum": [
                             "completa",
-                            "individual"
+                            "individual",
+                            "equipo"
+                        ]
+                    },
+                    "equipo": {
+                        "description": "Para individual y equipo. Si no se manda, se elige el equipo con más lugares libres (o el que está vacío).",
+                        "type": "string",
+                        "example": "A",
+                        "nullable": true,
+                        "enum": [
+                            "A",
+                            "B"
                         ]
                     },
                     "cantidad_jugadores": {

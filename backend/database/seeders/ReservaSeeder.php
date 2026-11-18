@@ -47,7 +47,7 @@ class ReservaSeeder extends Seeder
         ]);
         $turnoCompleto->update(['estado' => 'ocupado']);
 
-        // Escenario 2: matchmaking con cupo incompleto (3 de 5 jugadores)
+        // Escenario 2: matchmaking con cupo incompleto (3 de 10 jugadores)
         $turnoMatchmaking = $turnos[1];
         for ($i = 1; $i <= 3; $i++) {
             Reserva::create([
@@ -59,6 +59,6 @@ class ReservaSeeder extends Seeder
                 'estado_pago' => 'pendiente',
             ]);
         }
-        // El turno permanece "disponible": el cupo (3/5) todavía no se completó
+        // El turno permanece "disponible": el cupo (3/10) todavía no se completó
     }
 }
