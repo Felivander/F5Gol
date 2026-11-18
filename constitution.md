@@ -228,7 +228,7 @@ Extensiones de PHP necesarias: BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Toke
 
 ---
 
-## 8. Estado actual y pendientes (revisado el 15/11/2026)
+## 8. Estado actual y pendientes (revisado el 18/11/2026)
 
 Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, rúbrica, propuesta, backlog, nota de n8n y las guías de las semanas 1 a 13) contra el código. Esta sección se actualiza cada vez que se cierra algo. Cuando la lista de pendientes quede vacía, el proyecto está listo para presentar.
 
@@ -265,14 +265,14 @@ Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, 
 6. ~~Alta y edición de clubes desde el front.~~ Hecho: pantalla **Mis clubes** (`/mis-clubes`), formulario reactivo del club con fotos y descripción, y detalles de cancha (superficie y comodidades).
 7. ~~Alta de turnos desde el front.~~ Hecho: `POST /api/turnos/generar` crea en lote los turnos de un rango de fechas (hasta 90 días), días de la semana y franja horaria, sin duplicar ni superponer; pantalla `/canchas/:id/horarios` con vista previa; el dueño puede eliminar turnos libres desde la grilla. Además, crear, editar y borrar turnos ahora exige ser dueño de la cancha (403). Queda pendiente la tarifa diferencial por horario pico (opcional).
 8. ~~Mails reales en la demo.~~ Hecho: la bienvenida y los avisos de partido completo e incompleto salen por n8n (`docs/n8n/partido-completo.json`, `docs/n8n/partido-incompleto.json`), probados con Gmail. Si n8n no responde, los avisos de partido salen por el mail de Laravel.
-9. **Probar la demo de punta a punta** con la base recién creada (`migrate:fresh --seed`): registro → (Google) → crear club → crear cancha y turnos → reservar → matchmaking hasta 5 → mail → panel → cambiar pago → cancelar. Instalar GD en el PHP de la máquina de la presentación (en la de Felipe ya está: `extension=gd` en `C:\xampp\php\php.ini`). Antes de presentar, correr `php artisan db:seed --class=TurnoSeeder` para tener turnos de hoy y mañana. El programador (`php artisan schedule:work`) tiene que estar corriendo para que salga el aviso de partido incompleto; en n8n hay que importar y activar también el flujo de partido incompleto.
+9. ~~Probar la demo de punta a punta.~~ Hecho el 18/11 con la base recién creada (`migrate:fresh --seed` + `TurnoSeeder`), por la API y en las pantallas: registro de un administrador, club, cancha, carga de turnos, reserva de la cancha entera, doble reserva rechazada (409), matchmaking hasta 10 (sigue "disponible" con 9/10, pasa a "ocupado" con 10 y no entra el 11), mail a los 10 jugadores, panel, seña, el jugador no cambia el pago (403), otro administrador no edita la cancha (403) y cancelación que libera el turno. Los mails se probaron contra el log (n8n con Gmail ya se había probado antes). Lo que queda para la máquina de la presentación: probar la demo con la base (`migrate:fresh --seed`): registro → (Google) → crear club → crear cancha y turnos → reservar → matchmaking hasta 5 → mail → panel → cambiar pago → cancelar. Instalar GD en el PHP de la máquina de la presentación (en la de Felipe ya está: `extension=gd` en `C:\xampp\php\php.ini`). Antes de presentar, correr `php artisan db:seed --class=TurnoSeeder` para tener turnos de hoy y mañana. El programador (`php artisan schedule:work`) tiene que estar corriendo para que salga el aviso de partido incompleto; en n8n hay que importar y activar también el flujo de partido incompleto.
 
 ### 8.4 Limpieza antes de entregar
 
 9b. Factories: solo existe `UserFactory`. La guía de Seeders muestra seeder + factory; agregar factories de `Club`, `Cancha`, `Turno` y `Reserva` simplificaría los tests y los seeders (opcional, suma en "calidad del código").
 10. ~~Sacar la página de práctica y los `ExampleTest`.~~ Hecho.
 11. ~~Aviso de `ng build` por el bundle.~~ Hecho: páginas con `loadComponent` (lazy loading) y sin el JavaScript de Bootstrap, que no se usaba. El inicial bajó de 760 kB a 534 kB (104 kB comprimido). El presupuesto quedó en 600 kB porque lo que resta es el CSS de Bootstrap, que sí se usa.
-12. Unificar el número de grupo (`idea_de_proyecto_F5GOL.md` dice "Grupo 4", la propuesta entregada es `Grupo5.docx`) y actualizar el README con Google, n8n y Power BI.
+12. ~~Unificar el número de grupo y actualizar el README.~~ Hecho: es el **Grupo 4** (`Grupo5.docx` es solo el nombre del archivo de la propuesta, fuera del repo). El README explica la instalación desde cero, Google, n8n, el programador, la preparación de la demo, el matchmaking y los problemas frecuentes. `.env.example` traía `DB_DATABASE=backend`: ahora dice `f5gol`, que es la base que usa el instalador.
 13. Revisar que el reparto de commits sea parejo entre los cuatro integrantes (`git shortlog -sn --all`) y que cada uno pueda explicar su parte.
 
 ### 8.5 Opcional (está en la propuesta, no lo exige la cátedra)
