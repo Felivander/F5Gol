@@ -1,9 +1,10 @@
-import { Component, DestroyRef, OnInit, inject, input, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Cancha, CanchaInput, SUPERFICIES, Superficie } from '../../models';
 import { Icono } from '../../components/icono/icono';
+import { pesos } from '../../formato';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 import { noSoloEspacios } from '../../validadores';
@@ -44,6 +45,19 @@ export class CanchaForm implements OnInit {
   });
 
   protected superficies = SUPERFICIES;
+
+  // El precio que se carga es el de la cancha entera por turno; acá se muestra lo que paga cada uno
+  private valores = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+  protected precios = computed(() => {
+    const tarifa = Number(this.valores().tarifa) || 0;
+    const jugadores = Math.max(2, Number(this.valores().capacidad_jugadores) || 2);
+    return {
+      jugadores,
+      porJugador: pesos(tarifa / jugadores),
+      porEquipo: pesos(tarifa / 2),
+      hay: tarifa > 0
+    };
+  });
   clubId = signal(0);
   // Cancha guardada (en edición, o después del alta): habilita la carga de fotos
   cancha = signal<Cancha | null>(null);
