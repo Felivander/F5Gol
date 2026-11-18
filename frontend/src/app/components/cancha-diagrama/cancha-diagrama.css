@@ -6,28 +6,41 @@
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 5 / 3;
   border-radius: var(--r-chico);
+  /* Si el lugar es más ancho que la cancha, los costados quedan del mismo verde que el borde */
+  background: #0a3f27;
 }
 
-.campo-pasto {
-  fill: var(--cancha);
+.campo-borde {
+  fill: #0a3f27;
 }
 
-.campo-franja {
-  fill: var(--cancha-oscura);
-  opacity: 0.35;
+/* Pasto cortado en franjas */
+.campo-franja-a {
+  fill: #16804f;
+}
+
+.campo-franja-b {
+  fill: #12703f;
 }
 
 .campo-lineas {
   fill: none;
-  stroke: rgb(255 255 255 / 0.75);
-  stroke-width: 2;
+  stroke: rgb(255 255 255 / 0.85);
+  stroke-width: 5;
+  stroke-linejoin: round;
 }
 
+/* En las tarjetas chicas las líneas van más gruesas para que se vean */
 .mini .campo-lineas {
-  stroke-width: 3;
+  stroke-width: 8;
 }
 
-.campo-punto {
-  fill: rgb(255 255 255 / 0.75);
+.campo-arco {
+  fill: rgb(255 255 255 / 0.18);
+}
+
+.campo-puntos {
+  fill: rgb(255 255 255 / 0.9);
 }

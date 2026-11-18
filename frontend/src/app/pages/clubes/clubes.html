@@ -1,4 +1,43 @@
 <section class="portada">
+  <!-- Cancha en perspectiva, de fondo. Medidas reales en decímetros (105 x 68 m) -->
+  <div class="portada-cancha" aria-hidden="true">
+    <svg viewBox="0 0 1150 780" preserveAspectRatio="xMidYMid meet" focusable="false">
+      <defs>
+        <radialGradient id="portada-luz" cx="50%" cy="45%" r="65%">
+          <stop offset="0" stop-color="#fff" stop-opacity="0.16" />
+          <stop offset="1" stop-color="#fff" stop-opacity="0" />
+        </radialGradient>
+        <pattern id="portada-red" width="8" height="8" patternUnits="userSpaceOnUse">
+          <path d="M0 0L8 8M8 0L0 8" stroke="#fff" stroke-opacity="0.35" stroke-width="1" />
+        </pattern>
+      </defs>
+      <rect x="0" y="0" width="1150" height="780" rx="24" class="pc-borde" />
+      @for (franja of franjas; track franja) {
+        <rect [attr.x]="50 + franja * 105" y="50" width="105" height="680" [class]="franja % 2 ? 'pc-franja-b' : 'pc-franja-a'" />
+      }
+      <rect x="50" y="50" width="1050" height="680" fill="url(#portada-luz)" />
+      <g class="pc-lineas">
+        <rect x="50" y="50" width="1050" height="680" />
+        <line x1="575" y1="50" x2="575" y2="730" />
+        <circle cx="575" cy="390" r="91.5" />
+        <rect x="50" y="188.5" width="165" height="403" />
+        <rect x="935" y="188.5" width="165" height="403" />
+        <rect x="50" y="298.5" width="55" height="183" />
+        <rect x="1045" y="298.5" width="55" height="183" />
+        <path d="M215 316.9A91.5 91.5 0 0 1 215 463.1" />
+        <path d="M935 316.9A91.5 91.5 0 0 0 935 463.1" />
+        <path d="M50 60A10 10 0 0 0 60 50M1090 50A10 10 0 0 0 1100 60M1100 720A10 10 0 0 0 1090 730M60 730A10 10 0 0 0 50 720" />
+      </g>
+      <g class="pc-puntos">
+        <circle cx="575" cy="390" r="5" />
+        <circle cx="160" cy="390" r="4" />
+        <circle cx="990" cy="390" r="4" />
+      </g>
+      <rect x="28" y="353.4" width="22" height="73.2" class="pc-arco" />
+      <rect x="1100" y="353.4" width="22" height="73.2" class="pc-arco" />
+    </svg>
+  </div>
+
   <div class="portada-interior">
     <p class="antetitulo portada-ante">Turnos y partidos de fútbol 5</p>
     <h1>Reservá cancha.<br>O sumate a un partido.</h1>
