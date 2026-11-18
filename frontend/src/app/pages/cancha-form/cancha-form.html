@@ -59,8 +59,14 @@
         </div>
 
         <div class="campo">
-          <label for="tarifa">Precio del turno ($)</label>
-          <input id="tarifa" type="number" min="0" step="100" formControlName="tarifa">
+          <label for="tarifa">Precio del turno, cancha entera ($)</label>
+          <input id="tarifa" type="number" min="0" step="100" formControlName="tarifa" aria-describedby="ayuda-tarifa">
+          <small id="ayuda-tarifa" class="ayuda">
+            Lo que paga el grupo que alquila la cancha entera por un turno.
+            @if (precios().hay) {
+              En matchmaking se divide: {{ precios().porJugador }} por jugador ({{ precios().jugadores }} lugares) o {{ precios().porEquipo }} por un equipo completo.
+            }
+          </small>
           @if (errorDe('tarifa')) {
             <small class="error-campo">{{ errorDe('tarifa') }}</small>
           }
