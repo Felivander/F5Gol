@@ -1,9 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Icono } from '../../components/icono/icono';
-import { partesFecha } from '../../formato';
+import { fechaRelativa, partesFecha } from '../../formato';
 import { Reserva } from '../../models';
 import { Api } from '../../services/api';
+import { Dialogos } from '../../services/dialogos';
 import { Auth } from '../../services/auth';
 
 @Component({
@@ -14,6 +15,7 @@ import { Auth } from '../../services/auth';
 })
 export class MisReservas implements OnInit {
   private api = inject(Api);
+  private dialogos = inject(Dialogos);
   private auth = inject(Auth);
   private router = inject(Router);
 
@@ -65,8 +67,20 @@ export class MisReservas implements OnInit {
     return inicio.getTime() > Date.now();
   }
 
-  cancelar(reserva: Reserva) {
-    if (!confirm('¿Querés cancelar esta reserva?')) {
+  async cancelar(reserva: Reserva) {
+    const turno = reserva.turno;
+    const cuando = turno
+      ? ` del ${fechaRelativa(turno.fecha).toLowerCase()} a las ${turno.hora_inicio.slice(0, 5)}${turno.cancha ? ' en ' + turno.cancha.nombre : ''}`
+      : '';
+    if (!(await this.dialogos.confirmar({
+      titulo: `¿Cancelar la reserva${cuando}?`,
+      mensaje: reserva.tipo === 'completa'
+        ? 'La cancha queda libre para que la reserve otro.'
+        : 'Tu lugar en el partido queda libre para otro jugador.',
+      textoConfirmar: 'Cancelar reserva',
+      textoVolver: 'No, mantenerla',
+      peligro: true
+    }))) {
       return;
     }
     this.cancelando.set(reserva.id);

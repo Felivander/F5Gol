@@ -6,6 +6,7 @@ import { Cancha, CanchaInput, SUPERFICIES, Superficie } from '../../models';
 import { Icono } from '../../components/icono/icono';
 import { pesos } from '../../formato';
 import { Api } from '../../services/api';
+import { Dialogos } from '../../services/dialogos';
 import { Auth } from '../../services/auth';
 import { noSoloEspacios } from '../../validadores';
 
@@ -22,6 +23,7 @@ type Campo = 'nombre' | 'capacidad_jugadores' | 'superficie' | 'tarifa' | 'descr
 })
 export class CanchaForm implements OnInit {
   private api = inject(Api);
+  private dialogos = inject(Dialogos);
   private auth = inject(Auth);
   private router = inject(Router);
   private fb = inject(FormBuilder);
@@ -195,9 +197,14 @@ export class CanchaForm implements OnInit {
     });
   }
 
-  borrarFoto(indice: number) {
+  async borrarFoto(indice: number) {
     const cancha = this.cancha();
-    if (!cancha || !confirm('¿Borrar esta foto?')) {
+    if (!cancha || !(await this.dialogos.confirmar({
+      titulo: '¿Borrar esta foto?',
+      mensaje: `Se saca de ${cancha.nombre} y no se puede recuperar.`,
+      textoConfirmar: 'Borrar foto',
+      peligro: true
+    }))) {
       return;
     }
     this.api.borrarFotoCancha(cancha.id, indice).subscribe({

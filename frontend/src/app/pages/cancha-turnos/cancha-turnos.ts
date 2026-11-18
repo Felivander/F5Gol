@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Cancha, CupoEquipo, Equipo, Equipos, NuevaReserva, Turno } from '../../models';
 import { Api } from '../../services/api';
+import { Dialogos } from '../../services/dialogos';
 import { Auth } from '../../services/auth';
 
 import { CanchaDiagrama } from '../../components/cancha-diagrama/cancha-diagrama';
@@ -29,6 +30,7 @@ function hoy(): string {
 })
 export class CanchaTurnos implements OnInit {
   private api = inject(Api);
+  private dialogos = inject(Dialogos);
   private router = inject(Router);
   protected auth = inject(Auth);
 
@@ -90,8 +92,13 @@ export class CanchaTurnos implements OnInit {
     });
   }
 
-  eliminarTurno(turno: Turno) {
-    if (!confirm(`¿Eliminar el turno del ${turno.fecha.slice(0, 10)} a las ${turno.hora_inicio.slice(0, 5)}?`)) {
+  async eliminarTurno(turno: Turno) {
+    if (!(await this.dialogos.confirmar({
+      titulo: `¿Eliminar el turno de las ${turno.hora_inicio.slice(0, 5)}?`,
+      mensaje: `Es el del ${fechaRelativa(turno.fecha).toLowerCase()} en ${this.cancha()?.nombre ?? 'esta cancha'}. Deja de aparecer en la grilla y nadie lo puede reservar.`,
+      textoConfirmar: 'Eliminar turno',
+      peligro: true
+    }))) {
       return;
     }
     this.reservando.set(turno.id);

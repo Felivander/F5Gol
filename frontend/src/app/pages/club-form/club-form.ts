@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Club, ClubInput } from '../../models';
 import { Icono } from '../../components/icono/icono';
 import { Api } from '../../services/api';
+import { Dialogos } from '../../services/dialogos';
 import { Auth } from '../../services/auth';
 import { PATRON_TELEFONO, noSoloEspacios } from '../../validadores';
 
@@ -15,6 +16,7 @@ import { PATRON_TELEFONO, noSoloEspacios } from '../../validadores';
 })
 export class ClubForm implements OnInit {
   private api = inject(Api);
+  private dialogos = inject(Dialogos);
   private auth = inject(Auth);
   private router = inject(Router);
   private fb = inject(FormBuilder);
@@ -150,9 +152,14 @@ export class ClubForm implements OnInit {
     });
   }
 
-  borrarFoto(indice: number): void {
+  async borrarFoto(indice: number): Promise<void> {
     const club = this.club();
-    if (!club || !confirm('¿Borrar esta foto?')) {
+    if (!club || !(await this.dialogos.confirmar({
+      titulo: '¿Borrar esta foto?',
+      mensaje: `Se saca de ${club.nombre} y no se puede recuperar.`,
+      textoConfirmar: 'Borrar foto',
+      peligro: true
+    }))) {
       return;
     }
     this.api.borrarFotoClub(club.id, indice).subscribe({

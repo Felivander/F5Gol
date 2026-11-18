@@ -202,7 +202,7 @@ Extensiones de PHP necesarias: BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Toke
 - Los tipos de los datos de la API están en `src/app/models.ts`.
 - Formularios con validaciones, mostrando los errores (incluidos los `422` de Laravel, `err.error?.errors?.campo?.[0]`) en la interfaz. El plan anual (semana 13) pide **formularios reactivos con validaciones personalizadas**; las guías de clase usan `FormsModule` + `[(ngModel)]`. Los formularios nuevos se hacen reactivos (`ReactiveFormsModule`).
 - Para crear y editar desde un listado se puede reutilizar un **modal de Bootstrap** controlado con un `signal` (`modalAbierto`, `xEditando`), como en las guías "Insertar/Actualizar datos con modal".
-- Borrar y restaurar piden confirmación (`confirm(...)`) y después recargan las listas de activos y de eliminados.
+- Borrar, restaurar, cancelar y toda acción que pida confirmación usan el diálogo de la app (servicio `Dialogos` + `components/dialogo`, con `<dialog>` nativo), nunca `confirm()`, `prompt()` ni `alert()` del navegador; después recargan las listas que correspondan.
 - El token de Sanctum se guarda en `localStorage`/`sessionStorage`, se agrega con un **HTTP Interceptor** (`Authorization: Bearer ...`) y las rutas privadas se protegen con **guards**.
 - En desarrollo, `/api` se redirige a Laravel con `proxy.conf.json`.
 - Diseño mobile-first con Bootstrap; textos en español.

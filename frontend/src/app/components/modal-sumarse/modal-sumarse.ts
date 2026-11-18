@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, injec
 import { pesos } from '../../formato';
 import { Equipo, Equipos } from '../../models';
 import { Api } from '../../services/api';
+import { Dialogos } from '../../services/dialogos';
 import { Auth } from '../../services/auth';
 import { Icono } from '../icono/icono';
 
@@ -33,6 +34,7 @@ export interface PartidoParaSumarse {
 })
 export class ModalSumarse {
   private api = inject(Api);
+  private dialogos = inject(Dialogos);
   private auth = inject(Auth);
 
   // null = cerrado
@@ -108,7 +110,7 @@ export class ModalSumarse {
       await navigator.clipboard.writeText(link);
       this.copiado.set(true);
     } catch {
-      prompt('Copiá este link para invitar:', link);
+      await this.dialogos.mostrarLink('Link para invitar', link, 'Copialo y mandáselo: con este link se anotan en la grilla de ese día.');
     }
   }
 
