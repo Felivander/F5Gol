@@ -79,7 +79,7 @@ class CancelarReservaTest extends TestCase
         $this->deleteJson("/api/reservas/{$reserva->id}")->assertOk();
         $this->deleteJson("/api/reservas/{$reserva->id}")
             ->assertConflict()
-            ->assertJsonPath('message', 'La reserva ya estaba cancelada');
+            ->assertJsonPath('message', 'La reserva ya estaba cancelada.');
     }
 
     public function test_cancelar_en_matchmaking_libera_cupo(): void
@@ -111,7 +111,7 @@ class CancelarReservaTest extends TestCase
 
         $this->deleteJson("/api/reservas/{$reserva->id}")
             ->assertConflict()
-            ->assertJsonPath('message', 'Las reservas se pueden cancelar hasta 2 horas antes del turno.');
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Las reservas se pueden cancelar hasta 2 horas antes del turno'));
 
         $this->assertDatabaseHas('reservas', ['id' => $reserva->id]);
         $this->assertSame('ocupado', $turno->fresh()->estado);
@@ -126,11 +126,32 @@ class CancelarReservaTest extends TestCase
         $this->deleteJson("/api/reservas/{$reserva->id}")->assertOk();
     }
 
-    public function test_el_administrador_puede_cancelar_fuera_de_plazo(): void
+    public function test_el_administrador_del_club_puede_cancelar_fuera_de_plazo(): void
     {
         $reserva = $this->reservaDe($this->crearJugador(), $this->turnoQueEmpiezaEn(30));
-        Sanctum::actingAs($this->crearAdministrador());
+        Sanctum::actingAs($reserva->turno->cancha->club->administrador);
 
         $this->deleteJson("/api/reservas/{$reserva->id}")->assertOk();
+    }
+
+    public function test_un_administrador_de_otro_club_no_puede_cancelar_la_reserva(): void
+    {
+        $reserva = $this->reservaDe($this->crearJugador(), $this->turnoQueEmpiezaEn(3 * 60));
+        Sanctum::actingAs($this->crearAdministrador());
+
+        $this->deleteJson("/api/reservas/{$reserva->id}")
+            ->assertForbidden()
+            ->assertJsonPath('message', 'Solo podés cancelar tus propias reservas o las de tus clubes.');
+
+        $this->assertSame('confirmada', $reserva->fresh()->estado);
+    }
+
+    public function test_un_jugador_no_puede_cancelar_la_reserva_de_otro(): void
+    {
+        $reserva = $this->reservaDe($this->crearJugador(), $this->turnoQueEmpiezaEn(3 * 60));
+        Sanctum::actingAs($this->crearJugador());
+
+        $this->deleteJson("/api/reservas/{$reserva->id}")->assertForbidden();
+        $this->assertSame('confirmada', $reserva->fresh()->estado);
     }
 }

@@ -1,0 +1,132 @@
+// =====================================================================
+// F5GOL · Medidas y columnas para el dashboard de Power BI
+// Cómo usarlas: en Power BI Desktop, "Inicio > Nueva medida" (o "Nueva columna"
+// en las columnas calculadas) y pegar cada definición. Ver README.md.
+// =====================================================================
+
+
+// ---------------------------------------------------------------------
+// 1. Tabla Calendario ("Modelado > Nueva tabla")
+// ---------------------------------------------------------------------
+Calendario =
+ADDCOLUMNS (
+    CALENDAR ( MIN ( bi_turnos[fecha] ), MAX ( bi_turnos[fecha] ) ),
+    "Año", YEAR ( [Date] ),
+    "Mes", FORMAT ( [Date], "mmmm yyyy" ),
+    "Semana", [Date] - WEEKDAY ( [Date], 2 ) + 1,
+    "Día de la semana", FORMAT ( [Date], "dddd" ),
+    "Nro día", WEEKDAY ( [Date], 2 ),
+    "Es fin de semana", WEEKDAY ( [Date], 2 ) >= 6
+)
+// Ordenar "Día de la semana" por "Nro día" (Herramientas de columna > Ordenar por columna)
+
+
+// ---------------------------------------------------------------------
+// 2. Columnas calculadas en bi_turnos
+// ---------------------------------------------------------------------
+Hora = HOUR ( bi_turnos[hora_inicio] )
+
+Franja =
+SWITCH (
+    TRUE (),
+    bi_turnos[Hora] < 18, "Tarde (antes de 18 hs)",
+    bi_turnos[Hora] < 20, "Previa (18 a 20 hs)",
+    "Noche (desde 20 hs)"
+)
+
+
+// Columna calculada en bi_usuarios: solo la fecha, para relacionarla con Calendario
+Fecha de alta = DATE ( YEAR ( bi_usuarios[creado_en] ), MONTH ( bi_usuarios[creado_en] ), DAY ( bi_usuarios[creado_en] ) )
+
+
+// ---------------------------------------------------------------------
+// 3. Medidas · Ocupación
+// ---------------------------------------------------------------------
+Turnos ofrecidos =
+CALCULATE ( COUNTROWS ( bi_turnos ), bi_turnos[estado] <> "bloqueado" )
+
+Turnos ocupados =
+CALCULATE ( COUNTROWS ( bi_turnos ), bi_turnos[estado] = "ocupado" )
+
+% Ocupación =
+DIVIDE ( [Turnos ocupados], [Turnos ofrecidos] )
+
+Turnos bloqueados =
+CALCULATE ( COUNTROWS ( bi_turnos ), bi_turnos[estado] = "bloqueado" )
+
+
+// ---------------------------------------------------------------------
+// 4. Medidas · Reservas
+// ---------------------------------------------------------------------
+Reservas =
+CALCULATE ( COUNTROWS ( bi_reservas ), bi_reservas[estado] <> "cancelada" )
+
+Reservas canceladas =
+CALCULATE ( COUNTROWS ( bi_reservas ), bi_reservas[estado] = "cancelada" )
+
+% Cancelación =
+DIVIDE ( [Reservas canceladas], COUNTROWS ( bi_reservas ) )
+
+Reservas completas =
+CALCULATE ( [Reservas], bi_reservas[tipo] = "completa" )
+
+Inscripciones de matchmaking =
+CALCULATE ( [Reservas], bi_reservas[tipo] = "individual" )
+
+// Turnos que se llenaron con jugadores sueltos (el módulo distintivo de F5GOL)
+Partidos armados por matchmaking =
+CALCULATE (
+    DISTINCTCOUNT ( bi_reservas[turno_id] ),
+    bi_reservas[tipo] = "individual",
+    bi_reservas[estado] <> "cancelada",
+    bi_turnos[estado] = "ocupado"
+)
+
+% Partidos por matchmaking =
+DIVIDE ( [Partidos armados por matchmaking], [Turnos ocupados] )
+
+
+// ---------------------------------------------------------------------
+// 5. Medidas · Ingresos (monto estimado: tarifa de la cancha;
+//    en matchmaking, la parte de cada jugador anotado)
+// ---------------------------------------------------------------------
+Facturación =
+CALCULATE ( SUM ( bi_reservas[monto] ), bi_reservas[estado] <> "cancelada" )
+
+Cobrado =
+CALCULATE ( [Facturación], bi_reservas[estado_pago] = "pagado" )
+
+Con seña =
+CALCULATE ( [Facturación], bi_reservas[estado_pago] = "sena" )
+
+Pendiente de cobro =
+CALCULATE ( [Facturación], bi_reservas[estado_pago] = "pendiente" )
+
+% Cobrado =
+DIVIDE ( [Cobrado], [Facturación] )
+
+Ticket promedio =
+DIVIDE ( [Facturación], [Reservas] )
+
+
+// ---------------------------------------------------------------------
+// 6. Medidas · Usuarios
+// ---------------------------------------------------------------------
+Usuarios nuevos =
+COUNTROWS ( bi_usuarios )
+
+Jugadores nuevos =
+CALCULATE ( [Usuarios nuevos], bi_usuarios[rol] = "jugador" )
+
+% Altas con Google =
+DIVIDE ( CALCULATE ( [Usuarios nuevos], bi_usuarios[origen] = "Google" ), [Usuarios nuevos] )
+
+
+// ---------------------------------------------------------------------
+// 7. Comparación con la semana anterior (para las tarjetas)
+// ---------------------------------------------------------------------
+% Ocupación semana anterior =
+CALCULATE ( [% Ocupación], DATEADD ( Calendario[Date], -7, DAY ) )
+
+Variación de ocupación =
+[% Ocupación] - [% Ocupación semana anterior]

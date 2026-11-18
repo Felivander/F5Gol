@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-class FotoCanchaRequest extends ApiRequest
+class FotoRequest extends ApiRequest
 {
     protected function reglas(): array
     {

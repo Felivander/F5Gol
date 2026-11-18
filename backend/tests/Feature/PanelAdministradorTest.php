@@ -24,15 +24,18 @@ class PanelAdministradorTest extends TestCase
             ->assertJsonPath('data.0.id', $propia->id);
     }
 
-    public function test_mis_clubes_sin_token_no_devuelve_nada(): void
+    public function test_sin_token_no_se_pueden_ver_reservas(): void
     {
         $this->crearReserva($this->crearTurno());
 
-        $this->getJson('/api/reservas?mis_clubes=1')->assertOk()->assertJsonCount(0, 'data');
+        $this->getJson('/api/reservas?mis_clubes=1')->assertUnauthorized();
+        $this->getJson('/api/reservas')->assertUnauthorized();
     }
 
     public function test_por_pagina_se_limita_a_100(): void
     {
+        Sanctum::actingAs($this->crearAdministrador());
+
         $this->getJson('/api/reservas?por_pagina=500')->assertOk()->assertJsonPath('per_page', 100);
         $this->getJson('/api/reservas?por_pagina=25')->assertOk()->assertJsonPath('per_page', 25);
         $this->getJson('/api/reservas')->assertOk()->assertJsonPath('per_page', 10);

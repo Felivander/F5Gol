@@ -9,6 +9,7 @@
       @if (auth.logueado()) {
         <a class="nav-link" routerLink="/mis-reservas" routerLinkActive="activo">Mis reservas</a>
         @if (auth.usuario()?.rol === 'administrador') {
+          <a class="nav-link" routerLink="/mis-clubes" routerLinkActive="activo">Mis clubes</a>
           <a class="nav-link" routerLink="/panel" routerLinkActive="activo">Panel</a>
         }
         <div class="usuario-badge">

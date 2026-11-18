@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Turno;
+use App\Http\Requests\GenerarTurnosRequest;
 use App\Http\Requests\TurnoRequest;
+use App\Models\Cancha;
+use App\Models\Turno;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use OpenApi\Attributes as OA;
 
 class TurnoController extends Controller
@@ -60,15 +64,19 @@ class TurnoController extends Controller
             new OA\Response(response: 201, description: 'Creado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
-            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o la cancha no es de su club.'),
         ]
     )]
     public function store(TurnoRequest $request)
     {
+        if (! $this->esDuenoDeLaCancha($request, $request->input('cancha_id'))) {
+            return $this->respuestaNoEsDueno();
+        }
+
         $turno = Turno::create($request->validated());
 
         return response()->json([
-            'message' => 'Turno creado correctamente',
+            'message' => 'El turno '.$turno->textoHorario().' se creó correctamente.',
             'turno' => $turno,
         ], 201);
     }
@@ -108,7 +116,7 @@ class TurnoController extends Controller
             new OA\Response(response: 200, description: 'Actualizado correctamente.'),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
             new OA\Response(response: 401, description: 'No autenticado.'),
-            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o la cancha no es de su club.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
         ]
     )]
@@ -118,14 +126,19 @@ class TurnoController extends Controller
 
         if (! $turno) {
             return response()->json([
-                'message' => 'Turno no encontrado',
+                'message' => "No existe un turno con el id {$id}.",
             ], 404);
+        }
+
+        if (! $this->esDuenoDeLaCancha($request, $turno->cancha_id)
+            || ($request->has('cancha_id') && ! $this->esDuenoDeLaCancha($request, $request->input('cancha_id')))) {
+            return $this->respuestaNoEsDueno();
         }
 
         $turno->update($request->validated());
 
         return response()->json([
-            'message' => 'Turno actualizado correctamente',
+            'message' => 'Los cambios del turno '.$turno->fresh()->textoHorario().' se guardaron.',
             'turno' => $turno->fresh(),
         ], 200);
     }
@@ -153,13 +166,14 @@ class TurnoController extends Controller
     {
         $request->validate(['bloqueado' => ['required', 'boolean']], [
             'bloqueado.required' => 'Indicá si el turno queda bloqueado (true) o no (false).',
+            'bloqueado.boolean' => 'El campo bloqueado tiene que ser true (bloquear) o false (desbloquear).',
         ]);
 
         $turno = Turno::with('cancha.club')->find($id);
 
         if (! $turno) {
             return response()->json([
-                'message' => 'Turno no encontrado',
+                'message' => "No existe un turno con el id {$id}.",
             ], 404);
         }
 
@@ -185,7 +199,9 @@ class TurnoController extends Controller
         }
 
         return response()->json([
-            'message' => $request->boolean('bloqueado') ? 'Turno bloqueado' : 'Turno desbloqueado',
+            'message' => $request->boolean('bloqueado')
+                ? 'El turno '.$turno->textoHorario().' quedó bloqueado por mantenimiento: nadie lo puede reservar.'
+                : 'El turno '.$turno->textoHorario().' se desbloqueó y se puede volver a reservar.',
             'turno' => $turno->fresh(),
         ], 200);
     }
@@ -196,30 +212,166 @@ class TurnoController extends Controller
     #[OA\Delete(
         path: '/api/turnos/{id}',
         summary: 'Eliminar turno',
+        description: 'Solo se puede eliminar un turno sin reservas activas.',
         tags: ['Turnos'],
         security: [['sanctum' => []]],
         parameters: [new OA\Parameter(ref: '#/components/parameters/id')],
         responses: [
             new OA\Response(response: 200, description: 'Eliminado correctamente.', content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')),
             new OA\Response(response: 401, description: 'No autenticado.'),
-            new OA\Response(response: 403, description: 'El usuario no es administrador.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o la cancha no es de su club.'),
             new OA\Response(response: 404, description: 'No encontrado.'),
+            new OA\Response(response: 409, description: 'El turno tiene reservas activas.'),
         ]
     )]
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $turno = Turno::find($id);
 
         if (! $turno) {
             return response()->json([
-                'message' => 'Turno no encontrado',
+                'message' => "No existe un turno con el id {$id}.",
             ], 404);
+        }
+
+        if (! $this->esDuenoDeLaCancha($request, $turno->cancha_id)) {
+            return $this->respuestaNoEsDueno();
+        }
+
+        if ($turno->reservas()->where('estado', '!=', 'cancelada')->exists()) {
+            return response()->json([
+                'message' => 'El turno tiene reservas activas: cancelalas antes de eliminarlo.',
+            ], 409);
         }
 
         $turno->delete();
 
         return response()->json([
-            'message' => 'Turno eliminado correctamente',
+            'message' => 'El turno '.$turno->textoHorario().' se eliminó.',
         ], 200);
+    }
+
+    #[OA\Post(
+        path: '/api/turnos/generar',
+        summary: 'Generar turnos en lote',
+        description: 'Crea los turnos de una cancha para un rango de fechas (hasta 90 días), en los días de la semana elegidos y dentro de una franja horaria, cada uno de la duración indicada. No pisa turnos que ya existen ni que se superponen, y no crea turnos que ya empezaron.',
+        tags: ['Turnos'],
+        security: [['sanctum' => []]],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
+            required: ['cancha_id', 'desde', 'hasta', 'hora_desde', 'hora_hasta', 'duracion'],
+            properties: [
+                new OA\Property(property: 'cancha_id', type: 'integer', example: 1),
+                new OA\Property(property: 'desde', type: 'string', format: 'date', example: '2026-12-01'),
+                new OA\Property(property: 'hasta', type: 'string', format: 'date', example: '2026-12-31'),
+                new OA\Property(property: 'dias', description: '0 = domingo ... 6 = sábado. Si no se manda, todos los días.', type: 'array', items: new OA\Items(type: 'integer', minimum: 0, maximum: 6), example: [1, 2, 3, 4, 5]),
+                new OA\Property(property: 'hora_desde', type: 'string', example: '15:00'),
+                new OA\Property(property: 'hora_hasta', description: 'El último turno termina a esta hora o antes', type: 'string', example: '23:00'),
+                new OA\Property(property: 'duracion', description: 'Minutos de cada turno', type: 'integer', enum: [30, 60, 90, 120], example: 60),
+                new OA\Property(property: 'cupo_maximo', description: 'Jugadores sueltos para el matchmaking. Por defecto, la mitad de la capacidad de la cancha.', type: 'integer', nullable: true, example: 5),
+            ]
+        )),
+        responses: [
+            new OA\Response(response: 201, description: 'Turnos generados.', content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'message', type: 'string', example: 'Se crearon 40 turnos.'),
+                new OA\Property(property: 'creados', type: 'integer', example: 40),
+                new OA\Property(property: 'omitidos', description: 'Ya existían, se superponían con otro turno o ya empezaron', type: 'integer', example: 2),
+            ])),
+            new OA\Response(response: 401, description: 'No autenticado.'),
+            new OA\Response(response: 403, description: 'El usuario no es administrador o la cancha no es de su club.'),
+            new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
+        ]
+    )]
+    public function generar(GenerarTurnosRequest $request)
+    {
+        $datos = $request->validated();
+
+        if (! $this->esDuenoDeLaCancha($request, $datos['cancha_id'])) {
+            return $this->respuestaNoEsDueno();
+        }
+
+        $cancha = Cancha::findOrFail($datos['cancha_id']);
+        $cupo = $datos['cupo_maximo'] ?? max(1, intdiv($cancha->capacidad_jugadores, 2));
+        $dias = isset($datos['dias']) ? array_map('intval', $datos['dias']) : null;
+        $duracion = (int) $datos['duracion'];
+
+        // Turnos que ya tiene la cancha en el rango, agrupados por fecha, para no superponer
+        $existentes = Turno::where('cancha_id', $cancha->id)
+            ->whereBetween('fecha', [$datos['desde'], $datos['hasta']])
+            ->get(['fecha', 'hora_inicio', 'hora_fin'])
+            ->groupBy(fn (Turno $t) => substr($t->fecha, 0, 10));
+
+        $nuevos = [];
+        $omitidos = 0;
+        $ahora = now();
+        $ultimoDia = Carbon::parse($datos['hasta']);
+
+        for ($fecha = Carbon::parse($datos['desde']); $fecha->lte($ultimoDia); $fecha->addDay()) {
+            if ($dias !== null && ! in_array($fecha->dayOfWeek, $dias, true)) {
+                continue;
+            }
+
+            $dia = $fecha->toDateString();
+            $inicio = Carbon::parse("{$dia} {$datos['hora_desde']}");
+            $limite = Carbon::parse("{$dia} {$datos['hora_hasta']}");
+            $delDia = collect($existentes->get($dia, []));
+
+            while ($inicio->copy()->addMinutes($duracion)->lte($limite)) {
+                $fin = $inicio->copy()->addMinutes($duracion);
+                $horaInicio = $inicio->format('H:i:s');
+                $horaFin = $fin->format('H:i:s');
+
+                // Se compara en HH:MM: según la base, la hora viene como "20:00" o "20:00:00"
+                $seSuperpone = $delDia->contains(
+                    fn (Turno $t) => substr($t->hora_inicio, 0, 5) < $fin->format('H:i')
+                        && substr($t->hora_fin, 0, 5) > $inicio->format('H:i')
+                );
+
+                if ($seSuperpone || $inicio->lte($ahora)) {
+                    $omitidos++;
+                } else {
+                    $nuevos[] = [
+                        'cancha_id' => $cancha->id,
+                        'fecha' => $dia,
+                        'hora_inicio' => $horaInicio,
+                        'hora_fin' => $horaFin,
+                        'estado' => 'disponible',
+                        'cupo_maximo' => $cupo,
+                        'created_at' => $ahora,
+                        'updated_at' => $ahora,
+                    ];
+                }
+
+                $inicio = $fin;
+            }
+        }
+
+        DB::transaction(function () use ($nuevos) {
+            foreach (array_chunk($nuevos, 200) as $tanda) {
+                Turno::insert($tanda);
+            }
+        });
+
+        $creados = count($nuevos);
+
+        return response()->json([
+            'message' => $creados === 1 ? 'Se creó 1 turno.' : "Se crearon {$creados} turnos.",
+            'creados' => $creados,
+            'omitidos' => $omitidos,
+        ], 201);
+    }
+
+    // Un administrador solo gestiona los turnos de las canchas de sus clubes
+    private function esDuenoDeLaCancha(Request $request, mixed $canchaId): bool
+    {
+        return Cancha::where('id', $canchaId)
+            ->whereHas('club', fn ($q) => $q->where('administrador_id', $request->user()->id))
+            ->exists();
+    }
+
+    private function respuestaNoEsDueno()
+    {
+        return response()->json([
+            'message' => 'Solo podés gestionar los turnos de las canchas de tus propios clubes.',
+        ], 403);
     }
 }

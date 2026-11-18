@@ -108,6 +108,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "description": "Demasiados intentos: máximo 10 por minuto."
                     }
                 }
             }
@@ -175,10 +178,20 @@
                         }
                     },
                     "401": {
-                        "description": "Credenciales incorrectas."
+                        "description": "El correo o la contraseña son incorrectos."
                     },
                     "422": {
-                        "description": "Datos inválidos."
+                        "description": "Faltan el correo o la contraseña, o el correo no tiene un formato válido.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiados intentos: máximo 10 por minuto."
                     }
                 }
             }
@@ -649,7 +662,7 @@
                     "Clubes"
                 ],
                 "summary": "Listar clubs",
-                "description": "Con buscar, devuelve solo los clubes cuyo nombre o dirección contienen ese texto.",
+                "description": "Con buscar, devuelve solo los clubes cuyo nombre o dirección contienen ese texto. Con mios=1 y el token de un administrador, devuelve solo sus clubes. Cada club trae canchas_count: las canchas activas (en \"mis clubes\", todas las que no están eliminadas).",
                 "operationId": "c44731a8866e74bcd14a6b4f0f1f82b6",
                 "parameters": [
                     {
@@ -664,6 +677,16 @@
                         "example": "norte"
                     },
                     {
+                        "name": "mios",
+                        "in": "query",
+                        "description": "Solo los clubes del administrador logueado (requiere token)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": 1
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "description": "Número de página",
@@ -676,6 +699,9 @@
                 "responses": {
                     "200": {
                         "description": "Listado paginado (10 por página)."
+                    },
+                    "401": {
+                        "description": "Se pidió mios=1 sin token."
                     }
                 }
             },
@@ -684,7 +710,7 @@
                     "Clubes"
                 ],
                 "summary": "Crear club",
-                "description": "Store a newly created resource in storage.",
+                "description": "El club queda a nombre del administrador logueado: el dueño no se manda en el pedido.",
                 "operationId": "4e37feabfe957444c16ab299c31af0a7",
                 "requestBody": {
                     "required": true,
@@ -786,7 +812,7 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o el club no es suyo."
                     },
                     "404": {
                         "description": "No encontrado."
@@ -803,7 +829,7 @@
                     "Clubes"
                 ],
                 "summary": "Eliminar club",
-                "description": "Remove the specified resource from storage.",
+                "description": "Solo se puede eliminar un club sin canchas activas. Si tiene canchas eliminadas, se borran con él, salvo que tengan reservas registradas.",
                 "operationId": "7ae9561f331895c99ba0d047eb68ba96",
                 "parameters": [
                     {
@@ -825,10 +851,13 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o el club no es suyo."
                     },
                     "404": {
                         "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "El club todavía tiene canchas activas o sus canchas eliminadas tienen reservas."
                     }
                 },
                 "security": [
@@ -838,13 +867,173 @@
                 ]
             }
         },
+        "/api/clubs/{id}/fotos": {
+            "post": {
+                "tags": [
+                    "Clubes"
+                ],
+                "summary": "Subir una foto del club",
+                "description": "Agrega la URL pública de la foto al final del array fotos del club.",
+                "operationId": "45afff908dc472f2717d0efda4d02418",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "foto"
+                                ],
+                                "properties": {
+                                    "foto": {
+                                        "description": "Imagen jpg, png o webp de hasta 4 MB",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Foto subida: devuelve el club con el array fotos actualizado."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o el club no es suyo."
+                    },
+                    "404": {
+                        "description": "No encontrado."
+                    },
+                    "422": {
+                        "description": "No es una imagen válida o pesa más de 4 MB.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/clubs/{id}/fotos/{indice}": {
+            "delete": {
+                "tags": [
+                    "Clubes"
+                ],
+                "summary": "Borrar una foto del club",
+                "description": "Borra la foto que está en esa posición del array fotos (empieza en 0). Las siguientes se corren un lugar.",
+                "operationId": "4bd206af537e495cb86e355217b110a9",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "name": "indice",
+                        "in": "path",
+                        "description": "Posición de la foto en el array fotos",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "example": 0
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Foto borrada: devuelve el club con el array fotos actualizado."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o el club no es suyo."
+                    },
+                    "404": {
+                        "description": "No existe el club o la foto."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/google/redirect": {
+            "get": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Ingresar con Google",
+                "description": "Redirige el navegador a la pantalla de inicio de sesión de Google. Se abre desde el navegador (no con fetch/XHR): Swagger UI no puede seguir la redirección.",
+                "operationId": "834b00ff528f81d904b6c3a407c3ce11",
+                "responses": {
+                    "302": {
+                        "description": "Redirección a accounts.google.com."
+                    }
+                }
+            }
+        },
+        "/api/auth/google/callback": {
+            "get": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Retorno de Google",
+                "description": "Google llama a esta URL después de que el usuario elige su cuenta. Busca el usuario por su cuenta de Google o por su email (si ya estaba registrado con contraseña, vincula la cuenta); si no existe, lo crea como jugador. Después redirige al front con el token de Sanctum en el fragmento: FRONTEND_URL/auth/google#token=... Si algo falla, redirige a FRONTEND_URL/login?error=google.",
+                "operationId": "8abfc58bd78d4f913e4202410305738e",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Código de autorización que manda Google",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "error",
+                        "in": "query",
+                        "description": "Lo manda Google si el usuario canceló",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "access_denied"
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirección al front: /auth/google#token=... si salió bien, /login?error=google si no."
+                    }
+                }
+            }
+        },
         "/api/jugador-anotados": {
             "get": {
                 "tags": [
                     "Jugadores anotados"
                 ],
                 "summary": "Listar jugador-anotados",
-                "description": "Display a listing of the resource.",
+                "description": "Requiere sesión. Cada uno ve sus inscripciones y las de sus reservas; el administrador, también las de sus clubes.",
                 "operationId": "0691e70b05fcd3d8fd31f75342bfa4da",
                 "parameters": [
                     {
@@ -860,8 +1049,16 @@
                 "responses": {
                     "200": {
                         "description": "Listado obtenido correctamente."
+                    },
+                    "401": {
+                        "description": "No autenticado."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -896,6 +1093,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "La reserva no es suya ni de un club suyo."
                     }
                 },
                 "security": [
@@ -911,7 +1111,7 @@
                     "Jugadores anotados"
                 ],
                 "summary": "Obtener jugador anotado",
-                "description": "Display the specified resource.",
+                "description": "Requiere sesión. Solo lo ve el jugador, el dueño de la reserva o el administrador del club.",
                 "operationId": "a4edeea6d2343edf1140d719db951720",
                 "parameters": [
                     {
@@ -922,10 +1122,21 @@
                     "200": {
                         "description": "Operación exitosa."
                     },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "No tiene permiso para verlo."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -966,6 +1177,9 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "No es el jugador anotado, ni quien hizo la reserva, ni el administrador del club."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
@@ -1002,6 +1216,9 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "No es el jugador anotado, ni quien hizo la reserva, ni el administrador del club."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
@@ -1019,7 +1236,7 @@
                     "Reservas"
                 ],
                 "summary": "Listar reservas",
-                "description": "Display a listing of the resource.\n\n\"Mis reservas\": /api/reservas?usuario_id=1",
+                "description": "Requiere sesión. El jugador ve solo sus reservas; el administrador ve las suyas y las de las canchas de sus clubes.",
                 "operationId": "8536ca90a9f5ba3709643c0493395478",
                 "parameters": [
                     {
@@ -1110,8 +1327,16 @@
                 "responses": {
                     "200": {
                         "description": "Listado paginado (10 por página salvo que se pida otra cantidad)."
+                    },
+                    "401": {
+                        "description": "No autenticado."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -1147,8 +1372,11 @@
                     "401": {
                         "description": "No autenticado."
                     },
+                    "403": {
+                        "description": "Se intentó reservar a nombre de otro usuario sin ser el administrador del club."
+                    },
                     "409": {
-                        "description": "Turno no disponible, ya pasado, con jugadores anotados o sin cupo suficiente."
+                        "description": "El mensaje dice el motivo: turno bloqueado, ya reservado, ya empezado, con jugadores anotados (para reserva completa) o sin cupo suficiente."
                     }
                 },
                 "security": [
@@ -1164,7 +1392,7 @@
                     "Reservas"
                 ],
                 "summary": "Obtener reserva",
-                "description": "Display the specified resource.",
+                "description": "Requiere sesión. Solo la ve quien la hizo o el administrador del club de la cancha.",
                 "operationId": "12b2a5f422f7abede6bff94de0d990f6",
                 "parameters": [
                     {
@@ -1175,10 +1403,21 @@
                     "200": {
                         "description": "Operación exitosa."
                     },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "La reserva no es suya ni de un club suyo."
+                    },
                     "404": {
                         "description": "No encontrado."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -1260,6 +1499,9 @@
                     },
                     "401": {
                         "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "La reserva no es suya ni de un club suyo."
                     },
                     "404": {
                         "description": "No encontrado."
@@ -1344,7 +1586,7 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o la cancha no es de su club."
                     }
                 },
                 "security": [
@@ -1416,7 +1658,7 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o la cancha no es de su club."
                     },
                     "404": {
                         "description": "No encontrado."
@@ -1433,7 +1675,7 @@
                     "Turnos"
                 ],
                 "summary": "Eliminar turno",
-                "description": "Remove the specified resource from storage.",
+                "description": "Solo se puede eliminar un turno sin reservas activas.",
                 "operationId": "90a5cffdb27234b86eb4ab2e09bd9c44",
                 "parameters": [
                     {
@@ -1455,10 +1697,13 @@
                         "description": "No autenticado."
                     },
                     "403": {
-                        "description": "El usuario no es administrador."
+                        "description": "El usuario no es administrador o la cancha no es de su club."
                     },
                     "404": {
                         "description": "No encontrado."
+                    },
+                    "409": {
+                        "description": "El turno tiene reservas activas."
                     }
                 },
                 "security": [
@@ -1523,16 +1768,146 @@
                     }
                 ]
             }
+        },
+        "/api/turnos/generar": {
+            "post": {
+                "tags": [
+                    "Turnos"
+                ],
+                "summary": "Generar turnos en lote",
+                "description": "Crea los turnos de una cancha para un rango de fechas (hasta 90 días), en los días de la semana elegidos y dentro de una franja horaria, cada uno de la duración indicada. No pisa turnos que ya existen ni que se superponen, y no crea turnos que ya empezaron.",
+                "operationId": "a828b0077400a3e8b8a232e69462b16e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "cancha_id",
+                                    "desde",
+                                    "hasta",
+                                    "hora_desde",
+                                    "hora_hasta",
+                                    "duracion"
+                                ],
+                                "properties": {
+                                    "cancha_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "desde": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-12-01"
+                                    },
+                                    "hasta": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-12-31"
+                                    },
+                                    "dias": {
+                                        "description": "0 = domingo ... 6 = sábado. Si no se manda, todos los días.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "maximum": 6,
+                                            "minimum": 0
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3,
+                                            4,
+                                            5
+                                        ]
+                                    },
+                                    "hora_desde": {
+                                        "type": "string",
+                                        "example": "15:00"
+                                    },
+                                    "hora_hasta": {
+                                        "description": "El último turno termina a esta hora o antes",
+                                        "type": "string",
+                                        "example": "23:00"
+                                    },
+                                    "duracion": {
+                                        "description": "Minutos de cada turno",
+                                        "type": "integer",
+                                        "example": 60,
+                                        "enum": [
+                                            30,
+                                            60,
+                                            90,
+                                            120
+                                        ]
+                                    },
+                                    "cupo_maximo": {
+                                        "description": "Jugadores sueltos para el matchmaking. Por defecto, la mitad de la capacidad de la cancha.",
+                                        "type": "integer",
+                                        "example": 5,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Turnos generados.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Se crearon 40 turnos."
+                                        },
+                                        "creados": {
+                                            "type": "integer",
+                                            "example": 40
+                                        },
+                                        "omitidos": {
+                                            "description": "Ya existían, se superponían con otro turno o ya empezaron",
+                                            "type": "integer",
+                                            "example": 2
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "El usuario no es administrador o la cancha no es de su club."
+                    },
+                    "422": {
+                        "description": "Datos inválidos: devuelve un mensaje por cada campo con error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorValidacion"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
         "schemas": {
             "ClubInput": {
                 "properties": {
-                    "administrador_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
                     "nombre": {
                         "type": "string",
                         "example": "Club Atlético Norte",
@@ -1545,10 +1920,30 @@
                         "maxLength": 255
                     },
                     "telefono": {
+                        "description": "Solo números, espacios, +, - y paréntesis",
                         "type": "string",
-                        "example": "1144556677",
+                        "example": "345 4123456",
                         "nullable": true,
                         "maxLength": 30
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Complejo con 4 canchas de fútbol 5, buffet y estacionamiento.",
+                        "nullable": true,
+                        "maxLength": 2000
+                    },
+                    "fotos": {
+                        "description": "URLs públicas de las fotos. Se cargan con POST /api/clubs/{id}/fotos y se borran con DELETE /api/clubs/{id}/fotos/{indice}.",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "readOnly": true,
+                        "example": [
+                            "http://localhost:8000/storage/clubs/1/foto.jpg"
+                        ],
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -1573,9 +1968,33 @@
                         "type": "integer",
                         "example": 10
                     },
+                    "superficie": {
+                        "type": "string",
+                        "example": "cesped_sintetico",
+                        "nullable": true,
+                        "enum": [
+                            "cesped_sintetico",
+                            "cesped_natural",
+                            "cemento",
+                            "parquet",
+                            "caucho"
+                        ]
+                    },
+                    "techada": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "iluminacion": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "vestuarios": {
+                        "type": "boolean",
+                        "example": false
+                    },
                     "descripcion": {
                         "type": "string",
-                        "example": "Césped sintético, techada",
+                        "example": "Césped de última generación, red perimetral",
                         "nullable": true
                     },
                     "tarifa": {

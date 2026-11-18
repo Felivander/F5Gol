@@ -1,0 +1,81 @@
+<a class="volver-link" routerLink="/mis-clubes">← Volver a mis clubes</a>
+
+<div class="login-card" style="max-width: 640px;">
+  <h1 style="font-size: 1.6rem;">{{ club() ? 'Editar club' : 'Nuevo club' }}</h1>
+
+  <form class="formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <div class="campo">
+      <label for="nombre">Nombre del club *</label>
+      <input id="nombre" formControlName="nombre" maxlength="150" placeholder="Ej.: Complejo La Bombonera" autocomplete="organization">
+      @if (errorDe('nombre')) {
+        <small class="error-campo">{{ errorDe('nombre') }}</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="direccion">Dirección</label>
+      <input id="direccion" formControlName="direccion" maxlength="255" placeholder="Ej.: San Martín 123, Concordia" autocomplete="street-address">
+      @if (errorDe('direccion')) {
+        <small class="error-campo">{{ errorDe('direccion') }}</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="telefono">Teléfono</label>
+      <input id="telefono" formControlName="telefono" type="tel" maxlength="30" placeholder="Ej.: 345 4123456" autocomplete="tel">
+      @if (errorDe('telefono')) {
+        <small class="error-campo">{{ errorDe('telefono') }}</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" formControlName="descripcion" rows="4" maxlength="2000"
+        placeholder="Qué ofrece el complejo: buffet, estacionamiento, parrilla, horarios..."></textarea>
+      @if (errorDe('descripcion')) {
+        <small class="error-campo">{{ errorDe('descripcion') }}</small>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+    @if (aviso()) {
+      <p class="aviso">{{ aviso() }}</p>
+    }
+
+    <button type="submit" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando...' : (club() ? 'Guardar cambios' : 'Crear club') }}
+    </button>
+  </form>
+
+  @if (club(); as club) {
+    <h2 style="font-size: 1.2rem; margin-top: 2rem;">Fotos del complejo</h2>
+    <div class="fotos-cancha">
+      @for (foto of club.fotos ?? []; track foto; let i = $index) {
+        <figure>
+          <img [src]="foto" [alt]="'Foto ' + (i + 1) + ' de ' + club.nombre">
+          <button type="button" class="btn-secundario" (click)="borrarFoto(i)">Borrar</button>
+        </figure>
+      } @empty {
+        <p style="color: var(--text-muted);">Todavía no tiene fotos.</p>
+      }
+    </div>
+    <label class="campo-foto">
+      <span>Agregar foto (jpg, png o webp, hasta 4 MB)</span>
+      <input type="file" accept="image/jpeg,image/png,image/webp" (change)="subirFoto($event)" [disabled]="subiendoFoto()">
+    </label>
+    @if (subiendoFoto()) {
+      <p style="color: var(--text-muted);">Subiendo foto...</p>
+    }
+
+    <div class="club-form-siguiente">
+      <h2 style="font-size: 1.2rem;">Canchas</h2>
+      <p style="color: var(--text-muted);">Cada cancha tiene sus propias fotos, superficie, tarifa y comodidades.</p>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a class="btn btn-primary" routerLink="/canchas/nueva" [queryParams]="{ club: club.id }">+ Agregar cancha</a>
+        <a class="btn btn-outline-primary" [routerLink]="['/clubes', club.id]">Ver las canchas del club</a>
+      </div>
+    </div>
+  }
+</div>

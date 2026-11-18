@@ -28,6 +28,26 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Login con Google (Laravel Socialite). Las credenciales se crean en Google Cloud Console
+    // y la URL de retorno tiene que coincidir exactamente con la registrada allá.
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', rtrim(env('APP_URL', 'http://localhost:8000'), '/').'/api/auth/google/callback'),
+    ],
+
+    // Automatización con n8n: Laravel avisa a este webhook cada vez que se crea una cuenta.
+    // El secreto viaja en el encabezado X-F5GOL-Secreto y el flujo lo verifica.
+    'n8n' => [
+        'webhook_usuario_creado' => env('N8N_WEBHOOK_USUARIO_CREADO'),
+        'secreto' => env('N8N_WEBHOOK_SECRETO'),
+    ],
+
+    // Dirección del front de Angular, a donde vuelve el usuario después de Google
+    'frontend' => [
+        'url' => env('FRONTEND_URL', 'http://localhost:4200'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Jobs\AvisarUsuarioCreado;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use OpenApi\Attributes as OA;
@@ -43,6 +44,7 @@ class AuthController extends Controller
                 ])
             ),
             new OA\Response(response: 422, description: 'Datos inválidos: devuelve un mensaje por cada campo con error.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
+            new OA\Response(response: 429, description: 'Demasiados intentos: máximo 10 por minuto.'),
         ]
     )]
     public function register(Request $request)
@@ -55,13 +57,13 @@ class AuthController extends Controller
             'telefono' => 'nullable|string|max:30',
         ],
         [
-            'name.required' => 'El campo nombre es obligatorio.',
-            'email.required' => 'El campo correo electrónico es obligatorio.',
-            'email.email' => 'El campo correo electrónico debe ser una dirección de correo válida.',
-            'email.unique' => 'Ya existe una cuenta con ese correo electrónico.',
-            'password.required' => 'El campo contraseña es obligatorio.',
+            'name.required' => 'Falta tu nombre.',
+            'email.required' => 'Falta tu correo electrónico.',
+            'email.email' => 'El correo electrónico no es válido: tiene que ser como nombre@dominio.com.',
+            'email.unique' => 'Ya existe una cuenta con ese correo electrónico. Iniciá sesión o usá otro correo.',
+            'password.required' => 'Falta la contraseña.',
             'password.min' => 'La contraseña tiene que tener al menos 8 caracteres.',
-            'password.confirmed' => 'Las contraseñas no coinciden.',
+            'password.confirmed' => 'Las dos contraseñas no coinciden.',
             'rol.required' => 'Elegí si te registrás como jugador o como administrador.',
             'rol.in' => 'El rol tiene que ser jugador o administrador.',
         ]);
@@ -69,10 +71,13 @@ class AuthController extends Controller
         // El cast "hashed" del modelo encripta la contraseña al guardarla
         $user = User::create($datos);
 
+        // n8n manda el mail de bienvenida (corre después de responder; si falla, no afecta el registro)
+        AvisarUsuarioCreado::dispatch($user, 'registro')->afterResponse();
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Usuario registrado correctamente',
+            'message' => "¡Bienvenido a F5GOL, {$user->name}! Tu cuenta se creó correctamente.",
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user->only(self::CAMPOS_USUARIO)
@@ -105,8 +110,9 @@ class AuthController extends Controller
                     new OA\Property(property: 'user', ref: '#/components/schemas/Usuario'),
                 ])
             ),
-            new OA\Response(response: 401, description: 'Credenciales incorrectas.'),
-            new OA\Response(response: 422, description: 'Datos inválidos.'),
+            new OA\Response(response: 401, description: 'El correo o la contraseña son incorrectos.'),
+            new OA\Response(response: 422, description: 'Faltan el correo o la contraseña, o el correo no tiene un formato válido.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion')),
+            new OA\Response(response: 429, description: 'Demasiados intentos: máximo 10 por minuto.'),
         ]
     )]
     public function login(Request $request)
@@ -116,16 +122,18 @@ class AuthController extends Controller
             'password' => 'required',
         ],
         [
-            'email.required' => 'El campo correo electrónico es obligatorio.',
-            'email.email' => 'El campo correo electrónico debe ser una dirección de correo válida.',
-            'password.required' => 'El campo contraseña es obligatorio.',
+            'email.required' => 'Falta tu correo electrónico.',
+            'email.email' => 'El correo electrónico no es válido: tiene que ser como nombre@dominio.com.',
+            'password.required' => 'Falta la contraseña.',
         ]);
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        // Quien se registró con Google no tiene contraseña: solo puede entrar con Google
+        if (!$user || !$user->password || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'message' => 'Credenciales incorrectas'
+                // Mismo mensaje exista o no la cuenta, para no revelar qué mails están registrados
+                'message' => 'El correo o la contraseña son incorrectos. Si te registraste con Google, usá el botón "Ingresar con Google".'
             ], 401);
         }
 
@@ -133,7 +141,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Login exitoso',
+            'message' => "Hola de nuevo, {$user->name}.",
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user->only(self::CAMPOS_USUARIO)
@@ -182,7 +190,7 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Sesión cerrada correctamente'
+            'message' => 'Cerraste sesión. El token ya no sirve.'
         ]);
     }
 }

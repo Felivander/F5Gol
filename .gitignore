@@ -1,0 +1,8 @@
+# Configuración local de herramientas del editor
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+
+# Credenciales descargadas de Google Cloud (tienen el secreto OAuth)
+client_secret_*.json

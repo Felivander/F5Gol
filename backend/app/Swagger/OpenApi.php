@@ -36,10 +36,19 @@ use OpenApi\Attributes as OA;
         new OA\Schema(
             schema: 'ClubInput',
             properties: [
-                new OA\Property(property: 'administrador_id', type: 'integer', example: 1),
                 new OA\Property(property: 'nombre', type: 'string', maxLength: 150, example: 'Club Atlético Norte'),
                 new OA\Property(property: 'direccion', type: 'string', maxLength: 255, nullable: true, example: 'Av. Siempre Viva 742'),
-                new OA\Property(property: 'telefono', type: 'string', maxLength: 30, nullable: true, example: '1144556677'),
+                new OA\Property(property: 'telefono', type: 'string', maxLength: 30, nullable: true, description: 'Solo números, espacios, +, - y paréntesis', example: '345 4123456'),
+                new OA\Property(property: 'descripcion', type: 'string', maxLength: 2000, nullable: true, example: 'Complejo con 4 canchas de fútbol 5, buffet y estacionamiento.'),
+                new OA\Property(
+                    property: 'fotos',
+                    type: 'array',
+                    items: new OA\Items(type: 'string', format: 'uri'),
+                    nullable: true,
+                    readOnly: true,
+                    description: 'URLs públicas de las fotos. Se cargan con POST /api/clubs/{id}/fotos y se borran con DELETE /api/clubs/{id}/fotos/{indice}.',
+                    example: ['http://localhost:8000/storage/clubs/1/foto.jpg']
+                ),
             ]
         ),
         new OA\Schema(
@@ -49,7 +58,11 @@ use OpenApi\Attributes as OA;
                 new OA\Property(property: 'nombre', type: 'string', maxLength: 100, example: 'Cancha 1'),
                 new OA\Property(property: 'tipo', type: 'string', maxLength: 20, example: 'futbol5'),
                 new OA\Property(property: 'capacidad_jugadores', type: 'integer', example: 10),
-                new OA\Property(property: 'descripcion', type: 'string', nullable: true, example: 'Césped sintético, techada'),
+                new OA\Property(property: 'superficie', type: 'string', nullable: true, enum: ['cesped_sintetico', 'cesped_natural', 'cemento', 'parquet', 'caucho'], example: 'cesped_sintetico'),
+                new OA\Property(property: 'techada', type: 'boolean', example: true),
+                new OA\Property(property: 'iluminacion', type: 'boolean', example: true),
+                new OA\Property(property: 'vestuarios', type: 'boolean', example: false),
+                new OA\Property(property: 'descripcion', type: 'string', nullable: true, example: 'Césped de última generación, red perimetral'),
                 new OA\Property(property: 'tarifa', type: 'number', format: 'float', example: 25000),
                 new OA\Property(property: 'estado', type: 'string', maxLength: 20, example: 'activa'),
                 new OA\Property(

@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'nombre',
     'tipo',
     'capacidad_jugadores',
+    'superficie',
+    'techada',
+    'iluminacion',
+    'vestuarios',
     'descripcion',
     'tarifa',
     'estado',
@@ -22,9 +26,15 @@ class Cancha extends Model
     use HasFactory;
     use SoftDeletes;
 
+    // Tipos de superficie que se pueden elegir al cargar una cancha
+    public const SUPERFICIES = ['cesped_sintetico', 'cesped_natural', 'cemento', 'parquet', 'caucho'];
+
     // URLs públicas de las fotos, en el orden en que se subieron
     protected $casts = [
         'fotos' => 'array',
+        'techada' => 'boolean',
+        'iluminacion' => 'boolean',
+        'vestuarios' => 'boolean',
     ];
 
     // Una cancha pertenece a un club

@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Cancha, Club } from '../../models';
+import { Cancha, Club, textoSuperficie } from '../../models';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 
@@ -32,6 +32,8 @@ export class ClubDetalle implements OnInit {
   });
 
   mensaje = signal('');
+
+  protected textoSuperficie = textoSuperficie;
 
   // Canchas eliminadas (soft delete) que el dueño puede restaurar
   canchasEliminadas = signal<Cancha[]>([]);

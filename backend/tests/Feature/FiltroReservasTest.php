@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Reserva;
 use App\Models\Turno;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\CreaDatosDePrueba;
 use Tests\TestCase;
 
@@ -27,6 +28,7 @@ class FiltroReservasTest extends TestCase
         $cancha = $this->crearCancha();
         $hoy = $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-10']));
         $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-11']));
+        Sanctum::actingAs($cancha->club->administrador);
 
         $this->getJson('/api/reservas?fecha=2026-11-10')
             ->assertOk()
@@ -41,6 +43,7 @@ class FiltroReservasTest extends TestCase
         $cancha2 = $this->crearCancha($club);
         $deLaCancha1 = $this->reservar($this->crearTurno($cancha1));
         $this->reservar($this->crearTurno($cancha2));
+        Sanctum::actingAs($club->administrador);
 
         $this->getJson("/api/reservas?cancha_id={$cancha1->id}")
             ->assertOk()
@@ -55,6 +58,7 @@ class FiltroReservasTest extends TestCase
         $lunes = $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-09']));
         $domingo = $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-15']));
         $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-16']));
+        Sanctum::actingAs($cancha->club->administrador);
 
         $ids = $this->getJson("/api/reservas?cancha_id={$cancha->id}&desde=2026-11-09&hasta=2026-11-15")
             ->assertOk()
@@ -71,6 +75,7 @@ class FiltroReservasTest extends TestCase
         $buscada = $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-10']));
         $this->reservar($this->crearTurno($cancha, ['fecha' => '2026-11-12']));
         $this->reservar($this->crearTurno($otraCancha, ['fecha' => '2026-11-10']));
+        Sanctum::actingAs($cancha->club->administrador);
 
         $this->getJson("/api/reservas?cancha_id={$cancha->id}&fecha=2026-11-10")
             ->assertOk()

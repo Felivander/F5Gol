@@ -49,6 +49,23 @@ cd frontend
 npm install
 ```
 
+### Login con Google (una vez por máquina)
+
+1. En [Google Cloud Console](https://console.cloud.google.com/apis/credentials) crear un proyecto y una credencial **ID de cliente de OAuth** de tipo **Aplicación web** (antes hay que configurar la pantalla de consentimiento en modo *Prueba* y agregar como usuarios de prueba los mails del grupo).
+2. En **URI de redireccionamiento autorizados** poner exactamente `http://localhost:8000/api/auth/google/callback`.
+3. Copiar el ID y el secreto en `backend/.env`:
+
+```env
+GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=xxxxxxxx
+GOOGLE_REDIRECT_URI="${APP_URL}/api/auth/google/callback"
+FRONTEND_URL=http://localhost:4200
+```
+
+4. `php artisan config:clear` y `php artisan migrate` (agrega la columna `google_id`).
+
+Quien entra con Google por primera vez queda registrado como **jugador**. Si ya tenía cuenta con ese mail (por ejemplo un administrador), se vincula a esa cuenta y conserva su rol.
+
 ## Levantar todo
 
 Doble clic en **`iniciar-f5gol.bat`**: arranca MySQL (si no está corriendo), el back y el front, y abre el navegador.
@@ -65,6 +82,11 @@ cd frontend
 ng serve
 ```
 
+## Automatización y reportes
+
+- **n8n** (mail de bienvenida al crear una cuenta): ver [docs/n8n/README.md](docs/n8n/README.md).
+- **Power BI** (dashboard de ocupación, reservas e ingresos): ver [docs/powerbi/README.md](docs/powerbi/README.md).
+
 ## Direcciones
 
 - Front: http://localhost:4200
@@ -79,9 +101,13 @@ Usuarios de prueba (seeders): `admin1@f5gol.com` / `password` (administrador) y 
 |---|---|---|
 | `/clubes`, `/clubes/:id` | Todos | Listado de clubes y sus canchas activas |
 | `/canchas/:id` | Todos | Grilla de turnos: **Reservar cancha** (completa) o **Sumarme al partido** (matchmaking) |
-| `/login`, `/registro` | Todos | Ingreso y registro eligiendo rol (jugador o administrador) |
+| `/login`, `/registro` | Todos | Ingreso y registro eligiendo rol (jugador o administrador), o con Google |
+| `/auth/google` | Todos | Pantalla de vuelta de Google: guarda el token y redirige según el rol |
 | `/mis-reservas` | Logueado | Historial de reservas propias, con cancelación hasta 2 horas antes |
 | `/panel` | Administrador | Reservas del día por cancha de sus clubes |
+| `/mis-clubes` | Administrador | Sus clubes con cantidad de canchas y fotos: crear, editar, eliminar |
+| `/clubes/nuevo`, `/clubes/:id/editar` | Administrador dueño | Nombre, dirección, teléfono, descripción y fotos del club |
+| `/canchas/:id/horarios` | Administrador dueño | Carga en lote de turnos: período, días de la semana, franja horaria, duración y cupo |
 
 ## Endpoints principales
 
@@ -90,11 +116,15 @@ Todos bajo `/api`. Los de escritura piden `Authorization: Bearer <token>`; el de
 | Método y ruta | Notas |
 |---|---|
 | `POST /register`, `POST /login`, `POST /logout`, `GET /user` | Autenticación con Sanctum |
-| `GET /clubs`, `GET /clubs/{id}` | El detalle muestra solo canchas activas (el dueño ve todas) |
+| `GET /auth/google/redirect`, `GET /auth/google/callback` | Login con Google (Socialite). Se abren desde el navegador; el callback vuelve al front con el token en `#token=` |
+| `GET /clubs?buscar=&mios=1`, `GET /clubs/{id}` | `mios=1` con token devuelve los clubes del administrador. Cada club trae `canchas_count`. El detalle muestra solo canchas activas (el dueño ve todas) |
+| `POST/PUT/DELETE /clubs`, `POST /clubs/{id}/fotos`, `DELETE /clubs/{id}/fotos/{indice}` | Solo el dueño (403). El dueño lo pone el servidor. 409 al borrar un club con canchas activas |
 | `GET /canchas?club_id=&incluir_inactivas=1` | `incluir_inactivas` solo funciona con token de administrador |
 | `PUT /canchas/{id}` | 409 si se desactiva una cancha con reservas futuras |
 | `POST /canchas/{id}/fotos`, `DELETE /canchas/{id}/fotos/{indice}` | Fotos de la cancha (solo el dueño del club) |
 | `GET /turnos?cancha_id=&fecha=` | Grilla de disponibilidad con `cupo_actual` |
+| `POST /turnos/generar` | Crea en lote los turnos de una cancha (hasta 90 días). No duplica ni superpone. Devuelve `creados` y `omitidos`. Solo el dueño (403) |
+| `DELETE /turnos/{id}` | Solo el dueño y sin reservas activas (409) |
 | `GET /reservas?usuario_id=&cancha_id=&fecha=&desde=&hasta=&mis_clubes=1&por_pagina=` | `mis_clubes` filtra por los clubes del administrador logueado; `por_pagina` hasta 100 |
 | `POST /reservas` | `tipo` completa o individual. 409 si el turno está ocupado, bloqueado, ya pasó, tiene jugadores anotados (para completa) o no tiene cupo. 422 si el turno no existe |
 | `PUT /reservas/{id}` | Cambiar de turno libera el anterior y ocupa el nuevo. Solo el administrador cambia `estado_pago` (403) |

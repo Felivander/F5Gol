@@ -21,6 +21,7 @@ class ClubSeeder extends Seeder
             'nombre' => 'Complejo Concordia FC',
             'direccion' => 'Av. Costanera 1200, Concordia',
             'telefono' => '3454111111',
+            'descripcion' => 'Cinco canchas sobre la costanera, buffet, estacionamiento y vestuarios con duchas.',
         ]);
 
         Club::create([
@@ -28,6 +29,7 @@ class ClubSeeder extends Seeder
             'nombre' => 'Arena Norte',
             'direccion' => 'Ruta 22 Km 3, Concordia',
             'telefono' => '3454222222',
+            'descripcion' => 'Complejo a la salida de la ciudad, con canchas techadas y una de césped natural.',
         ]);
     }
 }

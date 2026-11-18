@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Cancha, CanchaInput } from '../../models';
+import { Cancha, CanchaInput, SUPERFICIES } from '../../models';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 
@@ -25,10 +25,15 @@ export class CanchaForm implements OnInit {
     nombre: '',
     tipo: 'futbol5',
     capacidad_jugadores: 10,
+    superficie: 'cesped_sintetico',
+    techada: false,
+    iluminacion: true,
+    vestuarios: false,
     descripcion: '',
     tarifa: 0,
     estado: 'activa'
   };
+  protected superficies = SUPERFICIES;
   // Cancha guardada (en edición, o después del alta): habilita la carga de fotos
   cancha = signal<Cancha | null>(null);
   error = signal('');
@@ -52,6 +57,10 @@ export class CanchaForm implements OnInit {
             nombre: cancha.nombre,
             tipo: cancha.tipo,
             capacidad_jugadores: cancha.capacidad_jugadores,
+            superficie: cancha.superficie ?? null,
+            techada: !!cancha.techada,
+            iluminacion: !!cancha.iluminacion,
+            vestuarios: !!cancha.vestuarios,
             descripcion: cancha.descripcion ?? '',
             tarifa: Number(cancha.tarifa),
             estado: cancha.estado === 'inactiva' ? 'inactiva' : 'activa'

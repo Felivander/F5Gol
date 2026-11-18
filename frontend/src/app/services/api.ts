@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Cancha, CanchaInput, Club, NuevaReserva, Paginado, Reserva, RespuestaMensaje, Turno } from '../models';
+import { Cancha, CanchaInput, Club, ClubInput, GenerarTurnos, NuevaReserva, RespuestaGenerarTurnos, Paginado, Reserva, RespuestaMensaje, Turno } from '../models';
 
 // En desarrollo, ng serve redirige /api a Laravel (ver proxy.conf.json)
 const API = '/api';
@@ -20,6 +20,34 @@ export class Api {
 
   getClub(id: number) {
     return this.http.get<Club>(`${API}/clubs/${id}`);
+  }
+
+  // Clubes del administrador logueado, con canchas_count
+  getMisClubes(page = 1) {
+    const params = new HttpParams().set('mios', 1).set('page', page);
+    return this.http.get<Paginado<Club>>(`${API}/clubs`, { params });
+  }
+
+  crearClub(club: ClubInput) {
+    return this.http.post<{ message: string; club: Club }>(`${API}/clubs`, club);
+  }
+
+  actualizarClub(id: number, club: Partial<ClubInput>) {
+    return this.http.put<{ message: string; club: Club }>(`${API}/clubs/${id}`, club);
+  }
+
+  eliminarClub(id: number) {
+    return this.http.delete<RespuestaMensaje>(`${API}/clubs/${id}`);
+  }
+
+  subirFotoClub(id: number, foto: File) {
+    const datos = new FormData();
+    datos.append('foto', foto);
+    return this.http.post<{ message: string; club: Club }>(`${API}/clubs/${id}/fotos`, datos);
+  }
+
+  borrarFotoClub(id: number, indice: number) {
+    return this.http.delete<{ message: string; club: Club }>(`${API}/clubs/${id}/fotos/${indice}`);
   }
 
   getCancha(id: number) {
@@ -73,6 +101,16 @@ export class Api {
   // Filtros de GET /api/reservas: usuario_id, cancha_id, fecha, desde, hasta, page
   getReservas(filtros: Record<string, string | number>) {
     return this.http.get<Paginado<Reserva>>(`${API}/reservas`, { params: filtros });
+  }
+
+  // Crea en lote los turnos de una cancha (solo el dueño del club)
+  generarTurnos(datos: GenerarTurnos) {
+    return this.http.post<RespuestaGenerarTurnos>(`${API}/turnos/generar`, datos);
+  }
+
+  // Solo turnos sin reservas activas (409 si tiene)
+  eliminarTurno(id: number) {
+    return this.http.delete<RespuestaMensaje>(`${API}/turnos/${id}`);
   }
 
   bloquearTurno(id: number, bloqueado: boolean) {

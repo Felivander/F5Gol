@@ -9,6 +9,12 @@ import { CanchaDiagrama } from '../../components/cancha-diagrama/cancha-diagrama
 
 const REFRESCO_MS = 15_000;
 
+// Fecha de hoy en formato AAAA-MM-DD, en la zona horaria del usuario
+function hoy(): string {
+  const ahora = new Date();
+  return `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
+}
+
 @Component({
   selector: 'app-cancha-turnos',
   imports: [RouterLink, FormsModule, CanchaDiagrama],
@@ -26,7 +32,8 @@ export class CanchaTurnos implements OnInit {
 
   cancha = signal<Cancha | null>(null);
   turnos = signal<Turno[]>([]);
-  fecha = '';
+  // Arranca en el día de hoy: con varias semanas de turnos cargados, "todas las fechas" es una lista muy larga
+  fecha = hoy();
   cargando = signal(true);
   error = signal('');
   aviso = signal('');
@@ -63,6 +70,28 @@ export class CanchaTurnos implements OnInit {
       error: err => {
         this.error.set(err.error?.message ?? 'No se pudo cambiar el bloqueo del turno.');
         this.reservando.set(null);
+      }
+    });
+  }
+
+  eliminarTurno(turno: Turno) {
+    if (!confirm(`¿Eliminar el turno del ${turno.fecha.slice(0, 10)} a las ${turno.hora_inicio.slice(0, 5)}?`)) {
+      return;
+    }
+    this.reservando.set(turno.id);
+    this.error.set('');
+    this.aviso.set('');
+    this.api.eliminarTurno(turno.id).subscribe({
+      next: res => {
+        this.aviso.set(res.message);
+        this.reservando.set(null);
+        this.buscarTurnos();
+      },
+      error: err => {
+        // 409: alguien reservó mientras tanto
+        this.error.set(err.error?.message ?? 'No se pudo eliminar el turno.');
+        this.reservando.set(null);
+        this.buscarTurnos();
       }
     });
   }

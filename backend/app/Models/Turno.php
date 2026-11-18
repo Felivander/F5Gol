@@ -55,6 +55,15 @@ class Turno extends Model
         $this->update(['estado' => $hayCompleta || $cupoLleno ? 'ocupado' : 'disponible']);
     }
 
+    // Texto para los mensajes de la API: "del 19/11 a las 20:00 en Cancha 1"
+    public function textoHorario(): string
+    {
+        $texto = 'del '.Carbon::parse(substr($this->fecha, 0, 10))->format('d/m').' a las '.substr($this->hora_inicio, 0, 5);
+        $cancha = $this->cancha?->nombre;
+
+        return $cancha ? "{$texto} en {$cancha}" : $texto;
+    }
+
     // El partido ya empezó o terminó: no se puede reservar
     public function yaPaso(): bool
     {
