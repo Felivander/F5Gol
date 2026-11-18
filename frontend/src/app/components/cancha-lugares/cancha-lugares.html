@@ -1,0 +1,47 @@
+<div class="campo">
+  <!-- Media cancha: el arco abajo, la mitad de la cancha arriba -->
+  <svg class="campo-dibujo" viewBox="0 0 300 380" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <rect width="300" height="380" class="pasto" />
+    @for (f of [0, 2, 4, 6]; track f) {
+      <rect x="0" [attr.y]="f * 47.5" width="300" height="47.5" class="franja" />
+    }
+    <g class="lineas">
+      <rect x="14" y="14" width="272" height="352" rx="2" />
+      <path d="M100 14a50 50 0 0 0 100 0" />
+      <path d="M78 366v-62a10 10 0 0 1 10-10h124a10 10 0 0 1 10 10v62" />
+      <rect x="122" y="366" width="56" height="10" />
+    </g>
+    <circle cx="150" cy="14" r="3" class="punto" />
+    <circle cx="150" cy="322" r="2.5" class="punto" />
+  </svg>
+
+  @if (faltan() > 0) {
+    <p class="faltan" aria-hidden="true">
+      <span class="num">{{ faltan() }}</span>
+      {{ faltan() === 1 ? 'lugar libre' : 'lugares libres' }}
+    </p>
+  } @else {
+    <p class="faltan completo" aria-hidden="true">Completo</p>
+  }
+
+  <ol class="fichas" aria-label="Lugares del partido">
+    @for (u of ubicados(); track u.numero) {
+      <li class="ficha" [class.libre]="!u.nombre" [class.yo]="u.soyYo" [class.amigo]="u.amigo"
+        [style.left.%]="u.x" [style.top.%]="u.y">
+        <span class="ficha-circulo" aria-hidden="true">
+          @if (!u.nombre) {
+            +
+          } @else if (u.inicial) {
+            {{ u.inicial }}
+          } @else {
+            {{ u.numero }}
+          }
+        </span>
+        <span class="ficha-nombre">
+          <span class="visually-hidden">Lugar {{ u.numero }}: </span>
+          {{ u.nombre ? (u.soyYo && !u.amigo ? 'Vos' : u.nombre) : 'Libre' }}
+        </span>
+      </li>
+    }
+  </ol>
+</div>

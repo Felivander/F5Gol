@@ -1,0 +1,139 @@
+:host {
+  display: block;
+}
+
+.campo {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  aspect-ratio: 300 / 380;
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.campo-dibujo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pasto {
+  fill: var(--cancha);
+}
+
+.franja {
+  fill: var(--cancha-oscura);
+  opacity: 0.35;
+}
+
+.lineas {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.7);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.punto {
+  fill: rgb(255 255 255 / 0.7);
+}
+
+/* Cartel de lugares libres, en la esquina de arriba a la derecha (al costado del círculo central) */
+.faltan {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--lima);
+  color: var(--tinta);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.faltan .num {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.faltan.completo {
+  background: #fff;
+  color: var(--cancha-oscura);
+}
+
+/* Fichas de los jugadores, centradas en su posición */
+.fichas {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.ficha {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: 96px;
+  translate: -50% -50%;
+}
+
+.ficha-circulo {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--cancha-oscura);
+  font-size: 1.15rem;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+}
+
+.ficha.amigo .ficha-circulo {
+  background: var(--cancha-suave);
+  font-size: 0.95rem;
+}
+
+.ficha.yo .ficha-circulo {
+  background: var(--lima);
+  color: var(--tinta);
+  box-shadow: 0 0 0 3px #fff, 0 2px 6px rgb(0 0 0 / 0.25);
+}
+
+.ficha.libre .ficha-circulo {
+  background: rgb(255 255 255 / 0.08);
+  border: 2px dashed rgb(255 255 255 / 0.8);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.ficha-nombre {
+  max-width: 100%;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.45);
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ficha.libre .ficha-nombre {
+  background: transparent;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.ficha.yo .ficha-nombre {
+  background: var(--tinta);
+  color: var(--lima);
+}

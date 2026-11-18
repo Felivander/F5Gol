@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { CanchaLugares, LugarPartido } from '../../components/cancha-lugares/cancha-lugares';
 import { Icono } from '../../components/icono/icono';
 import { fechaRelativa, partesFecha, pesos, textoTipo } from '../../formato';
 import { SalaPartido as Sala, textoSuperficie } from '../../models';
@@ -7,17 +8,10 @@ import { Api } from '../../services/api';
 
 const REFRESCO_MS = 15_000;
 
-// Un lugar del partido: ocupado por un jugador (o por un amigo que anotó) o libre
-interface Lugar {
-  nombre: string | null;
-  soyYo: boolean;
-  amigo: boolean;
-}
-
 // Sala de un partido de matchmaking: /partidos/:id (solo para los anotados y el dueño del club)
 @Component({
   selector: 'app-sala-partido',
-  imports: [RouterLink, Icono],
+  imports: [RouterLink, Icono, CanchaLugares],
   templateUrl: './sala-partido.html',
   styleUrl: './sala-partido.css'
 })
@@ -44,12 +38,12 @@ export class SalaPartido implements OnInit {
   });
 
   // Un casillero por lugar: primero cada jugador, después sus amigos, después los libres
-  protected lugares = computed<Lugar[]>(() => {
+  protected lugares = computed<LugarPartido[]>(() => {
     const s = this.sala();
     if (!s) {
       return [];
     }
-    const lista: Lugar[] = [];
+    const lista: LugarPartido[] = [];
     for (const j of s.jugadores) {
       lista.push({ nombre: j.nombre, soyYo: j.soy_yo, amigo: false });
       for (let i = 1; i < j.cantidad; i++) {

@@ -55,21 +55,7 @@
         </p>
       </div>
 
-      <ol class="lugares">
-        @for (lugar of lugares(); track $index) {
-          <li class="lugar" [class.libre]="!lugar.nombre" [class.yo]="lugar.soyYo" [class.amigo]="lugar.amigo">
-            <span class="lugar-numero num">{{ $index + 1 }}</span>
-            @if (lugar.nombre) {
-              <span class="lugar-nombre">{{ lugar.nombre }}</span>
-              @if (lugar.soyYo && !lugar.amigo) {
-                <span class="chip chip-lima">Vos</span>
-              }
-            } @else {
-              <span class="lugar-nombre">Lugar libre</span>
-            }
-          </li>
-        }
-      </ol>
+      <app-cancha-lugares class="cupo-campo" [lugares]="lugares()" [faltan]="s.faltan" />
 
       @if (s.estado === 'armandose') {
         <p class="ayuda">Se actualiza solo. Cuando se completen los {{ s.cupo_maximo }} lugares, la cancha queda reservada y les llega un mail a todos.</p>
