@@ -1,4 +1,4 @@
-<div class="pagina pagina-media">
+<div class="pagina">
   <a class="volver" routerLink="/partidos">
     <app-icono nombre="volver" [tamano]="16" />
     Partidos abiertos
@@ -19,6 +19,16 @@
         <p class="antetitulo">{{ s.club?.nombre }}</p>
         <h1>{{ s.cancha.nombre }}</h1>
         <p class="cabecera-hora num">{{ fecha()?.relativa }}, {{ s.hora_inicio }} a {{ s.hora_fin }}</p>
+      </div>
+      <div class="cabecera-cuenta" aria-live="polite">
+        <span class="cabecera-numero num">{{ s.anotados }}<small>/{{ s.cupo_maximo }}</small></span>
+        <span class="cabecera-estado" [class.listo]="s.estado === 'completo'">
+          @switch (s.estado) {
+            @case ('completo') { Partido completo }
+            @case ('ya_empezo') { Ya empezó }
+            @default { {{ s.faltan === 1 ? 'Falta 1 jugador' : 'Faltan ' + s.faltan + ' jugadores' }} }
+          }
+        </span>
       </div>
     </header>
 
@@ -44,18 +54,17 @@
       }
     }
 
+    <div class="sala">
     <section class="tarjeta cupo" aria-labelledby="titulo-cupo">
-      <div class="cupo-cabeza">
-        <h2 id="titulo-cupo">Jugadores</h2>
-        <p class="cupo-cuenta" aria-live="polite">
-          <span class="num">{{ s.anotados }}</span> de <span class="num">{{ s.cupo_maximo }}</span>
-          @if (s.faltan > 0) {
-            · <strong>{{ s.faltan === 1 ? 'falta 1' : 'faltan ' + s.faltan }}</strong>
-          }
-        </p>
-      </div>
+      <h2 id="titulo-cupo" class="visually-hidden">Jugadores</h2>
 
-      <app-cancha-lugares class="cupo-campo" [equipoA]="equipoA()" [equipoB]="equipoB()" />
+      <app-cancha-lugares class="cupo-campo"
+        [equipoA]="equipoA()"
+        [equipoB]="equipoB()"
+        [miEquipo]="s.mi_reserva?.equipo ?? null"
+        [seleccionable]="!!s.mi_reserva && s.estado === 'armandose'"
+        [ocupado]="sumando()"
+        (elegir)="sumarAmigo($event)" />
 
       <div class="planteles">
         @for (plantel of planteles(); track plantel.letra) {
@@ -76,9 +85,16 @@
       </div>
 
       @if (s.estado === 'armandose') {
-        <p class="ayuda">Se actualiza solo. Cuando se completen los {{ s.cupo_maximo }} lugares, la cancha queda reservada y les llega un mail a todos.</p>
+        <p class="ayuda">
+          @if (s.mi_reserva) {
+            Tocá un lugar libre para sumar a un amigo a ese equipo.
+          }
+          Se actualiza solo. Cuando se completen los {{ s.cupo_maximo }} lugares, la cancha queda reservada y les llega un mail a todos.
+        </p>
       }
     </section>
+
+    <aside class="sala-lateral">
 
     @if (s.mi_reserva; as mia) {
       <section class="tarjeta mia" aria-labelledby="titulo-mia">
@@ -149,6 +165,8 @@
         <app-icono nombre="flecha" [tamano]="16" />
       </a>
     </section>
+    </aside>
+    </div>
   } @else {
     <div class="vacio">
       <strong>No podés ver este partido</strong>

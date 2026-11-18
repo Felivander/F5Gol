@@ -1,7 +1,3 @@
-.pagina-media {
-  max-width: 760px;
-}
-
 .cabecera {
   display: flex;
   align-items: center;
@@ -49,10 +45,81 @@
   font-weight: 600;
 }
 
-.tarjeta + .tarjeta,
-.alerta + .tarjeta,
-.tarjeta + .alerta {
-  margin-top: 14px;
+/* Cuenta grande de jugadores, a la derecha de la cabecera */
+.cabecera-cuenta {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  margin-left: auto;
+  text-align: right;
+}
+
+.cabecera-numero {
+  font-size: 2.6rem;
+  font-weight: 800;
+  font-stretch: 75%;
+  line-height: 0.9;
+}
+
+.cabecera-numero small {
+  color: var(--tinta-3);
+  font-size: 1.4rem;
+}
+
+.cabecera-estado {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--lima);
+  color: var(--tinta);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.cabecera-estado.listo {
+  background: var(--cancha);
+  color: #fff;
+}
+
+@media (max-width: 560px) {
+  .cabecera {
+    flex-wrap: wrap;
+  }
+
+  .cabecera-cuenta {
+    grid-template-columns: auto auto;
+    align-items: center;
+    justify-items: start;
+    margin-left: 0;
+    text-align: left;
+  }
+}
+
+/* Dos columnas en pantallas anchas: la cancha ocupa el espacio y lo demás va al costado */
+.sala {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .sala {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 20px;
+  }
+
+  .sala-lateral {
+    position: sticky;
+    top: 20px;
+  }
+}
+
+.sala-lateral {
+  display: grid;
+  gap: 16px;
+}
+
+.sala-lateral .alerta {
+  margin: 0;
 }
 
 .tarjeta h2 {
@@ -61,27 +128,6 @@
 }
 
 /* Cupo: un casillero por lugar */
-.cupo-cabeza {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 4px 12px;
-}
-
-.cupo-cuenta {
-  color: var(--tinta-2);
-}
-
-.cupo-cuenta .num {
-  color: var(--tinta);
-  font-weight: 800;
-}
-
-.cupo-cuenta strong {
-  color: var(--cancha);
-}
-
 .cupo-campo {
   margin: 4px 0 14px;
 }
@@ -91,7 +137,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-bottom: 12px;
+  margin: 16px 0 12px;
 }
 
 .plantel h3 {

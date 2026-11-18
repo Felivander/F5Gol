@@ -1,17 +1,23 @@
-<div class="marcador" aria-hidden="true">
+<div class="marcador" [class.chico]="compacto()" aria-hidden="true">
   @for (lado of lados(); track lado.letra) {
-    <span class="marcador-equipo" [class.completo]="lado.faltan === 0" [class.derecha]="lado.letra === 'B'">
+    <span class="marcador-equipo" [class.completo]="lado.faltan === 0" [class.derecha]="lado.letra === 'B'" [class.mio]="miEquipo() === lado.letra">
       <strong>Equipo {{ lado.letra }}</strong>
-      {{ lado.faltan === 0 ? 'Completo' : lado.faltan === 1 ? 'Falta 1' : 'Faltan ' + lado.faltan }}
+      @if (miEquipo() === lado.letra) {
+        <span class="marcador-tuyo">el tuyo</span>
+      }
+      <span>{{ lado.faltan === 0 ? 'Completo' : lado.faltan === 1 ? 'Falta 1' : 'Faltan ' + lado.faltan }}</span>
     </span>
   }
 </div>
 
-<div class="campo">
+<div class="campo" [class.chico]="compacto()">
   <svg class="campo-dibujo" viewBox="0 0 400 250" preserveAspectRatio="none" aria-hidden="true" focusable="false">
     <rect width="400" height="250" class="pasto" />
     @for (f of [0, 2, 4, 6, 8]; track f) {
       <rect [attr.x]="f * 40" y="0" width="40" height="250" class="franja" />
+    }
+    @if (miEquipo()) {
+      <rect [attr.x]="miEquipo() === 'A' ? 12 : 200" y="12" width="188" height="226" class="mitad-mia" />
     }
     <g class="lineas">
       <rect x="12" y="12" width="376" height="226" rx="2" />
@@ -30,15 +36,20 @@
       @for (u of lado.lugares; track u.numero) {
         <li class="ficha" [class.libre]="!u.nombre" [class.yo]="u.soyYo" [class.amigo]="u.amigo" [class.b]="lado.letra === 'B'"
           [style.left.%]="u.x" [style.top.%]="u.y">
-          <span class="ficha-circulo" aria-hidden="true">
-            @if (!u.nombre) {
-              +
-            } @else if (u.inicial) {
-              {{ u.inicial }}
-            } @else {
-              {{ u.numero }}
-            }
-          </span>
+          @if (!u.nombre && seleccionable()) {
+            <button type="button" class="ficha-circulo ficha-boton" [disabled]="ocupado()"
+              [attr.aria-label]="'Sumarse al lugar ' + u.numero + ' del Equipo ' + lado.letra" (click)="elegir.emit(lado.letra)">+</button>
+          } @else {
+            <span class="ficha-circulo" aria-hidden="true">
+              @if (!u.nombre) {
+                +
+              } @else if (u.inicial) {
+                {{ u.inicial }}
+              } @else if (!compacto()) {
+                {{ u.numero }}
+              }
+            </span>
+          }
           <span class="ficha-nombre">
             <span class="visually-hidden">Lugar {{ u.numero }}: </span>
             {{ u.nombre ? (u.soyYo && !u.amigo ? 'Vos' : u.nombre) : 'Libre' }}

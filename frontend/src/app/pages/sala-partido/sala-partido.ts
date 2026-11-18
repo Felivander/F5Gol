@@ -5,6 +5,7 @@ import { Icono } from '../../components/icono/icono';
 import { fechaRelativa, partesFecha, pesos, textoTipo } from '../../formato';
 import { Equipo, SalaPartido as Sala, textoSuperficie } from '../../models';
 import { Api } from '../../services/api';
+import { Auth } from '../../services/auth';
 
 const REFRESCO_MS = 15_000;
 
@@ -18,6 +19,7 @@ const REFRESCO_MS = 15_000;
 export class SalaPartido implements OnInit {
   private api = inject(Api);
   private router = inject(Router);
+  private auth = inject(Auth);
 
   // Id del turno, del parámetro de ruta
   id = input.required<string>();
@@ -27,6 +29,8 @@ export class SalaPartido implements OnInit {
   error = signal('');
   cancelando = signal(false);
   copiado = signal(false);
+  // Mientras se suma un amigo desde la cancha
+  sumando = signal(false);
 
   protected textoSuperficie = textoSuperficie;
   protected textoTipo = textoTipo;
@@ -134,6 +138,33 @@ export class SalaPartido implements OnInit {
     } catch {
       prompt('Copiá este link para invitar:', link);
     }
+  }
+
+  // Tocar un lugar libre en la cancha: suma un amigo en ese equipo (una reserva más a su nombre)
+  sumarAmigo(equipo: Equipo): void {
+    const s = this.sala();
+    const usuario = this.auth.usuario();
+    if (!s || !usuario) {
+      return;
+    }
+    const precio = pesos(s.precio_por_jugador);
+    if (!confirm(`¿Sumar a un amigo al Equipo ${equipo}? Son ${precio} más en el club.`)) {
+      return;
+    }
+    this.sumando.set(true);
+    this.error.set('');
+    this.api.crearReserva({ turno_id: s.turno_id, usuario_id: usuario.id, tipo: 'individual', equipo, cantidad_jugadores: 1 }).subscribe({
+      next: () => {
+        this.sumando.set(false);
+        this.cargar(true);
+      },
+      error: err => {
+        // 409: ese equipo se llenó mientras tanto o el partido ya empezó
+        this.error.set(err.error?.message ?? 'No se pudo sumar a tu amigo.');
+        this.sumando.set(false);
+        this.cargar(true);
+      }
+    });
   }
 
   salirDelPartido(): void {

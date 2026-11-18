@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 // Un lugar del partido: ocupado por un jugador (o por un amigo que anotó) o libre
 export interface LugarPartido {
@@ -57,6 +57,16 @@ export function formacion(n: number, lado: 'A' | 'B' = 'A'): { x: number; y: num
 export class CanchaLugares {
   equipoA = input.required<LugarPartido[]>();
   equipoB = input.required<LugarPartido[]>();
+  // Versión chica para las tarjetas del lobby: sin nombres, fichas más chicas
+  compacto = input(false);
+  // Los lugares libres son botones: al tocar uno se avisa el equipo
+  seleccionable = input(false);
+  // Equipo del usuario, para marcar su mitad
+  miEquipo = input<'A' | 'B' | null>(null);
+  // Mientras se guarda una reserva, los lugares libres no se pueden tocar
+  ocupado = input(false);
+
+  elegir = output<'A' | 'B'>();
 
   protected lados = computed<Lado[]>(() => [this.ubicar('A', this.equipoA()), this.ubicar('B', this.equipoB())]);
 

@@ -202,6 +202,8 @@ export interface PartidoAbierto {
   equipos: Equipos;
   // Solo si hay sesión: el usuario ya está anotado en este partido
   estoy_anotado: boolean;
+  // Equipo donde está anotado (solo si hay sesión)
+  mi_equipo?: Equipo | null;
   cancha: { id: number; nombre: string; tipo: string; superficie: Superficie | null };
   club: { id: number; nombre: string; direccion: string | null } | null;
 }

@@ -1,57 +1,66 @@
 <article class="partido" [class.casi]="casiCompleto()" [class.mio]="partido().estoy_anotado">
-  <div class="partido-fecha" [attr.aria-label]="cuando()">
-    <span class="partido-semana">{{ fecha().semana }}</span>
-    <span class="partido-dia num">{{ fecha().dia }}</span>
-    <span class="partido-mes">{{ fecha().mes }}</span>
-  </div>
+  @if (auth.usuario()) {
+    @if (partido().estoy_anotado) {
+      <p class="estado estado-si">
+        <app-icono nombre="ok" [tamano]="16" />
+        Estás anotado · Equipo {{ partido().mi_equipo }}
+      </p>
+    } @else {
+      <p class="estado estado-no">No estás anotado</p>
+    }
+  }
 
-  <div class="partido-info">
-    <p class="partido-club">{{ partido().club?.nombre }}</p>
-    <h3>{{ partido().cancha.nombre }}</h3>
-    <div class="meta">
-      <span><app-icono nombre="reloj" [tamano]="16" /> {{ cuando() }}, {{ partido().hora_inicio }} a {{ partido().hora_fin }}</span>
-      @if (superficie()) {
-        <span><app-icono nombre="cesped" [tamano]="16" /> {{ superficie() }}</span>
-      }
+  <div class="partido-cabeza">
+    <div class="partido-fecha" [attr.aria-label]="cuando()">
+      <span class="partido-semana">{{ fecha().semana }}</span>
+      <span class="partido-dia num">{{ fecha().dia }}</span>
+      <span class="partido-mes">{{ fecha().mes }}</span>
+    </div>
+
+    <div class="partido-info">
+      <p class="partido-club">{{ partido().club?.nombre }}</p>
+      <h3>{{ partido().cancha.nombre }}</h3>
+      <div class="meta">
+        <span><app-icono nombre="reloj" [tamano]="16" /> {{ cuando() }}, {{ partido().hora_inicio }} a {{ partido().hora_fin }}</span>
+        @if (superficie()) {
+          <span><app-icono nombre="cesped" [tamano]="16" /> {{ superficie() }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="partido-cupo">
+      <span class="partido-faltan num">{{ partido().faltan }}</span>
+      <span class="partido-faltan-texto">{{ partido().faltan === 1 ? 'lugar libre' : 'lugares libres' }}</span>
     </div>
   </div>
 
-  <div class="partido-cupo">
-    <span class="partido-faltan num">{{ partido().faltan }}</span>
-    <span class="partido-faltan-texto">{{ partido().faltan === 1 ? 'lugar libre' : 'lugares libres' }}</span>
-  </div>
+  <app-cancha-lugares
+    [equipoA]="equipoA()"
+    [equipoB]="equipoB()"
+    [compacto]="true"
+    [seleccionable]="true"
+    [miEquipo]="partido().mi_equipo ?? null"
+    [ocupado]="sumando()"
+    (elegir)="sumarseEn($event)" />
 
-  <div class="partido-equipos">
-    @for (e of equipos(); track e.letra) {
-      <span class="partido-equipo" [class.lleno]="e.faltan === 0">
-        <span class="partido-equipo-letra">{{ e.letra }}</span>
-        <span class="pips" role="img" [attr.aria-label]="'Equipo ' + e.letra + ': ' + e.anotados + ' de ' + e.cupo">
-          @for (lleno of e.puntos; track $index) {
-            <span class="pip" [class.lleno]="lleno"></span>
-          }
-        </span>
-        <span class="partido-equipo-texto">{{ e.faltan === 0 ? 'completo' : 'faltan ' + e.faltan }}</span>
-      </span>
-    }
-  </div>
+  <p class="ayuda partido-ayuda">
+    {{ partido().estoy_anotado ? 'Tocá un lugar libre para sumar a un amigo.' : 'Tocá un lugar libre para sumarte a ese equipo.' }}
+  </p>
+
+  @if (error()) {
+    <p class="alerta alerta-error" role="alert">{{ error() }}</p>
+  }
 
   <div class="partido-pie">
+    <span class="precio">{{ precio() }} <small>por jugador</small></span>
     @if (partido().estoy_anotado) {
-      <span class="chip chip-lima">Ya estás anotado</span>
-      <span class="partido-acciones">
-        <a class="btn btn-fantasma btn-sm" [routerLink]="['/canchas', partido().cancha.id]" [queryParams]="{ dia: partido().fecha }">
-          <app-icono nombre="mas" [tamano]="16" />
-          Sumar a un amigo
-        </a>
-        <a class="btn btn-primary btn-sm" [routerLink]="['/partidos', partido().turno_id]">
-          Ver mi partido
-          <app-icono nombre="flecha" [tamano]="16" />
-        </a>
-      </span>
+      <a class="btn btn-primary btn-sm" [routerLink]="['/partidos', partido().turno_id]">
+        Ver mi partido
+        <app-icono nombre="flecha" [tamano]="16" />
+      </a>
     } @else {
-      <span class="precio">{{ precio() }} <small>por jugador</small></span>
-      <a class="btn btn-lima btn-sm" [routerLink]="['/canchas', partido().cancha.id]" [queryParams]="{ dia: partido().fecha }">
-        Sumarme
+      <a class="btn btn-fantasma btn-sm" [routerLink]="['/canchas', partido().cancha.id]" [queryParams]="{ dia: partido().fecha }">
+        Más opciones
         <app-icono nombre="flecha" [tamano]="16" />
       </a>
     }

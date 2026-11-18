@@ -33,6 +33,29 @@
   font-weight: 800;
 }
 
+.marcador-equipo.mio {
+  box-shadow: inset 0 0 0 2px var(--cancha);
+}
+
+.marcador-tuyo {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--tinta);
+  color: var(--lima);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.marcador.chico {
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.marcador.chico .marcador-equipo {
+  padding: 4px 8px;
+  font-size: 0.78rem;
+}
+
 .marcador-equipo.completo {
   background: var(--cancha);
   color: #fff;
@@ -67,6 +90,11 @@
   stroke: rgb(255 255 255 / 0.7);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
+}
+
+.mitad-mia {
+  fill: var(--lima);
+  opacity: 0.14;
 }
 
 .punto {
@@ -171,4 +199,64 @@
     background: var(--tinta);
     color: var(--lima);
   }
+}
+
+/* Lugar libre que se puede tocar para sumarse */
+.ficha-boton {
+  position: relative;
+  padding: 0;
+  font: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition-property: background-color, border-color, scale;
+  transition-duration: 150ms;
+}
+
+/* El área que se puede tocar es más grande que el círculo (44 px en las fichas chicas) */
+.ficha-boton::before {
+  content: '';
+  position: absolute;
+  inset: -9px;
+}
+
+.ficha.libre .ficha-boton {
+  background: rgb(207 240 74 / 0.18);
+  border: 2px dashed var(--lima);
+  color: var(--lima);
+}
+
+.ficha.libre .ficha-boton:hover {
+  background: var(--lima);
+  border-style: solid;
+  color: var(--tinta);
+}
+
+.ficha-boton:active:not(:disabled) {
+  scale: 0.92;
+}
+
+.ficha-boton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.ficha-boton:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+/* Versión compacta (tarjetas del lobby) */
+.campo.chico .ficha-circulo {
+  width: 26px;
+  height: 26px;
+  font-size: 0.8rem;
+}
+
+.campo.chico .ficha-nombre {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  padding: 0;
 }
