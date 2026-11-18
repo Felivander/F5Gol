@@ -119,6 +119,44 @@ class EquiposPartidoTest extends TestCase
             ->assertJsonPath('0.estoy_anotado', true);
     }
 
+    public function test_un_equipo_entero_se_puede_pasar_a_otro_turno_con_un_equipo_libre(): void
+    {
+        $cancha = $this->crearCancha();
+        $origen = $this->crearTurno($cancha);
+        $destino = $this->crearTurno($cancha, ['hora_inicio' => '21:00', 'hora_fin' => '22:00']);
+        $lleno = $this->crearTurno($cancha, ['hora_inicio' => '22:00', 'hora_fin' => '23:00']);
+        $yo = $this->crearJugador();
+        $reserva = $this->reservar($origen, ['tipo' => 'equipo', 'equipo' => 'B'], $yo)->assertCreated()->json('reserva.id');
+
+        // En el destino el B ya tiene gente: el equipo pasa al A
+        $this->reservar($destino, ['tipo' => 'individual', 'equipo' => 'B'])->assertCreated();
+        Sanctum::actingAs($yo);
+        $this->putJson("/api/reservas/{$reserva}", ['turno_id' => $destino->id])->assertOk();
+        $this->assertDatabaseHas('reservas', ['id' => $reserva, 'turno_id' => $destino->id, 'equipo' => 'A', 'cantidad_jugadores' => 5]);
+
+        // Si los dos equipos tienen jugadores, no se puede pasar
+        $this->reservar($lleno, ['tipo' => 'individual', 'equipo' => 'A'])->assertCreated();
+        $this->reservar($lleno, ['tipo' => 'individual', 'equipo' => 'B'])->assertCreated();
+        Sanctum::actingAs($yo);
+        $this->putJson("/api/reservas/{$reserva}", ['turno_id' => $lleno->id])
+            ->assertStatus(409)
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Los dos equipos'));
+    }
+
+    public function test_un_lugar_suelto_que_cambia_de_turno_va_al_equipo_donde_entra(): void
+    {
+        $cancha = $this->crearCancha();
+        $origen = $this->crearTurno($cancha);
+        $destino = $this->crearTurno($cancha, ['hora_inicio' => '21:00', 'hora_fin' => '22:00']);
+        $yo = $this->crearJugador();
+        $reserva = $this->reservar($origen, ['tipo' => 'individual', 'equipo' => 'A'], $yo)->assertCreated()->json('reserva.id');
+        $this->reservar($destino, ['tipo' => 'equipo', 'equipo' => 'A'])->assertCreated();
+
+        Sanctum::actingAs($yo);
+        $this->putJson("/api/reservas/{$reserva}", ['turno_id' => $destino->id])->assertOk();
+        $this->assertDatabaseHas('reservas', ['id' => $reserva, 'turno_id' => $destino->id, 'equipo' => 'B']);
+    }
+
     public function test_la_sala_muestra_el_equipo_de_cada_jugador(): void
     {
         $turno = $this->crearTurno();

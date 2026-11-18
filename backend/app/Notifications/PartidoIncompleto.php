@@ -28,7 +28,9 @@ class PartidoIncompleto extends Notification
         return (new MailMessage)
             ->subject('Tu partido en '.$cancha?->nombre.' no llegó a completarse')
             ->greeting('Hola '.$notifiable->name.',')
-            ->line('Llegó la hora del partido '.$this->turno->textoHorario()." y se anotaron {$anotados} de {$this->turno->cupo_maximo} jugadores.")
+            ->line('Llegó la hora del partido '.$this->turno->textoHorario()." y se anotaron {$anotados} de {$this->turno->cupo_maximo} jugadores "
+                .'(Equipo A: '.$this->turno->anotadosEquipo('A').' de '.$this->turno->cupoEquipo('A')
+                .', Equipo B: '.$this->turno->anotadosEquipo('B').' de '.$this->turno->cupoEquipo('B').').')
             ->line('Hablá con el club para ver si igual se puede jugar, o buscá otro partido abierto en F5GOL.');
     }
 }

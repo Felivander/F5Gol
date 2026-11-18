@@ -99,13 +99,15 @@ class AvisarPartidoCompleto
                         'direccion' => $club?->direccion,
                         'telefono' => $club?->telefono,
                     ],
-                    // Un elemento por reserva: cada jugador sabe con cuántos amigos se anotó
+                    // Un elemento por reserva: cada jugador sabe en qué equipo juega y con cuántos amigos se anotó
                     'jugadores' => $reservas
                         ->filter(fn ($r) => $r->usuario instanceof User)
                         ->map(fn ($r) => [
                             'nombre' => $r->usuario->name,
                             'email' => $r->usuario->email,
                             'cantidad_jugadores' => $r->cantidad_jugadores,
+                            'equipo' => $r->equipo,
+                            'tipo' => $r->tipo,
                         ])->values()->all(),
                     'links' => [
                         'cancha' => $frontend.'/canchas/'.$cancha?->id,
