@@ -101,6 +101,22 @@ class AvisoPartidoCompletoTest extends TestCase
         Notification::assertSentTo([$ana, $beto], PartidoCompleto::class);
     }
 
+    public function test_el_mail_de_laravel_usa_el_tema_de_la_app_y_sale_en_espanol(): void
+    {
+        $turno = $this->crearTurno(null, ['cupo_maximo' => 2]);
+        $ana = $this->crearJugador();
+        $this->crearReserva($turno, ['usuario_id' => $ana->id, 'tipo' => 'individual', 'equipo' => 'A']);
+
+        $html = (string) (new PartidoCompleto($turno))->toMail($ana)->render();
+
+        // Colores de resources/views/mail/f5gol.css: fondo papel y texto en tinta
+        $this->assertStringContainsString('#f5f2ea', $html);
+        $this->assertStringContainsString('#15171a', $html);
+        $this->assertStringContainsString('Saludos,', $html);
+        $this->assertStringNotContainsString('Regards', $html);
+        $this->assertStringContainsString('Jugás en el Equipo A.', $html);
+    }
+
     public function test_una_reserva_completa_no_dispara_el_aviso_de_matchmaking(): void
     {
         Http::fake();
