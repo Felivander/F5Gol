@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "F5GOL"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "388c5d3d-88ad-4144-b37c-7b1c1e146f3c"
+  }
+}

@@ -6,7 +6,12 @@ model Model
 		legacyRedirects
 		returnErrorValuesAsNull
 
+annotation PBI_QueryOrder = ["bi_turnos","bi_reservas","bi_usuarios"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
 ref table bi_turnos
 ref table bi_reservas
 ref table bi_usuarios
 ref table Calendario
+

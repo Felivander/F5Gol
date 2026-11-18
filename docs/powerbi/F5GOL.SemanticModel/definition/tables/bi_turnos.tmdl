@@ -157,3 +157,4 @@ table bi_turnos
 				    Tipos
 
 	annotation PBI_ResultType = Table
+

@@ -29,7 +29,7 @@ table bi_reservas
 		formatString: 0.0%
 		lineageTag: c0966f2e-650d-4ed8-a162-af25410417b0
 
-	measure 'Facturación' = CALCULATE(SUM(bi_reservas[monto]), bi_reservas[estado] <> "cancelada")
+	measure Facturación = CALCULATE(SUM(bi_reservas[monto]), bi_reservas[estado] <> "cancelada")
 		formatString: $ #,0
 		lineageTag: ac488057-e3d6-4dd1-a067-10bcabb2b485
 
@@ -188,3 +188,4 @@ table bi_reservas
 				    Tipos
 
 	annotation PBI_ResultType = Table
+

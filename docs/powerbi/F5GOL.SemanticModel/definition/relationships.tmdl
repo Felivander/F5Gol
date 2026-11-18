@@ -9,3 +9,4 @@ relationship de9fc3cc-40de-4389-81cc-9c2d4a1d4ea9
 relationship 352e46a5-814e-494f-b547-0618049be387
 	fromColumn: bi_usuarios.'Fecha de alta'
 	toColumn: Calendario.Date
+
