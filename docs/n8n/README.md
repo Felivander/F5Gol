@@ -122,6 +122,30 @@ Respuestas posibles: `200` mail enviado · `401` secreto incorrecto · `422` dat
 
 En n8n, la pestaña **Executions** muestra cada ejecución nodo por nodo: sirve para la presentación.
 
+## Segundo flujo: aviso de partido completo
+
+Archivo: [`partido-completo.json`](partido-completo.json) (9 nodos). Cuando un turno de matchmaking llega al cupo, Laravel (`AvisarPartidoCompleto`) manda al webhook `/webhook/f5gol-partido-completo` los datos del turno, la cancha, el club y la lista de jugadores. n8n arma **un mail por jugador** (día, horario, cancha, club, dirección y con cuántos amigos se anotó) y responde cuántos salieron.
+
+| # | Nodo | Qué hace |
+|---|---|---|
+| 1 | Webhook partido completo | Recibe el `POST` |
+| 2 | Configuración | Secreto esperado y remitente |
+| 3 | Validar y separar jugadores (Code) | Verifica secreto y evento, y devuelve un ítem por jugador con email válido |
+| 4 | ¿Pedido válido? (IF) | Separa válidos de rechazados |
+| 5 | Armar mail (Set) | Asunto y HTML personalizados |
+| 6 | Enviar aviso (Email/SMTP) | Manda cada mail; si uno falla, sigue con los demás |
+| 7 | Resumir envíos (Code) | Cuenta enviados y fallidos |
+| 8 | Responder resultado | `200` si salieron todos, `502` si alguno falló |
+| 9 | Responder rechazo | `401` o `422` |
+
+Se importa y activa igual que el de bienvenida, con la misma credencial **SMTP F5GOL** y el mismo secreto. En `backend/.env`:
+
+```env
+N8N_WEBHOOK_PARTIDO_COMPLETO=http://localhost:5678/webhook/f5gol-partido-completo
+```
+
+Si n8n no está configurado o no responde, Laravel manda el aviso con su propio mail (`PartidoCompleto`), así nunca se pierde.
+
 ## Problemas comunes
 
 | Síntoma | Causa |

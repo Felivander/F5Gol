@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\AvisarPartidoCompleto;
 use App\Models\Reserva;
 use App\Models\Turno;
 use App\Models\User;
 use App\Http\Requests\ReservaRequest;
-use App\Notifications\PartidoCompleto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 use OpenApi\Attributes as OA;
 
 class ReservaController extends Controller
@@ -191,11 +190,8 @@ class ReservaController extends Controller
             } elseif ($turno->cupoActual() >= $turno->cupo_maximo) {
                 // Se completó el cupo de matchmaking: el turno queda confirmado y se avisa a todos los anotados
                 $turno->update(['estado' => 'ocupado']);
-                $anotados = User::whereIn('id', $turno->reservas()
-                    ->where('tipo', 'individual')
-                    ->where('estado', '!=', 'cancelada')
-                    ->pluck('usuario_id'))->get();
-                Notification::send($anotados, new PartidoCompleto($turno->load('cancha')));
+                // El mail sale por n8n (o por Laravel si n8n no está), después de responder la reserva
+                AvisarPartidoCompleto::dispatch($turno)->afterResponse();
             }
 
             $horario = $turno->textoHorario();
