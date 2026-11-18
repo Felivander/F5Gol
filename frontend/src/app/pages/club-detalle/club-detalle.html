@@ -94,6 +94,7 @@
         @if (esDueno()) {
           <div style="display: flex; gap: 0.5rem; align-items: center;">
             <a class="btn-link editar-cancha" [routerLink]="['/canchas', cancha.id, 'editar']">Editar cancha y fotos</a>
+            <a class="btn-link editar-cancha" [routerLink]="['/canchas', cancha.id, 'horarios']">Cargar horarios</a>
             <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminarCancha(cancha)">Eliminar</button>
           </div>
         }

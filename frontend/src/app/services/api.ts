@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Cancha, CanchaInput, Club, ClubInput, NuevaReserva, Paginado, Reserva, RespuestaMensaje, Turno } from '../models';
+import { Cancha, CanchaInput, Club, ClubInput, GenerarTurnos, NuevaReserva, RespuestaGenerarTurnos, Paginado, Reserva, RespuestaMensaje, Turno } from '../models';
 
 // En desarrollo, ng serve redirige /api a Laravel (ver proxy.conf.json)
 const API = '/api';
@@ -101,6 +101,16 @@ export class Api {
   // Filtros de GET /api/reservas: usuario_id, cancha_id, fecha, desde, hasta, page
   getReservas(filtros: Record<string, string | number>) {
     return this.http.get<Paginado<Reserva>>(`${API}/reservas`, { params: filtros });
+  }
+
+  // Crea en lote los turnos de una cancha (solo el dueño del club)
+  generarTurnos(datos: GenerarTurnos) {
+    return this.http.post<RespuestaGenerarTurnos>(`${API}/turnos/generar`, datos);
+  }
+
+  // Solo turnos sin reservas activas (409 si tiene)
+  eliminarTurno(id: number) {
+    return this.http.delete<RespuestaMensaje>(`${API}/turnos/${id}`);
   }
 
   bloquearTurno(id: number, bloqueado: boolean) {

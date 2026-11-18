@@ -1072,3 +1072,117 @@ tbody tr:hover {
   width: 1.1rem;
   height: 1.1rem;
 }
+
+/* ===== Carga de horarios ===== */
+.horarios-fila {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 0 1rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.horarios-fila > legend,
+.formulario fieldset > legend {
+  grid-column: 1 / -1;
+  font-size: inherit;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.formulario fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.dias-semana {
+  display: grid;
+  /* En pantallas muy angostas los días pasan a dos filas */
+  grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));
+  gap: 0.35rem;
+}
+
+.dia-chip {
+  position: relative;
+  display: block;
+}
+
+.dia-chip input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.dia-chip span {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.88rem;
+  background: var(--card-bg);
+  transition: var(--transition);
+}
+
+.dia-chip input:checked + span {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.dia-chip input:focus-visible + span {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.dias-atajos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-top: 0.4rem;
+}
+
+.dias-atajos button.btn-link {
+  padding: 0.35rem 0;
+  min-height: 36px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: none;
+  border: 0;
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  box-shadow: none;
+}
+
+.dias-atajos button.btn-link:hover:not(:disabled) {
+  background: none;
+  color: var(--primary-hover);
+  box-shadow: none;
+  transform: none;
+}
+
+.horarios-resumen {
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--primary-light);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+}
+
+.acciones-dueno {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.btn-eliminar-turno {
+  color: #b91c1c;
+}

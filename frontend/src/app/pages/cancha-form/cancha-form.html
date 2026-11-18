@@ -86,6 +86,10 @@
   </form>
 
   @if (cancha(); as cancha) {
+    <div class="aviso" style="margin-top: 1.25rem;">
+      Para que los jugadores puedan reservar, la cancha necesita horarios.
+      <a [routerLink]="['/canchas', cancha.id, 'horarios']">Cargar horarios →</a>
+    </div>
     <h2 style="font-size: 1.2rem; margin-top: 2rem;">Fotos</h2>
     <div class="fotos-cancha">
       @for (foto of cancha.fotos ?? []; track foto; let i = $index) {

@@ -154,3 +154,22 @@ export interface LoginResponse {
   token_type: string;
   user: Usuario;
 }
+
+// Datos para POST /api/turnos/generar: crea en lote los turnos de una cancha
+export interface GenerarTurnos {
+  cancha_id: number;
+  desde: string;
+  hasta: string;
+  // 0 = domingo ... 6 = sábado
+  dias: number[];
+  hora_desde: string;
+  hora_hasta: string;
+  duracion: number;
+  cupo_maximo: number | null;
+}
+
+export interface RespuestaGenerarTurnos {
+  message: string;
+  creados: number;
+  omitidos: number;
+}

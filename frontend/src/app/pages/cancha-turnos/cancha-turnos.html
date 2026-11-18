@@ -1,7 +1,7 @@
 @if (cancha(); as cancha) {
   <a class="volver-link" [routerLink]="['/clubes', cancha.club_id]">← Volver a {{ cancha.club?.nombre }}</a>
   <div class="club-hero" style="margin-bottom: 2rem;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.75rem; align-items: center;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 1.75rem; align-items: center;">
       <div>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
           <span class="badge badge-tipo">⚽ {{ cancha.tipo }}</span>
@@ -43,6 +43,13 @@
 }
 @if (aviso()) {
   <p class="aviso">{{ aviso() }} <a routerLink="/mis-reservas">Ver mis reservas</a></p>
+}
+
+@if (esDueno() && cancha(); as cancha) {
+  <div class="acciones-dueno">
+    <a class="btn btn-primary" [routerLink]="['/canchas', cancha.id, 'horarios']">+ Cargar horarios</a>
+    <a class="btn btn-outline-primary" [routerLink]="['/canchas', cancha.id, 'editar']">Editar cancha y fotos</a>
+  </div>
 }
 
 <section class="filtro-turnos">
@@ -100,6 +107,11 @@
                   {{ turno.estado === 'bloqueado' ? 'Desbloquear' : 'Bloquear por mantenimiento' }}
                 </button>
               }
+              @if (esDueno() && !yaPaso(turno) && turno.cupo_actual === 0 && turno.estado !== 'ocupado') {
+                <button class="btn-secundario btn-eliminar-turno" (click)="eliminarTurno(turno)" [disabled]="reservando() === turno.id">
+                  Eliminar turno
+                </button>
+              }
               @if (puedeReservar(turno)) {
                 <button (click)="reservar(turno)" [disabled]="reservando() === turno.id">
                   {{ reservando() === turno.id ? 'Reservando...' : 'Reservar cancha' }}
@@ -127,6 +139,9 @@
           <tr>
             <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
               No hay turnos disponibles para la fecha seleccionada.
+              @if (esDueno() && cancha(); as cancha) {
+                <br><a [routerLink]="['/canchas', cancha.id, 'horarios']">Cargar horarios para esta cancha</a>
+              }
             </td>
           </tr>
         }
