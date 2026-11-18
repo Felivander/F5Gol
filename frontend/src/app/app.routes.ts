@@ -6,6 +6,7 @@ import { administradorGuard, sesionGuard } from './guards/auth.guard';
 export const routes: Routes = [
   { path: '', redirectTo: 'clubes', pathMatch: 'full' },
   { path: 'clubes', loadComponent: () => import('./pages/clubes/clubes').then(m => m.Clubes) },
+  { path: 'partidos', loadComponent: () => import('./pages/partidos/partidos').then(m => m.Partidos) },
   // Las rutas fijas van antes de clubes/:id, si no "nuevo" se tomaría como un id
   {
     path: 'clubes/nuevo',

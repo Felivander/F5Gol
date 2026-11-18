@@ -1,0 +1,126 @@
+.partido {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'fecha info cupo'
+    'pie pie pie';
+  gap: 16px;
+  height: 100%;
+  padding: 16px;
+  background: var(--superficie);
+  border-radius: var(--r);
+  box-shadow: var(--sombra-1);
+}
+
+/* El que está a un jugador de completarse se destaca */
+.partido.casi {
+  box-shadow: 0 0 0 2px var(--lima), var(--sombra-1);
+}
+
+.partido-fecha {
+  grid-area: fecha;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  width: 56px;
+  padding: 6px 0 8px;
+  border-radius: var(--r-chico);
+  background: var(--tinta);
+  color: #fff;
+  line-height: 1;
+}
+
+.partido-semana,
+.partido-mes {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b9bcc2;
+}
+
+.partido-dia {
+  margin: 4px 0 2px;
+  font-size: 1.75rem;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+
+.partido-info {
+  grid-area: info;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.partido-club {
+  color: var(--tinta-3);
+  font-size: 0.82rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.partido-cupo {
+  grid-area: cupo;
+  display: grid;
+  justify-items: end;
+  align-content: start;
+  gap: 4px;
+  text-align: right;
+}
+
+.partido-faltan {
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-stretch: 75%;
+  line-height: 0.9;
+}
+
+.partido.casi .partido-faltan {
+  color: var(--cancha);
+}
+
+.partido-faltan-texto {
+  color: var(--tinta-2);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.partido-pie {
+  grid-area: pie;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--linea-fuerte);
+}
+
+.partido-pie .precio {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 400px) {
+  .partido {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'fecha info'
+      'cupo cupo'
+      'pie pie';
+  }
+
+  .partido-cupo {
+    grid-template-columns: auto auto 1fr;
+    align-items: baseline;
+    justify-items: start;
+    gap: 8px;
+    text-align: left;
+  }
+
+  .partido-cupo .pips {
+    justify-self: end;
+  }
+}

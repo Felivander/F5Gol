@@ -4,10 +4,8 @@
   min-height: 100vh;
 }
 
+/* Cada página define su propio ancho con .pagina */
 main {
   flex: 1;
   width: 100%;
-  max-width: 1050px;
-  margin: 1.75rem auto 3rem auto;
-  padding: 0 1.25rem;
 }

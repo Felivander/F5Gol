@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Cancha, CanchaInput, Club, ClubInput, GenerarTurnos, NuevaReserva, RespuestaGenerarTurnos, Paginado, Reserva, RespuestaMensaje, Turno } from '../models';
+import { Cancha, CanchaInput, Club, ClubInput, GenerarTurnos, NuevaReserva, PartidoAbierto, RespuestaGenerarTurnos, Paginado, Reserva, RespuestaMensaje, Turno } from '../models';
 
 // En desarrollo, ng serve redirige /api a Laravel (ver proxy.conf.json)
 const API = '/api';
@@ -84,6 +84,18 @@ export class Api {
 
   restaurarCancha(id: number) {
     return this.http.put<RespuestaMensaje>(`${API}/canchas/${id}/restore`, {});
+  }
+
+  // Lobby de matchmaking: partidos que se están armando (público)
+  getPartidosAbiertos(filtros: { club_id?: number; fecha?: string } = {}) {
+    let params = new HttpParams();
+    if (filtros.club_id) {
+      params = params.set('club_id', filtros.club_id);
+    }
+    if (filtros.fecha) {
+      params = params.set('fecha', filtros.fecha);
+    }
+    return this.http.get<PartidoAbierto[]>(`${API}/partidos-abiertos`, { params });
   }
 
   getTurnos(canchaId: number, fecha?: string) {

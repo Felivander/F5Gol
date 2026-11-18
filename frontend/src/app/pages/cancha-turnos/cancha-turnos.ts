@@ -6,6 +6,9 @@ import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 
 import { CanchaDiagrama } from '../../components/cancha-diagrama/cancha-diagrama';
+import { Icono } from '../../components/icono/icono';
+import { fechaRelativa, partesFecha, pesos, textoTipo } from '../../formato';
+import { textoSuperficie } from '../../models';
 
 const REFRESCO_MS = 15_000;
 
@@ -17,8 +20,9 @@ function hoy(): string {
 
 @Component({
   selector: 'app-cancha-turnos',
-  imports: [RouterLink, FormsModule, CanchaDiagrama],
-  templateUrl: './cancha-turnos.html'
+  imports: [RouterLink, FormsModule, CanchaDiagrama, Icono],
+  templateUrl: './cancha-turnos.html',
+  styleUrl: './cancha-turnos.css'
 })
 export class CanchaTurnos implements OnInit {
   private api = inject(Api);
@@ -29,6 +33,13 @@ export class CanchaTurnos implements OnInit {
   id = input.required<string>();
   // ?mover=<id de reserva>: el jugador viene de Mis reservas a elegir un turno nuevo
   mover = input<string>();
+  // ?dia=AAAA-MM-DD: se llega desde un partido abierto y se muestra ese día
+  dia = input<string>();
+
+  protected fechaRelativa = fechaRelativa;
+  protected pesos = pesos;
+  protected textoTipo = textoTipo;
+  protected textoSuperficie = textoSuperficie;
 
   cancha = signal<Cancha | null>(null);
   turnos = signal<Turno[]>([]);
@@ -106,6 +117,28 @@ export class CanchaTurnos implements OnInit {
     return new Date(`${turno.fecha.slice(0, 10)}T${turno.hora_inicio}`).getTime() <= Date.now();
   }
 
+  // Los próximos 7 días, para elegir con un toque en el celular
+  protected dias = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const valor = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return { valor, ...partesFecha(valor), titulo: i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : '' };
+  });
+
+  esDiaDeLaTira() {
+    return this.dias.some(d => d.valor === this.fecha);
+  }
+
+  elegirDia(valor: string) {
+    this.fecha = valor;
+    this.buscarTurnos();
+  }
+
+  // Un punto por lugar del partido: lleno si ya está ocupado
+  lugares(turno: Turno) {
+    return Array.from({ length: turno.cupo_maximo }, (_, i) => i < turno.cupo_actual);
+  }
+
   // Lugares libres para sumarse al partido por matchmaking
   lugaresLibres(turno: Turno) {
     return turno.cupo_maximo - turno.cupo_actual;
@@ -174,6 +207,9 @@ export class CanchaTurnos implements OnInit {
   }
 
   ngOnInit() {
+    if (this.dia() && /^\d{4}-\d{2}-\d{2}/.test(this.dia()!)) {
+      this.fecha = this.dia()!.slice(0, 10);
+    }
     this.api.getCancha(Number(this.id())).subscribe({
       next: cancha => this.cancha.set(cancha),
       error: () => this.error.set('No se encontró la cancha.')

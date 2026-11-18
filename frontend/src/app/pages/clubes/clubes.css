@@ -1,0 +1,197 @@
+/* Portada: verde de cancha con las líneas del área dibujadas */
+.portada {
+  position: relative;
+  overflow: hidden;
+  background: var(--cancha-oscura);
+  color: #fff;
+}
+
+.portada::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.035) 0 64px, transparent 64px 128px);
+  pointer-events: none;
+}
+
+/* Medio círculo de la cancha, a la derecha */
+.portada::after {
+  content: '';
+  position: absolute;
+  right: -140px;
+  top: 50%;
+  width: 360px;
+  height: 360px;
+  border: 2px solid rgb(255 255 255 / 0.14);
+  border-radius: 50%;
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+.portada-interior {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 16px 56px;
+}
+
+@media (min-width: 768px) {
+  .portada-interior {
+    padding: 80px 24px 88px;
+  }
+
+  .portada::after {
+    right: 6%;
+    width: 440px;
+    height: 440px;
+  }
+}
+
+.portada h1 {
+  max-width: 14ch;
+  color: #fff;
+  font-size: clamp(2.4rem, 8vw, 4.25rem);
+  line-height: 0.95;
+}
+
+.portada-ante {
+  margin-bottom: 14px;
+  color: var(--lima);
+}
+
+.portada-bajada {
+  max-width: 46ch;
+  margin-top: 18px;
+  color: rgb(255 255 255 / 0.78);
+  font-size: 1.05rem;
+}
+
+.portada-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.seccion-inicial {
+  margin-bottom: 8px;
+}
+
+.enlace-flecha {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.resumen {
+  color: var(--tinta-3);
+  font-size: 0.9rem;
+}
+
+/* Buscador */
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 4px 6px 4px 14px;
+  background: var(--superficie);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--r);
+  transition-property: border-color, box-shadow;
+  transition-duration: 150ms;
+}
+
+.buscador:focus-within {
+  border-color: var(--cancha);
+  box-shadow: 0 0 0 3px rgb(14 94 58 / 0.18);
+}
+
+.buscador-icono {
+  color: var(--tinta-3);
+}
+
+.buscador input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--tinta);
+  font: inherit;
+  font-size: max(16px, 1rem);
+  outline: none;
+}
+
+/* Lista de clubes */
+.clubes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  transition-property: opacity;
+  transition-duration: 150ms;
+}
+
+.clubes.atenuado {
+  opacity: 0.55;
+}
+
+.club {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  height: 100%;
+  padding: 12px;
+}
+
+.club-foto {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--r-chico);
+}
+
+.club-sin-foto {
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), rgb(255 255 255 / 0.25) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+    var(--cancha);
+  color: var(--lima);
+  font-size: 3rem;
+  font-weight: 800;
+  font-stretch: 75%;
+  text-transform: uppercase;
+}
+
+.club-datos {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 0 6px;
+}
+
+.club-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 6px 4px;
+  border-top: 1px solid var(--linea);
+}
+
+.club-ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--cancha);
+  font-weight: 700;
+  font-size: 0.92rem;
+}

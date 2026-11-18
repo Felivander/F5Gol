@@ -173,3 +173,17 @@ export interface RespuestaGenerarTurnos {
   creados: number;
   omitidos: number;
 }
+
+// Partido de matchmaking que se está armando (GET /api/partidos-abiertos)
+export interface PartidoAbierto {
+  turno_id: number;
+  fecha: string;
+  hora_inicio: string;
+  hora_fin: string;
+  cupo_maximo: number;
+  anotados: number;
+  faltan: number;
+  precio_por_jugador: number;
+  cancha: { id: number; nombre: string; tipo: string; superficie: Superficie | null };
+  club: { id: number; nombre: string; direccion: string | null } | null;
+}

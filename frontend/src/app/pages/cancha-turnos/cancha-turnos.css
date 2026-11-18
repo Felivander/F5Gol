@@ -1,0 +1,242 @@
+/* Ficha de la cancha: datos a la izquierda, foto o dibujo a la derecha */
+.ficha {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 768px) {
+  .ficha {
+    grid-template-columns: 1.1fr 1fr;
+    align-items: center;
+    gap: 40px;
+  }
+}
+
+.ficha-texto {
+  display: grid;
+  gap: 12px;
+}
+
+.ficha-texto .precio {
+  margin-top: 4px;
+}
+
+.ficha-dueno {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.ficha-imagen img {
+  width: 100%;
+  aspect-ratio: 5 / 3;
+  object-fit: cover;
+  border-radius: var(--r);
+}
+
+.refresco {
+  color: var(--tinta-3);
+  font-size: 0.85rem;
+}
+
+/* Tira de días */
+.dias {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(64px, 1fr);
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  margin: 0 -2px 8px;
+}
+
+.dia {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  min-height: 76px;
+  padding: 8px 6px;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--r);
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  line-height: 1.1;
+  cursor: pointer;
+  transition-property: background-color, border-color, color, scale;
+  transition-duration: 150ms;
+  transition-timing-function: var(--curva);
+}
+
+.dia:hover {
+  border-color: var(--tinta-3);
+}
+
+.dia:active {
+  scale: 0.96;
+}
+
+.dia.activo {
+  background: var(--tinta);
+  border-color: var(--tinta);
+  color: #fff;
+}
+
+.dia:focus-visible,
+.dia-otro:focus-within {
+  outline: 2px solid var(--cancha);
+  outline-offset: 2px;
+}
+
+.dia-semana,
+.dia-mes {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+}
+
+.dia.activo .dia-semana,
+.dia.activo .dia-mes {
+  color: var(--lima);
+}
+
+.dia-numero {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+
+/* El input de fecha cubre todo el botón "Otro día", pero invisible */
+.dia-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.fecha-elegida {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+/* Lista de turnos */
+.turnos {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.turno {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  grid-template-areas:
+    'hora estado'
+    'acciones acciones';
+  align-items: center;
+  gap: 12px 16px;
+  padding: 14px 16px;
+  background: var(--superficie);
+  border-radius: var(--r);
+  box-shadow: var(--sombra-1);
+}
+
+@media (min-width: 768px) {
+  .turno {
+    grid-template-columns: 96px 1fr auto;
+    grid-template-areas: 'hora estado acciones';
+  }
+}
+
+.turno.pasado,
+.turno.no-disponible {
+  background: var(--papel);
+  box-shadow: inset 0 0 0 1px var(--linea);
+}
+
+.turno.pasado {
+  opacity: 0.6;
+}
+
+.turno-hora {
+  grid-area: hora;
+  display: grid;
+  line-height: 1.1;
+}
+
+.turno-inicio {
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+
+.turno-fin,
+.turno-fecha {
+  color: var(--tinta-3);
+  font-size: 0.82rem;
+}
+
+.turno-fecha {
+  font-weight: 700;
+  color: var(--tinta-2);
+}
+
+.turno-estado {
+  grid-area: estado;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.turno-cupo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.turno-acciones {
+  grid-area: acciones;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.turno-acciones:empty {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .turno-acciones {
+    justify-content: flex-end;
+  }
+}
+
+.sumarme {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.cantidad {
+  width: 64px;
+  min-height: 36px;
+  padding: 4px 8px;
+  text-align: center;
+}

@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Cancha, GenerarTurnos, RespuestaGenerarTurnos } from '../../models';
+import { Icono } from '../../components/icono/icono';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 
@@ -62,8 +63,9 @@ function alMenosUnDia(grupo: AbstractControl): ValidationErrors | null {
 // Carga en lote de los horarios de una cancha: /canchas/:id/horarios (solo el dueño del club)
 @Component({
   selector: 'app-cancha-horarios',
-  imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './cancha-horarios.html'
+  imports: [ReactiveFormsModule, RouterLink, Icono],
+  templateUrl: './cancha-horarios.html',
+  styleUrl: './cancha-horarios.css'
 })
 export class CanchaHorarios implements OnInit {
   private api = inject(Api);

@@ -1,100 +1,134 @@
-<section class="hero-banner">
-  <span class="hero-tag">Fútbol 5 & Matchmaking</span>
-  <h1>Encontrá tu cancha y jugá hoy</h1>
-  <p>Elegí tu complejo deportivo, mirá la disponibilidad en tiempo real y reservá tu partido en segundos.</p>
+<section class="portada">
+  <div class="portada-interior">
+    <p class="antetitulo portada-ante">Turnos y partidos de fútbol 5</p>
+    <h1>Reservá cancha.<br>O sumate a un partido.</h1>
+    <p class="portada-bajada">
+      Mirá los horarios libres de cada club y reservá en dos pasos. Si te falta gente, anotate solo
+      y el partido se arma con los que se vayan sumando.
+    </p>
+    <div class="portada-acciones">
+      <button type="button" class="btn btn-lima" (click)="irAClubes()">Buscar cancha</button>
+      <a class="btn btn-portada" routerLink="/partidos">
+        Ver partidos abiertos
+        <app-icono nombre="flecha" [tamano]="16" />
+      </a>
+    </div>
+  </div>
 </section>
 
-<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
-  <h2>Complejos y Clubes</h2>
-  <span style="font-size: 0.88rem; color: var(--text-muted);">Disponibilidad en vivo</span>
-</div>
-
-<form class="buscador-clubes" role="search" (submit)="$event.preventDefault()">
-  <label for="buscar-club" class="visually-hidden">Buscar club por nombre o dirección</label>
-  <span class="buscador-icono" aria-hidden="true">🔍</span>
-  <input
-    id="buscar-club"
-    type="search"
-    class="form-control"
-    placeholder="Buscar por nombre o dirección"
-    autocomplete="off"
-    maxlength="100"
-    [value]="busqueda()"
-    (input)="buscar($any($event.target).value)">
-  @if (busqueda()) {
-    <button type="button" class="btn btn-link buscador-limpiar" (click)="limpiarBusqueda()">Limpiar</button>
-  }
-</form>
-
-@if (error()) {
-  <p class="error">{{ error() }}</p>
-} @else if (cargando() && clubes().length === 0) {
-  <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
-    <p style="font-size: 1.1rem; font-weight: 600;">⚽ Cargando clubes...</p>
-  </div>
-} @else {
-  <p class="lista-clubes-resumen" aria-live="polite">
-    @if (cargando()) {
-      Buscando...
-    } @else if (busquedaMostrada()) {
-      {{ total() }} {{ total() === 1 ? 'club encontrado' : 'clubes encontrados' }} para "{{ busquedaMostrada() }}"
-    } @else {
-      {{ total() }} {{ total() === 1 ? 'club' : 'clubes' }}
-    }
-  </p>
-
-  <ul class="lista-clubes" [class.cargando]="cargando()">
-    @for (club of clubes(); track club.id) {
-      <li>
-        <a [routerLink]="['/clubes', club.id]">
-          @if (club.fotos?.length) {
-            <img class="lista-clubes-foto" [src]="club.fotos![0]" alt="" loading="lazy">
-          } @else {
-            <span class="lista-clubes-icono" aria-hidden="true">🏟️</span>
-          }
-
-          <div class="lista-clubes-datos">
-            <h3>{{ club.nombre }}</h3>
-            <p class="tarjeta-meta">
-              <span aria-hidden="true">📍</span>
-              <span>{{ club.direccion || 'Sin dirección cargada' }}</span>
-            </p>
-            @if (club.telefono) {
-              <p class="tarjeta-meta">
-                <span aria-hidden="true">📞</span>
-                <span>{{ club.telefono }}</span>
-              </p>
-            }
-            @if (club.canchas_count) {
-              <p class="tarjeta-meta">
-                <span aria-hidden="true">⚽</span>
-                <span>{{ club.canchas_count }} {{ club.canchas_count === 1 ? 'cancha' : 'canchas' }}</span>
-              </p>
-            }
-          </div>
-
-          <span class="lista-clubes-accion">
-            <span class="lista-clubes-accion-texto">Ver canchas y horarios</span>
-            <span class="flecha" aria-hidden="true">→</span>
-          </span>
+<div class="pagina">
+  @if (partidos().length) {
+    <section class="seccion-inicial" aria-labelledby="titulo-partidos">
+      <div class="seccion-titulo">
+        <h2 id="titulo-partidos">Les faltan jugadores</h2>
+        <a routerLink="/partidos" class="enlace-flecha">
+          Ver todos
+          <app-icono nombre="flecha" [tamano]="16" />
         </a>
-      </li>
-    } @empty {
-      <li class="lista-clubes-vacia">
-        @if (busquedaMostrada()) {
-          No encontramos clubes para "{{ busquedaMostrada() }}". Probá con otro nombre o dirección.
-        } @else {
-          No hay clubes cargados en este momento.
+      </div>
+      <div class="grilla">
+        @for (partido of partidos(); track partido.turno_id) {
+          <app-tarjeta-partido [partido]="partido" />
         }
-      </li>
-    }
-  </ul>
-
-  @if (ultimaPagina() > 1) {
-    <nav class="paginado" aria-label="Páginas de clubes">
-      <button [disabled]="pagina() === 1" (click)="cargar(pagina() - 1)">← Anterior</button>
-      <span>Página {{ pagina() }} de {{ ultimaPagina() }}</span>
-      <button [disabled]="pagina() === ultimaPagina()" (click)="cargar(pagina() + 1)">Siguiente →</button>
-    </nav>
+      </div>
+    </section>
   }
-}
+
+  <section id="clubes" class="seccion" aria-labelledby="titulo-clubes">
+    <div class="seccion-titulo">
+      <h2 id="titulo-clubes">Clubes</h2>
+      <p class="resumen" aria-live="polite">
+        @if (cargando()) {
+          Buscando…
+        } @else if (busquedaMostrada()) {
+          {{ total() }} {{ total() === 1 ? 'resultado' : 'resultados' }} para «{{ busquedaMostrada() }}»
+        } @else {
+          {{ total() }} {{ total() === 1 ? 'club' : 'clubes' }}
+        }
+      </p>
+    </div>
+
+    <form class="buscador" role="search" (submit)="$event.preventDefault()">
+      <label for="buscar-club" class="visually-hidden">Buscar club por nombre o dirección</label>
+      <app-icono class="buscador-icono" nombre="buscar" [tamano]="20" />
+      <input
+        id="buscar-club"
+        type="search"
+        placeholder="Nombre del club o barrio"
+        autocomplete="off"
+        maxlength="100"
+        [value]="busqueda()"
+        (input)="buscar($any($event.target).value)">
+      @if (busqueda()) {
+        <button type="button" class="btn btn-fantasma btn-sm" (click)="limpiarBusqueda()">Borrar</button>
+      }
+    </form>
+
+    @if (error()) {
+      <p class="alerta alerta-error" role="alert">
+        <app-icono nombre="alerta" [tamano]="20" />
+        {{ error() }}
+      </p>
+    } @else if (cargando() && clubes().length === 0) {
+      <p class="cargando">Cargando clubes…</p>
+    } @else {
+      <ul class="clubes" [class.atenuado]="cargando()">
+        @for (club of clubes(); track club.id) {
+          <li>
+            <a class="tarjeta tarjeta-enlace club" [routerLink]="['/clubes', club.id]">
+              @if (club.fotos?.length) {
+                <img class="club-foto foto" [src]="club.fotos![0]" alt="" loading="lazy">
+              } @else {
+                <span class="club-foto club-sin-foto" aria-hidden="true">{{ club.nombre.charAt(0) }}</span>
+              }
+
+              <div class="club-datos">
+                <h3>{{ club.nombre }}</h3>
+                <div class="meta">
+                  <span><app-icono nombre="ubicacion" [tamano]="16" /> {{ club.direccion || 'Sin dirección cargada' }}</span>
+                  @if (club.telefono) {
+                    <span><app-icono nombre="telefono" [tamano]="16" /> {{ club.telefono }}</span>
+                  }
+                </div>
+              </div>
+
+              <div class="club-pie">
+                @if (club.canchas_count) {
+                  <span class="chip">{{ club.canchas_count }} {{ club.canchas_count === 1 ? 'cancha' : 'canchas' }}</span>
+                }
+                <span class="club-ver">
+                  Ver horarios
+                  <app-icono nombre="flecha" [tamano]="16" />
+                </span>
+              </div>
+            </a>
+          </li>
+        } @empty {
+          <li class="vacio">
+            @if (busquedaMostrada()) {
+              <strong>Sin resultados para «{{ busquedaMostrada() }}»</strong>
+              <span>Probá con otro nombre o con el barrio.</span>
+            } @else {
+              <strong>Todavía no hay clubes</strong>
+              <span>Cuando un club cargue sus canchas, aparece acá.</span>
+            }
+          </li>
+        }
+      </ul>
+
+      @if (ultimaPagina() > 1) {
+        <nav class="paginado" aria-label="Páginas de clubes">
+          <button type="button" class="btn btn-outline-primary btn-sm" [disabled]="pagina() === 1" (click)="cargar(pagina() - 1)">
+            <app-icono nombre="volver" [tamano]="16" />
+            Anterior
+          </button>
+          <span class="num">{{ pagina() }} / {{ ultimaPagina() }}</span>
+          <button type="button" class="btn btn-outline-primary btn-sm" [disabled]="pagina() === ultimaPagina()" (click)="cargar(pagina() + 1)">
+            Siguiente
+            <app-icono nombre="flecha" [tamano]="16" />
+          </button>
+        </nav>
+      }
+    }
+  </section>
+</div>

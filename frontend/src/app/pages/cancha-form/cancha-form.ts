@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Cancha, CanchaInput, SUPERFICIES, Superficie } from '../../models';
+import { Icono } from '../../components/icono/icono';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 import { noSoloEspacios } from '../../validadores';
@@ -15,7 +16,7 @@ type Campo = 'nombre' | 'capacidad_jugadores' | 'superficie' | 'tarifa' | 'descr
 // Alta (/canchas/nueva?club=1) y edición (/canchas/:id/editar) de una cancha, solo para el dueño del club
 @Component({
   selector: 'app-cancha-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Icono],
   templateUrl: './cancha-form.html'
 })
 export class CanchaForm implements OnInit {

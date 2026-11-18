@@ -1,0 +1,50 @@
+.atajos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+/* Vista previa de lo que se va a crear */
+.resumen {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--r);
+  background: var(--papel);
+  box-shadow: inset 0 0 0 1px var(--linea);
+}
+
+.resumen-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  color: var(--tinta-2);
+}
+
+.resumen-total .num {
+  color: var(--tinta);
+  font-size: 2rem;
+  font-weight: 800;
+  font-stretch: 75%;
+  line-height: 1;
+}
+
+.resumen-horas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.resumen-horas li {
+  padding: 2px 8px;
+  border-radius: var(--r-chico);
+  background: var(--superficie);
+  box-shadow: inset 0 0 0 1px var(--linea-fuerte);
+  font-size: 0.85rem;
+  font-weight: 600;
+}

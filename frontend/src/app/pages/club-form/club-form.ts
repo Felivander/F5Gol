@@ -2,6 +2,7 @@ import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Club, ClubInput } from '../../models';
+import { Icono } from '../../components/icono/icono';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 import { PATRON_TELEFONO, noSoloEspacios } from '../../validadores';
@@ -9,7 +10,7 @@ import { PATRON_TELEFONO, noSoloEspacios } from '../../validadores';
 // Alta (/clubes/nuevo) y edición (/clubes/:id/editar) del club, con formulario reactivo
 @Component({
   selector: 'app-club-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Icono],
   templateUrl: './club-form.html'
 })
 export class ClubForm implements OnInit {

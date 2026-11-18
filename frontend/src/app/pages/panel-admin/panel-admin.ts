@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Cancha, Reserva } from '../../models';
+import { Icono } from '../../components/icono/icono';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 
@@ -31,8 +32,9 @@ function semanaDe(fecha: string) {
 
 @Component({
   selector: 'app-panel-admin',
-  imports: [FormsModule, RouterLink],
-  templateUrl: './panel-admin.html'
+  imports: [FormsModule, RouterLink, Icono],
+  templateUrl: './panel-admin.html',
+  styleUrl: './panel-admin.css'
 })
 export class PanelAdmin implements OnInit {
   private api = inject(Api);
@@ -63,6 +65,11 @@ export class PanelAdmin implements OnInit {
     lista.forEach(g => g.reservas.sort((a, b) => orden(a).localeCompare(orden(b))));
     return lista.sort((a, b) => a.cancha.nombre.localeCompare(b.cancha.nombre));
   });
+
+  // Números del resumen de arriba
+  activas = computed(() => this.reservas().filter(r => r.estado !== 'cancelada'));
+  pagadas = computed(() => this.activas().filter(r => r.estado_pago === 'pagado').length);
+  sinCobrar = computed(() => this.activas().filter(r => r.estado_pago !== 'pagado').length);
 
   canceladas = computed(() => this.reservas().filter(r => r.estado === 'cancelada').length);
 
