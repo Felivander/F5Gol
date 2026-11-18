@@ -1,20 +1,20 @@
-<a class="volver-link" [routerLink]="['/clubes', datos.club_id]">← Volver al club</a>
+<a class="volver-link" [routerLink]="['/clubes', clubId()]">← Volver al club</a>
 
 <div class="login-card" style="max-width: 640px;">
   <h1 style="font-size: 1.6rem;">{{ cancha() ? 'Editar cancha' : 'Nueva cancha' }}</h1>
 
-  <form class="formulario" (ngSubmit)="guardar()">
+  <form class="formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
     <div class="campo">
-      <label for="nombre">Nombre</label>
-      <input id="nombre" name="nombre" [(ngModel)]="datos.nombre" required maxlength="100">
-      @for (msg of errores()['nombre'] ?? []; track msg) {
-        <small class="error-campo">{{ msg }}</small>
+      <label for="nombre">Nombre *</label>
+      <input id="nombre" formControlName="nombre" maxlength="100" placeholder="Ej.: Cancha 1">
+      @if (errorDe('nombre')) {
+        <small class="error-campo">{{ errorDe('nombre') }}</small>
       }
     </div>
 
     <div class="campo">
       <label for="tipo">Tipo</label>
-      <select id="tipo" name="tipo" [(ngModel)]="datos.tipo">
+      <select id="tipo" formControlName="tipo">
         <option value="futbol5">Fútbol 5</option>
         <option value="futbol7">Fútbol 7</option>
         <option value="futbol11">Fútbol 11</option>
@@ -22,52 +22,56 @@
     </div>
 
     <div class="campo">
-      <label for="capacidad">Capacidad de jugadores</label>
-      <input id="capacidad" name="capacidad_jugadores" type="number" min="2" max="22" [(ngModel)]="datos.capacidad_jugadores">
-      @for (msg of errores()['capacidad_jugadores'] ?? []; track msg) {
-        <small class="error-campo">{{ msg }}</small>
+      <label for="capacidad">Capacidad de jugadores *</label>
+      <input id="capacidad" type="number" min="2" max="22" formControlName="capacidad_jugadores">
+      <small style="color: var(--text-muted);">Se completa sola según el tipo; la podés cambiar.</small>
+      @if (errorDe('capacidad_jugadores')) {
+        <small class="error-campo">{{ errorDe('capacidad_jugadores') }}</small>
       }
     </div>
 
     <div class="campo">
       <label for="superficie">Superficie</label>
-      <select id="superficie" name="superficie" [(ngModel)]="datos.superficie">
+      <select id="superficie" formControlName="superficie">
         <option [ngValue]="null">Sin especificar</option>
         @for (opcion of superficies; track opcion.valor) {
           <option [ngValue]="opcion.valor">{{ opcion.texto }}</option>
         }
       </select>
-      @for (msg of errores()['superficie'] ?? []; track msg) {
-        <small class="error-campo">{{ msg }}</small>
+      @if (errorDe('superficie')) {
+        <small class="error-campo">{{ errorDe('superficie') }}</small>
       }
     </div>
 
     <fieldset class="campo">
       <legend style="font-size: inherit; font-weight: 600; margin-bottom: 0.35rem;">Comodidades</legend>
       <div class="casillas">
-        <label><input type="checkbox" name="techada" [(ngModel)]="datos.techada"> Techada</label>
-        <label><input type="checkbox" name="iluminacion" [(ngModel)]="datos.iluminacion"> Iluminación</label>
-        <label><input type="checkbox" name="vestuarios" [(ngModel)]="datos.vestuarios"> Vestuarios</label>
+        <label><input type="checkbox" formControlName="techada"> Techada</label>
+        <label><input type="checkbox" formControlName="iluminacion"> Iluminación</label>
+        <label><input type="checkbox" formControlName="vestuarios"> Vestuarios</label>
       </div>
     </fieldset>
 
     <div class="campo">
-      <label for="tarifa">Tarifa por turno ($)</label>
-      <input id="tarifa" name="tarifa" type="number" min="0" step="100" [(ngModel)]="datos.tarifa" required>
-      @for (msg of errores()['tarifa'] ?? []; track msg) {
-        <small class="error-campo">{{ msg }}</small>
+      <label for="tarifa">Tarifa por turno ($) *</label>
+      <input id="tarifa" type="number" min="0" step="100" formControlName="tarifa">
+      @if (errorDe('tarifa')) {
+        <small class="error-campo">{{ errorDe('tarifa') }}</small>
       }
     </div>
 
     <div class="campo">
       <label for="descripcion">Descripción</label>
-      <textarea id="descripcion" name="descripcion" rows="3" [(ngModel)]="datos.descripcion"
+      <textarea id="descripcion" rows="3" maxlength="2000" formControlName="descripcion"
         placeholder="Ej.: red perimetral, césped de última generación, tribuna"></textarea>
+      @if (errorDe('descripcion')) {
+        <small class="error-campo">{{ errorDe('descripcion') }}</small>
+      }
     </div>
 
     <div class="campo">
       <label for="estado">Estado</label>
-      <select id="estado" name="estado" [(ngModel)]="datos.estado">
+      <select id="estado" formControlName="estado">
         <option value="activa">Activa (visible para los jugadores)</option>
         <option value="inactiva">Inactiva (no se muestra en las búsquedas)</option>
       </select>
