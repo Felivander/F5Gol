@@ -187,3 +187,20 @@ export interface PartidoAbierto {
   cancha: { id: number; nombre: string; tipo: string; superficie: Superficie | null };
   club: { id: number; nombre: string; direccion: string | null } | null;
 }
+
+// Sala de un partido de matchmaking (GET /api/partidos/{id}); solo para los anotados y el dueño del club
+export interface SalaPartido {
+  turno_id: number;
+  fecha: string;
+  hora_inicio: string;
+  hora_fin: string;
+  estado: 'armandose' | 'completo' | 'ya_empezo';
+  cupo_maximo: number;
+  anotados: number;
+  faltan: number;
+  precio_por_jugador: number;
+  cancha: { id: number; nombre: string; tipo: string; superficie: Superficie | null; techada: boolean; iluminacion: boolean; vestuarios: boolean };
+  club: { id: number; nombre: string; direccion: string | null; telefono: string | null } | null;
+  jugadores: { nombre: string; cantidad: number; soy_yo: boolean }[];
+  mi_reserva: { id: number; cantidad_jugadores: number; puede_cancelar: boolean; cancelar_hasta: string } | null;
+}

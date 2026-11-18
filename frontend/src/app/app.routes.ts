@@ -7,6 +7,11 @@ export const routes: Routes = [
   { path: '', redirectTo: 'clubes', pathMatch: 'full' },
   { path: 'clubes', loadComponent: () => import('./pages/clubes/clubes').then(m => m.Clubes) },
   { path: 'partidos', loadComponent: () => import('./pages/partidos/partidos').then(m => m.Partidos) },
+  {
+    path: 'partidos/:id',
+    loadComponent: () => import('./pages/sala-partido/sala-partido').then(m => m.SalaPartido),
+    canActivate: [sesionGuard]
+  },
   // Las rutas fijas van antes de clubes/:id, si no "nuevo" se tomaría como un id
   {
     path: 'clubes/nuevo',

@@ -75,7 +75,14 @@
   @if (aviso()) {
     <p class="alerta alerta-ok" role="status">
       <app-icono nombre="ok" [tamano]="20" />
-      <span>{{ aviso() }} <a routerLink="/mis-reservas">Ver mis reservas</a></span>
+      <span>
+        {{ aviso() }}
+        @if (salaTurno()) {
+          <a [routerLink]="['/partidos', salaTurno()]">Abrir la sala del partido</a>
+        } @else {
+          <a routerLink="/mis-reservas">Ver mis reservas</a>
+        }
+      </span>
     </p>
   }
 

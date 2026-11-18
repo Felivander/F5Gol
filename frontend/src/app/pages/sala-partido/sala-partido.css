@@ -1,0 +1,181 @@
+.pagina-media {
+  max-width: 760px;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.cabecera-fecha {
+  display: grid;
+  justify-items: center;
+  flex-shrink: 0;
+  width: 76px;
+  padding: 10px 0 12px;
+  border-radius: var(--r);
+  background: var(--tinta);
+  color: #fff;
+  line-height: 1;
+}
+
+.cabecera-semana,
+.cabecera-mes {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lima);
+}
+
+.cabecera-dia {
+  margin: 4px 0 2px;
+  font-size: 2.4rem;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+
+.cabecera-texto {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cabecera-hora {
+  color: var(--tinta-2);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.tarjeta + .tarjeta,
+.alerta + .tarjeta,
+.tarjeta + .alerta {
+  margin-top: 14px;
+}
+
+.tarjeta h2 {
+  margin-bottom: 12px;
+  font-size: 1.35rem;
+}
+
+/* Cupo: un casillero por lugar */
+.cupo-cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.cupo-cuenta {
+  color: var(--tinta-2);
+}
+
+.cupo-cuenta .num {
+  color: var(--tinta);
+  font-weight: 800;
+}
+
+.cupo-cuenta strong {
+  color: var(--cancha);
+}
+
+.lugares {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 12px;
+  list-style: none;
+}
+
+.lugar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: var(--r-chico);
+  background: var(--cancha-suave);
+  color: var(--cancha-oscura);
+  font-weight: 700;
+}
+
+.lugar.amigo {
+  font-weight: 600;
+}
+
+.lugar.yo {
+  background: var(--cancha);
+  color: #fff;
+}
+
+.lugar.libre {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--linea-fuerte);
+  color: var(--tinta-3);
+  font-weight: 600;
+}
+
+.lugar-numero {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.6);
+  color: var(--cancha-oscura);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.lugar.yo .lugar-numero {
+  background: var(--lima);
+  color: var(--tinta);
+}
+
+.lugar.libre .lugar-numero {
+  background: var(--papel);
+  color: var(--tinta-3);
+}
+
+.lugar-nombre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tu lugar */
+.mia p {
+  color: var(--tinta-2);
+}
+
+.mia-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 10px;
+}
+
+.lugar-info {
+  display: grid;
+  gap: 12px;
+}
+
+.lugar-info h2 {
+  margin-bottom: 0;
+}
+
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: start;
+  font-weight: 700;
+  text-decoration: none;
+}

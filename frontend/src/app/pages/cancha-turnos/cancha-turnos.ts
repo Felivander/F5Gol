@@ -48,6 +48,8 @@ export class CanchaTurnos implements OnInit {
   cargando = signal(true);
   error = signal('');
   aviso = signal('');
+  // Después de sumarse a un partido, el turno para abrir su sala
+  salaTurno = signal<number | null>(null);
   // Turno que se está reservando, para deshabilitar su botón mientras espera la API
   reservando = signal<number | null>(null);
 
@@ -188,12 +190,14 @@ export class CanchaTurnos implements OnInit {
     this.reservando.set(turno.id);
     this.error.set('');
     this.aviso.set('');
+    this.salaTurno.set(null);
     this.api.crearReserva({ turno_id: turno.id, usuario_id: usuario.id, tipo, cantidad_jugadores: cantidad }).subscribe({
       next: () => {
         const horario = `las ${turno.hora_inicio.slice(0, 5)} del ${turno.fecha}`;
         this.aviso.set(tipo === 'completa'
           ? `¡Listo! Reservaste el turno de ${horario}.`
           : `¡Listo! Te anotaste ${cantidad === 1 ? '' : `con ${cantidad} jugadores `}al partido de ${horario}.`);
+        this.salaTurno.set(tipo === 'individual' ? turno.id : null);
         this.reservando.set(null);
         this.buscarTurnos();
       },

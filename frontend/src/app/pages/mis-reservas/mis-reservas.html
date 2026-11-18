@@ -63,6 +63,12 @@
 
           @if (sePuedeCancelar(reserva)) {
             <div class="reserva-acciones">
+              @if (reserva.tipo === 'individual') {
+                <a class="btn btn-lima btn-sm" [routerLink]="['/partidos', reserva.turno_id]">
+                  <app-icono nombre="jugadores" [tamano]="16" />
+                  Ver el partido
+                </a>
+              }
               @if (reserva.turno?.cancha; as cancha) {
                 <a class="btn btn-outline-primary btn-sm" [routerLink]="['/canchas', cancha.id]" [queryParams]="{ mover: reserva.id }">Cambiar turno</a>
               }

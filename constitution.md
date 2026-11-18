@@ -243,11 +243,12 @@ Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, 
 - Privacidad: `GET /api/reservas` y `/api/jugador-anotados` eran públicos y exponían nombres y mails de todos los usuarios. Ahora piden sesión; el jugador ve solo lo suyo y el administrador, además, lo de sus clubes (`ReservasPrivadasTest`).
 - Seguridad de clubes: el dueño lo asigna el servidor (no se acepta `administrador_id` del cliente) y solo el dueño edita, borra o sube fotos (403).
 - Lobby de matchmaking: `GET /api/partidos-abiertos` (público, sin datos de los jugadores) y pantalla `/partidos` con los partidos que se están armando, cuántos lugares faltan, filtros por día y club y refresco cada 15 s. El inicio muestra los tres más cerca de completarse.
+- Sala de cada partido: `GET /api/partidos/{id}` y pantalla `/partidos/:id`, solo para los anotados y el dueño del club (403 para el resto). Muestra los lugares ocupados y libres con el nombre y la inicial del apellido de cada jugador (sin mails), tu reserva, hasta cuándo te podés bajar y un link para invitar. Se abre desde Mis reservas y después de sumarse en la grilla. No tiene chat: queda fuera del alcance (2.2) (`SalaPartidoTest`).
 - Aviso de partido incompleto: el comando `partidos:avisar-incompletos` corre cada 5 minutos con el programador de Laravel (`schedule:work`, lo levanta `iniciar-f5gol.bat`); cuando un partido llega a su hora sin completarse, avisa una sola vez a los anotados por n8n (`docs/n8n/partido-incompleto.json`) o, si n8n no responde, por el mail de Laravel (`LobbyMatchmakingTest`).
 - Zona horaria: Laravel corre en `America/Argentina/Buenos_Aires` (`APP_TIMEZONE`). Antes estaba en UTC y tomaba como empezados turnos a los que les faltaban 3 horas (lobby, plazo de cancelación y aviso de incompleto).
 - Interfaz rediseñada: sistema visual propio en `styles.css` (tipografía Archivo, verde cancha y lima, sin emojis), íconos SVG (`components/icono`), tarjeta de partido reutilizable, grilla de turnos con tira de días y pantallas pensadas primero para el celular. Revisado a 375 px sin desbordes.
 - Seeders idempotentes: `db:seed` se puede correr varias veces sin duplicar clubes, usuarios, reservas ni inscripciones (`SeedersTest`).
-- Tests: 168 tests del backend y 4 del frontend (`formato.spec.ts`), pasan todos (con la extensión **GD** de PHP activa; sin GD fallan los de fotos). `ng build` compila sin advertencias.
+- Tests: 174 tests del backend y 4 del frontend (`formato.spec.ts`), pasan todos (con la extensión **GD** de PHP activa; sin GD fallan los de fotos). `ng build` compila sin advertencias.
 
 ### 8.2 Pendiente — requisitos obligatorios de la cátedra
 
