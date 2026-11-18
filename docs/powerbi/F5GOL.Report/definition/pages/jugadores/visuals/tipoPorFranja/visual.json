@@ -1,0 +1,93 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "tipoPorFranja",
+  "position": {
+    "x": 650,
+    "y": 225,
+    "z": 6000,
+    "height": 235,
+    "width": 610,
+    "tabOrder": 6000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_turnos"
+                    }
+                  },
+                  "Property": "Franja"
+                }
+              },
+              "queryRef": "bi_turnos.Franja",
+              "nativeQueryRef": "Franja",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_reservas"
+                    }
+                  },
+                  "Property": "Reservas completas"
+                }
+              },
+              "queryRef": "bi_reservas.Reservas completas",
+              "nativeQueryRef": "Reservas completas"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_reservas"
+                    }
+                  },
+                  "Property": "Inscripciones de matchmaking"
+                }
+              },
+              "queryRef": "bi_reservas.Inscripciones de matchmaking",
+              "nativeQueryRef": "Inscripciones de matchmaking"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Reservas completas y matchmaking por franja horaria'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

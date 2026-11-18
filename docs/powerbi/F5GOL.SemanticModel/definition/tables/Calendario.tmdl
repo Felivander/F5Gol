@@ -1,0 +1,63 @@
+table Calendario
+	lineageTag: fa92e44c-2dc4-4187-a04b-97dae140ae73
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: dd/mm/yyyy
+		lineageTag: 0c7565f7-1e56-42b9-83f6-29654d1ccbdc
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+	column Año
+		dataType: int64
+		formatString: 0
+		lineageTag: 0aa066ae-26fa-49ac-bb40-04ec055abce6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Año]
+
+	column Mes
+		dataType: string
+		lineageTag: a5beda78-044e-4dbc-a6f1-33d6e56c4c16
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Mes]
+
+	column Semana
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 23b0f81b-3bf1-4dfb-b4c7-fc85e53057e6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Semana]
+
+	column 'Día de la semana'
+		dataType: string
+		lineageTag: a40a945b-b1a1-4ca8-8dfd-d7b1c72aadc9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Día de la semana]
+		sortByColumn: 'Nro día'
+
+	column 'Nro día'
+		dataType: int64
+		formatString: 0
+		lineageTag: 0f31f302-4638-4b53-b535-6a365298c011
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Nro día]
+
+	column 'Es fin de semana'
+		dataType: boolean
+		lineageTag: bc57c8c9-1791-4683-b270-bf5b28db9d02
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Es fin de semana]
+
+	partition Calendario = calculated
+		mode: import
+		source = ADDCOLUMNS(CALENDAR(MIN(MIN(bi_turnos[fecha]), MIN(bi_usuarios[Fecha de alta])), MAX(MAX(bi_turnos[fecha]), MAX(bi_usuarios[Fecha de alta]))), "Año", YEAR([Date]), "Mes", FORMAT([Date], "mmmm yyyy"), "Semana", [Date] - WEEKDAY([Date], 2) + 1, "Día de la semana", FORMAT([Date], "dddd"), "Nro día", WEEKDAY([Date], 2), "Es fin de semana", WEEKDAY([Date], 2) >= 6)
+

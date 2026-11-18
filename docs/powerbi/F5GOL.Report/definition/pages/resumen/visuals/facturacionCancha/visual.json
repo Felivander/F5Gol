@@ -1,0 +1,79 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "facturacionCancha",
+  "position": {
+    "x": 20,
+    "y": 475,
+    "z": 9000,
+    "height": 230,
+    "width": 300,
+    "tabOrder": 9000
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_turnos"
+                    }
+                  },
+                  "Property": "Club y cancha"
+                }
+              },
+              "queryRef": "bi_turnos.Club y cancha",
+              "nativeQueryRef": "Club y cancha",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_reservas"
+                    }
+                  },
+                  "Property": "Facturación"
+                }
+              },
+              "queryRef": "bi_reservas.Facturación",
+              "nativeQueryRef": "Facturación"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Facturación por cancha'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

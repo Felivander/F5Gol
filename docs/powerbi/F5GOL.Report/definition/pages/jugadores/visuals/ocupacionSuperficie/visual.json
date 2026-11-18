@@ -1,0 +1,79 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "ocupacionSuperficie",
+  "position": {
+    "x": 20,
+    "y": 475,
+    "z": 7000,
+    "height": 230,
+    "width": 1240,
+    "tabOrder": 7000
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_turnos"
+                    }
+                  },
+                  "Property": "Tipo de superficie"
+                }
+              },
+              "queryRef": "bi_turnos.Tipo de superficie",
+              "nativeQueryRef": "Tipo de superficie",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_turnos"
+                    }
+                  },
+                  "Property": "% Ocupación"
+                }
+              },
+              "queryRef": "bi_turnos.% Ocupación",
+              "nativeQueryRef": "% Ocupación"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Ocupación según la superficie de la cancha'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

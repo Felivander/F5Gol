@@ -36,7 +36,7 @@ class TurnoSeeder extends Seeder
                             'hora_fin' => sprintf('%02d:00:00', $hora + 1),
                             'estado' => 'disponible',
                             // Igual que el default de la tabla (5 en fútbol 5): la mitad de la capacidad
-                            'cupo_maximo' => intdiv($cancha->capacidad_jugadores, 2),
+                            'cupo_maximo' => $cancha->capacidad_jugadores,
                         ]
                     );
                 }

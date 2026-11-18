@@ -13,9 +13,10 @@ class EditarReservaTest extends TestCase
 
     public function test_al_sumar_jugadores_y_llenar_el_cupo_el_turno_queda_ocupado(): void
     {
-        $turno = $this->crearTurno();
-        $this->crearReserva($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 3]);
-        $reserva = $this->crearReserva($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 1]);
+        // Cupo 4: dos equipos de 2
+        $turno = $this->crearTurno(null, ['cupo_maximo' => 4]);
+        $this->crearReserva($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 2, 'equipo' => 'A']);
+        $reserva = $this->crearReserva($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 1, 'equipo' => 'B']);
         Sanctum::actingAs($reserva->usuario);
 
         $this->putJson("/api/reservas/{$reserva->id}", ['cantidad_jugadores' => 2])->assertOk();
@@ -25,14 +26,15 @@ class EditarReservaTest extends TestCase
 
     public function test_no_deja_subir_jugadores_por_encima_del_cupo(): void
     {
-        $turno = $this->crearTurno();
-        $this->crearReserva($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 3]);
-        $reserva = $this->crearReserva($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 1]);
+        $turno = $this->crearTurno(null, ['cupo_maximo' => 4]);
+        $this->crearReserva($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 2, 'equipo' => 'A']);
+        $reserva = $this->crearReserva($turno, ['tipo' => 'individual', 'cantidad_jugadores' => 1, 'equipo' => 'B']);
         Sanctum::actingAs($reserva->usuario);
 
+        // Su equipo tiene 1 lugar libre: no puede sumar 2 más
         $this->putJson("/api/reservas/{$reserva->id}", ['cantidad_jugadores' => 3])
             ->assertStatus(409)
-            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Queda 1 lugar'));
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Queda 1 lugar en el Equipo B'));
 
         $this->assertSame(1, $reserva->fresh()->cantidad_jugadores);
         $this->assertSame('disponible', $turno->fresh()->estado);

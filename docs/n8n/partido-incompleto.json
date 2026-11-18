@@ -1,0 +1,318 @@
+{
+  "name": "F5GOL - Aviso de partido incompleto",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "f5gol-partido-incompleto",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c78618cb-a94b-4450-8eef-97cbb8e76062",
+      "name": "Webhook partido incompleto",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "1437a7da-02f1-4f53-afc5-d5584945f7b2"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "55c3db9b-963a-4203-beb2-a1e431687d55",
+              "name": "secreto_esperado",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "09c9d9fd-67b5-46f8-9433-d3927bb341b9",
+              "name": "remitente",
+              "value": "F5GOL <tu-cuenta@gmail.com>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "208b3337-cdc8-4b7b-9c49-18f611d2430c",
+      "name": "Configuración",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Revisa el pedido y devuelve un ítem por cada jugador al que hay que avisar.\nconst entrada = $input.first().json;\nconst encabezados = entrada.headers || {};\nconst cuerpo = entrada.body || {};\n\nconst rechazo = (codigo, motivo) => [{ json: { valido: false, codigo, motivo } }];\n\nconst secretoRecibido = encabezados['x-f5gol-secreto'] || '';\nif (entrada.secreto_esperado && secretoRecibido !== entrada.secreto_esperado) {\n  return rechazo(401, 'El secreto del encabezado X-F5GOL-Secreto no es válido.');\n}\nif (cuerpo.evento !== 'partido.incompleto') {\n  return rechazo(422, 'Evento desconocido: se esperaba partido.incompleto.');\n}\n\nconst esMail = (m) => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(m || '');\nconst jugadores = (cuerpo.jugadores || []).filter(j => esMail(j.email));\nif (jugadores.length === 0) {\n  return rechazo(422, 'No hay jugadores con un email válido para avisar.');\n}\n\nconst turno = cuerpo.turno || {};\nconst cancha = cuerpo.cancha || {};\nconst club = cuerpo.club || {};\nconst links = cuerpo.links || {};\n\nreturn jugadores.map(j => {\n  const nombre = String(j.nombre || '').trim().split(/\\s+/)[0] || 'crack';\n  const extra = Number(j.cantidad_jugadores || 1) - 1;\n  return {\n    json: {\n      valido: true,\n      codigo: 200,\n      email: String(j.email).toLowerCase(),\n      nombre,\n      con_amigos: (j.tipo === 'equipo' ? `Reservaste el Equipo ${j.equipo || 'A'} entero.`\n        : `Jugás en el Equipo ${j.equipo || 'A'}.` + (extra > 0 ? ` Te anotaste con ${extra} ${extra === 1 ? 'amigo' : 'amigos'}.` : '')),\n      dia: turno.dia || turno.fecha || '',\n      horario: `${turno.hora_inicio || ''} a ${turno.hora_fin || ''}`,\n      cupo: turno.cupo_maximo || '',\n      anotados: turno.anotados || 0,\n      cancha: cancha.nombre || 'la cancha',\n      club: club.nombre || '',\n      direccion: club.direccion || '',\n      telefono: club.telefono || '',\n      link: links.partidos || links.mis_reservas || '',\n      remitente: entrada.remitente,\n    },\n  };\n});\n"
+      },
+      "id": "9ff9c9b4-b4ad-4ba6-a5f1-5a705983a064",
+      "name": "Validar y separar jugadores",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "04000f7a-bf2e-40b5-974c-b0c2b19cc4dc",
+              "leftValue": "={{ $json.valido }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "a2c69edd-5573-43b1-aeea-1d238567e2ec",
+      "name": "¿Pedido válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "88f39a0e-902d-41e6-897c-3e7529bdf227",
+              "name": "asunto",
+              "value": "=Tu partido del {{ $json.dia }} a las {{ $json.horario.split(\" a \")[0] }} no llegó a completarse",
+              "type": "string"
+            },
+            {
+              "id": "628bd5c2-77b8-46d7-86d0-c8a0c27a3e80",
+              "name": "html",
+              "value": "=<div style=\"margin:0;padding:24px 12px;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a;\"><div style=\"max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;\"><div style=\"background:#065f46;padding:20px 24px;color:#ffffff;font-size:22px;font-weight:bold;\">⚽ F5<span style=\"color:#34d399;\">GOL</span></div><div style=\"padding:24px;\"><h1 style=\"margin:0 0 12px;font-size:22px;\">{{ $json.nombre }}, tu partido no se completó</h1><p style=\"margin:0 0 16px;line-height:1.5;\">Llegó la hora y se anotaron {{ $json.anotados }} de {{ $json.cupo }} jugadores. Hablá con el club para ver si igual se puede jugar, o buscá otro partido abierto en F5GOL.</p><table style=\"width:100%;border-collapse:collapse;margin:0 0 20px;font-size:15px;\"><tr><td style=\"padding:6px 0;color:#64748b;width:110px;\">Día</td><td style=\"padding:6px 0;font-weight:bold;\">{{ $json.dia }}</td></tr><tr><td style=\"padding:6px 0;color:#64748b;\">Horario</td><td style=\"padding:6px 0;font-weight:bold;\">{{ $json.horario }}</td></tr><tr><td style=\"padding:6px 0;color:#64748b;\">Cancha</td><td style=\"padding:6px 0;font-weight:bold;\">{{ $json.cancha }}</td></tr><tr><td style=\"padding:6px 0;color:#64748b;\">Club</td><td style=\"padding:6px 0;font-weight:bold;\">{{ $json.club }}</td></tr><tr><td style=\"padding:6px 0;color:#64748b;\">Dirección</td><td style=\"padding:6px 0;\">{{ $json.direccion }}</td></tr></table><p style=\"margin:0 0 24px;\"><a href=\"{{ $json.link }}\" style=\"display:inline-block;background:#059669;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:8px;\">Ver partidos abiertos</a></p><p style=\"margin:0;color:#64748b;font-size:13px;line-height:1.5;\">Consultas al club: {{ $json.telefono }}.</p></div></div></div>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "2f1b06e9-5f87-44a8-8b0d-6ade59513521",
+      "name": "Armar mail",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.remitente }}",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.asunto }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "e343d825-a4a8-41e0-a6f8-06669c37ff45",
+      "name": "Enviar aviso",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1200,
+        -200
+      ],
+      "webhookId": "60576f02-104d-4097-ba4e-44b8b9a2476b",
+      "credentials": {
+        "smtp": {
+          "id": "",
+          "name": "SMTP F5GOL"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Junta el resultado de todos los envíos en una sola respuesta para Laravel.\nconst mails = $('Armar mail').all().map(i => i.json.email);\nconst resultados = $input.all();\nconst fallidos = [];\nresultados.forEach((r, i) => {\n  if (r.json.error) {\n    fallidos.push({ email: mails[i], error: r.json.error.message || String(r.json.error) });\n  }\n});\nconst enviados = resultados.length - fallidos.length;\nreturn [{\n  json: {\n    ok: fallidos.length === 0,\n    codigo: fallidos.length === 0 ? 200 : 502,\n    mensaje: fallidos.length === 0\n      ? (enviados === 1 ? 'Se avisó al jugador que el partido no se completó.' : `Se avisó a los ${enviados} jugadores que el partido no se completó.`)\n      : `Se mandaron ${enviados} de ${resultados.length} mails; fallaron ${fallidos.length}.`,\n    enviados,\n    fallidos,\n  },\n}];\n"
+      },
+      "id": "20469ca0-7b2d-47f8-846f-0a9ed51dcd03",
+      "name": "Resumir envíos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": $json.ok, \"mensaje\": $json.mensaje, \"enviados\": $json.enviados, \"fallidos\": $json.fallidos } }}",
+        "options": {
+          "responseCode": "={{ $json.codigo }}"
+        }
+      },
+      "id": "41040b5f-66b1-4c6f-a379-7a557e789576",
+      "name": "Responder resultado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": false, \"mensaje\": $json.motivo } }}",
+        "options": {
+          "responseCode": "={{ $json.codigo }}"
+        }
+      },
+      "id": "5c382f43-7d8a-4924-9c11-cad5159657ed",
+      "name": "Responder rechazo",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## F5GOL · Aviso de partido incompleto\nLaravel (comando partidos:avisar-incompletos) llama a este webhook cuando un partido de matchmaking llega a la hora sin completarse. Se manda un mail a cada jugador anotado.\n\n**Antes de activarlo:** en *Configuración* poné el mismo secreto que `N8N_WEBHOOK_SECRETO` y tu remitente; en *Enviar aviso* elegí la credencial **SMTP F5GOL**.",
+        "height": 240,
+        "width": 420
+      },
+      "id": "f77367b6-118e-4fd7-834a-a0fa34620fa7",
+      "name": "Instrucciones",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -480
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook partido incompleto": {
+      "main": [
+        [
+          {
+            "node": "Configuración",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuración": {
+      "main": [
+        [
+          {
+            "node": "Validar y separar jugadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar y separar jugadores": {
+      "main": [
+        [
+          {
+            "node": "¿Pedido válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Pedido válido?": {
+      "main": [
+        [
+          {
+            "node": "Armar mail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder rechazo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar mail": {
+      "main": [
+        [
+          {
+            "node": "Enviar aviso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar aviso": {
+      "main": [
+        [
+          {
+            "node": "Resumir envíos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resumir envíos": {
+      "main": [
+        [
+          {
+            "node": "Responder resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

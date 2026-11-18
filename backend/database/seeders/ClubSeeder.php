@@ -16,17 +16,20 @@ class ClubSeeder extends Seeder
         $admin1 = User::where('email', 'admin1@f5gol.com')->first();
         $admin2 = User::where('email', 'admin2@f5gol.com')->first();
 
-        Club::create([
+        // firstOrCreate: si el seeder se corre de nuevo, no se repiten los clubes
+        Club::firstOrCreate([
             'administrador_id' => $admin1->id,
             'nombre' => 'Complejo Concordia FC',
+        ], [
             'direccion' => 'Av. Costanera 1200, Concordia',
             'telefono' => '3454111111',
             'descripcion' => 'Cinco canchas sobre la costanera, buffet, estacionamiento y vestuarios con duchas.',
         ]);
 
-        Club::create([
+        Club::firstOrCreate([
             'administrador_id' => $admin2->id,
             'nombre' => 'Arena Norte',
+        ], [
             'direccion' => 'Ruta 22 Km 3, Concordia',
             'telefono' => '3454222222',
             'descripcion' => 'Complejo a la salida de la ciudad, con canchas techadas y una de césped natural.',

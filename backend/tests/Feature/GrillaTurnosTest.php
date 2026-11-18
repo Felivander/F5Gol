@@ -53,7 +53,7 @@ class GrillaTurnosTest extends TestCase
             ->assertOk()
             ->assertJsonPath('0.id', $conJugadores->id)
             ->assertJsonPath('0.cupo_actual', 3)
-            ->assertJsonPath('0.cupo_maximo', 5)
+            ->assertJsonPath('0.cupo_maximo', 10)
             ->assertJsonPath('1.id', $vacio->id)
             ->assertJsonPath('1.cupo_actual', 0);
     }
@@ -89,13 +89,17 @@ class GrillaTurnosTest extends TestCase
         $this->postJson('/api/reservas', [
             'turno_id' => $turno->id,
             'usuario_id' => $jugador->id,
-            'tipo' => 'individual',
-            'cantidad_jugadores' => 5,
+            'tipo' => 'equipo',
+        ])->assertCreated();
+        $this->postJson('/api/reservas', [
+            'turno_id' => $turno->id,
+            'usuario_id' => $jugador->id,
+            'tipo' => 'equipo',
         ])->assertCreated();
 
         $this->getJson("/api/turnos?cancha_id={$turno->cancha_id}&fecha={$turno->fecha}")
             ->assertOk()
             ->assertJsonPath('0.estado', 'ocupado')
-            ->assertJsonPath('0.cupo_actual', 5);
+            ->assertJsonPath('0.cupo_actual', 10);
     }
 }

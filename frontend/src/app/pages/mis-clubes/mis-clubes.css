@@ -1,0 +1,64 @@
+.mis-clubes {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.mi-club {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 14px;
+}
+
+@media (min-width: 768px) {
+  .mi-club {
+    grid-template-columns: 120px 1fr auto;
+    gap: 20px;
+  }
+}
+
+.mi-club-foto {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--r-chico);
+}
+
+.mi-club-sin-foto {
+  display: grid;
+  place-items: center;
+  background: var(--cancha);
+  color: var(--lima);
+  font-size: 2.5rem;
+  font-weight: 800;
+  font-stretch: 75%;
+  text-transform: uppercase;
+}
+
+.mi-club-datos {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mi-club-datos h2 {
+  font-size: 1.35rem;
+}
+
+.mi-club-acciones {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+@media (min-width: 768px) {
+  .mi-club-acciones {
+    grid-column: auto;
+    justify-content: flex-end;
+  }
+}

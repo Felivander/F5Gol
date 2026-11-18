@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "kpiGoogle",
+  "position": {
+    "x": 334,
+    "y": 105,
+    "z": 2000,
+    "height": 110,
+    "width": 300,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "bi_usuarios"
+                    }
+                  },
+                  "Property": "% Altas con Google"
+                }
+              },
+              "queryRef": "bi_usuarios.% Altas con Google",
+              "nativeQueryRef": "% Altas con Google"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

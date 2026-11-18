@@ -1,0 +1,186 @@
+<div class="pagina">
+  <a class="volver" routerLink="/partidos">
+    <app-icono nombre="volver" [tamano]="16" />
+    Partidos abiertos
+  </a>
+
+  @if (cargando()) {
+    <p class="cargando">Cargando el partido…</p>
+  } @else if (sala(); as s) {
+    <header class="cabecera">
+      @if (fecha(); as f) {
+        <div class="cabecera-fecha">
+          <span class="cabecera-semana">{{ f.semana }}</span>
+          <span class="cabecera-dia num">{{ f.dia }}</span>
+          <span class="cabecera-mes">{{ f.mes }}</span>
+        </div>
+      }
+      <div class="cabecera-texto">
+        <p class="antetitulo">{{ s.club?.nombre }}</p>
+        <h1>{{ s.cancha.nombre }}</h1>
+        <p class="cabecera-hora num">{{ fecha()?.relativa }}, {{ s.hora_inicio }} a {{ s.hora_fin }}</p>
+      </div>
+      <div class="cabecera-cuenta" aria-live="polite">
+        <span class="cabecera-numero num">{{ s.anotados }}<small>/{{ s.cupo_maximo }}</small></span>
+        <span class="cabecera-estado" [class.listo]="s.estado === 'completo'">
+          @if (aviso()) {
+      <p class="alerta alerta-ok" role="status">
+        <app-icono nombre="ok" [tamano]="20" />
+        {{ aviso() }}
+        <button type="button" class="cerrar" aria-label="Cerrar aviso" (click)="aviso.set('')">×</button>
+      </p>
+    }
+
+    @switch (s.estado) {
+            @case ('completo') { Partido completo }
+            @case ('ya_empezo') { Ya empezó }
+            @default { {{ s.faltan === 1 ? 'Falta 1 jugador' : 'Faltan ' + s.faltan + ' jugadores' }} }
+          }
+        </span>
+      </div>
+    </header>
+
+    @if (error()) {
+      <p class="alerta alerta-error" role="alert">
+        <app-icono nombre="alerta" [tamano]="20" />
+        {{ error() }}
+      </p>
+    }
+
+    @switch (s.estado) {
+      @case ('completo') {
+        <p class="alerta alerta-ok" role="status">
+          <app-icono nombre="ok" [tamano]="20" />
+          ¡Partido completo! La cancha quedó reservada y a todos les llegó un mail.
+        </p>
+      }
+      @case ('ya_empezo') {
+        <p class="alerta alerta-info">
+          <app-icono nombre="reloj" [tamano]="20" />
+          Este partido ya empezó.
+        </p>
+      }
+    }
+
+    <div class="sala">
+    <section class="tarjeta cupo" aria-labelledby="titulo-cupo">
+      <h2 id="titulo-cupo" class="visually-hidden">Jugadores</h2>
+
+      <app-cancha-lugares class="cupo-campo"
+        [equipoA]="equipoA()"
+        [equipoB]="equipoB()"
+        [miEquipo]="s.mi_reserva?.equipo ?? null"
+        [seleccionable]="!!s.mi_reserva && s.estado === 'armandose'"
+        (elegir)="abrirModal($event)" />
+
+      <div class="planteles">
+        @for (plantel of planteles(); track plantel.letra) {
+          <div class="plantel">
+            <h3>Equipo {{ plantel.letra }}</h3>
+            <ul>
+              @for (linea of plantel.lineas; track $index) {
+                <li [class.yo]="linea.yo">{{ linea.texto }}</li>
+              }
+              @if (plantel.libres > 0) {
+                <li class="libre">{{ plantel.libres === 1 ? '1 lugar libre' : plantel.libres + ' lugares libres' }}</li>
+              } @else {
+                <li class="completo">Equipo completo</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+
+      @if (s.estado === 'armandose') {
+        <p class="ayuda">
+          @if (s.mi_reserva) {
+            Tocá un lugar libre para sumar a un amigo a ese equipo.
+          }
+          Se actualiza solo. Cuando se completen los {{ s.cupo_maximo }} lugares, la cancha queda reservada y les llega un mail a todos.
+        </p>
+      }
+    </section>
+
+    <aside class="sala-lateral">
+
+    @if (s.mi_reserva; as mia) {
+      <section class="tarjeta mia" aria-labelledby="titulo-mia">
+        <h2 id="titulo-mia">Tu lugar</h2>
+        <p>
+          @if (mia.tipo === 'equipo') {
+            Reservaste el <strong>Equipo {{ mia.equipo }}</strong> entero ({{ mia.cantidad_jugadores }} lugares) para vos y tus amigos.
+          } @else {
+            Jugás en el <strong>Equipo {{ mia.equipo }}</strong>{{ mia.cantidad_jugadores === 1 ? '' : ', con ' + (mia.cantidad_jugadores - 1) + (mia.cantidad_jugadores === 2 ? ' amigo' : ' amigos') }}.
+          }
+          Pagás <strong>{{ pesos(s.precio_por_jugador * mia.cantidad_jugadores) }}</strong> en el club.
+        </p>
+        <div class="mia-acciones">
+          @if (s.estado === 'armandose') {
+            <button type="button" class="btn btn-lima" (click)="abrirModal()">
+              <app-icono nombre="jugadores" [tamano]="16" />
+              Sumar amigos
+            </button>
+          }
+          @if (mia.puede_cancelar && s.estado !== 'ya_empezo') {
+            <button type="button" class="btn btn-fantasma texto-rojo" (click)="salirDelPartido()" [disabled]="cancelando()">
+              {{ cancelando() ? 'Bajándote…' : 'Bajarme del partido' }}
+            </button>
+          }
+        </div>
+        @if (s.estado !== 'ya_empezo') {
+          <p class="ayuda">
+            @if (mia.puede_cancelar) {
+              Podés bajarte hasta {{ cancelarHasta() }}.
+            } @else {
+              Ya pasó el plazo para bajarte. Si no podés ir, avisale al club.
+            }
+          </p>
+        }
+      </section>
+    } @else {
+      <p class="alerta alerta-info">
+        <app-icono nombre="panel" [tamano]="20" />
+        Estás viendo el partido como administrador del club.
+      </p>
+    }
+
+    <section class="tarjeta lugar-info" aria-labelledby="titulo-donde">
+      <h2 id="titulo-donde">Dónde se juega</h2>
+      <div class="meta">
+        @if (s.club?.direccion) {
+          <span><app-icono nombre="ubicacion" [tamano]="16" /> {{ s.club?.direccion }}</span>
+        }
+        @if (s.club?.telefono) {
+          <span><app-icono nombre="telefono" [tamano]="16" /> {{ s.club?.telefono }}</span>
+        }
+      </div>
+      <div class="chips">
+        <span class="chip chip-verde">{{ textoTipo(s.cancha.tipo) }}</span>
+        @if (s.cancha.superficie) {
+          <span class="chip">{{ textoSuperficie(s.cancha.superficie) }}</span>
+        }
+        <span class="chip">{{ s.cancha.techada ? 'Techada' : 'Al aire libre' }}</span>
+        @if (s.cancha.iluminacion) {
+          <span class="chip">Luz</span>
+        }
+        @if (s.cancha.vestuarios) {
+          <span class="chip">Vestuarios</span>
+        }
+      </div>
+      <a class="enlace" [routerLink]="['/canchas', s.cancha.id]" [queryParams]="{ dia: s.fecha }">
+        Ver la grilla de la cancha
+        <app-icono nombre="flecha" [tamano]="16" />
+      </a>
+    </section>
+    </aside>
+    </div>
+  } @else {
+    <div class="vacio">
+      <strong>No podés ver este partido</strong>
+      <span>{{ error() }}</span>
+      <a class="btn btn-primary btn-sm" routerLink="/partidos">Ver partidos abiertos</a>
+    </div>
+  }
+</div>
+
+<app-modal-sumarse [partido]="modal()" [equipoInicial]="equipoModal()" (cerrado)="modal.set(null)" (sumado)="alSumar($event)" />

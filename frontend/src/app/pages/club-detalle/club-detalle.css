@@ -1,0 +1,88 @@
+.galeria {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(78%, 360px);
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  scroll-snap-type: x mandatory;
+}
+
+.galeria img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--r);
+  scroll-snap-align: start;
+}
+
+.canchas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.cancha {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 8px;
+}
+
+.cancha-enlace {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  padding: 12px;
+}
+
+.cancha-imagen {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 3;
+  object-fit: cover;
+  border-radius: var(--r-chico);
+}
+
+.cancha-cuerpo {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 0 6px;
+}
+
+.cancha-descripcion {
+  color: var(--tinta-2);
+  font-size: 0.92rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cancha-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 6px 4px;
+  border-top: 1px solid var(--linea);
+}
+
+.cancha-ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--cancha);
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.cancha-dueno {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}

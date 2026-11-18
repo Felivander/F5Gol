@@ -1,0 +1,67 @@
+<div class="pagina">
+  <header class="encabezado">
+    <div class="encabezado-texto">
+      <p class="antetitulo">Matchmaking</p>
+      <h1>Partidos abiertos</h1>
+      <p class="bajada">
+        Partidos que ya arrancaron a armarse y buscan jugadores. Sumate solo o con amigos:
+        cuando se completa el cupo, la cancha queda reservada y les llega un mail a todos.
+      </p>
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="alerta alerta-error" role="alert">
+      <app-icono nombre="alerta" [tamano]="20" />
+      {{ error() }}
+    </p>
+  }
+
+  @if (cargando()) {
+    <p class="cargando">Buscando partidos…</p>
+  } @else if (partidos().length === 0) {
+    <div class="vacio">
+      <strong>No hay partidos armándose ahora</strong>
+      <span>Arrancá uno: elegí un turno libre y anotate solo. Los demás se van sumando desde acá.</span>
+      <a class="btn btn-primary btn-sm" routerLink="/clubes">Buscar un turno</a>
+    </div>
+  } @else {
+    <div class="filtros">
+      <div class="filtro-dias" role="group" aria-label="Filtrar por día">
+        <button type="button" class="filtro" [class.activo]="!fechaElegida()" [attr.aria-pressed]="!fechaElegida()" (click)="fechaElegida.set('')">Todos los días</button>
+        @for (f of fechas(); track f.valor) {
+          <button type="button" class="filtro" [class.activo]="fechaElegida() === f.valor" [attr.aria-pressed]="fechaElegida() === f.valor" (click)="elegirFecha(f.valor)">{{ f.texto }}</button>
+        }
+      </div>
+
+      @if (clubes().length > 1) {
+        <label class="filtro-club">
+          <span class="visually-hidden">Filtrar por club</span>
+          <select class="control" [value]="clubElegido()" (change)="elegirClub($any($event.target).value)">
+            <option value="0">Todos los clubes</option>
+            @for (club of clubes(); track club.id) {
+              <option [value]="club.id">{{ club.nombre }}</option>
+            }
+          </select>
+        </label>
+      }
+    </div>
+
+    <p class="resumen" aria-live="polite">
+      <span class="num">{{ filtrados().length }}</span> {{ filtrados().length === 1 ? 'partido' : 'partidos' }}
+      · <span class="num">{{ lugaresLibres() }}</span> {{ lugaresLibres() === 1 ? 'lugar libre' : 'lugares libres' }}
+      · se actualiza solo
+    </p>
+
+    <div class="grilla">
+      @for (partido of filtrados(); track partido.turno_id) {
+        <app-tarjeta-partido [partido]="partido" />
+      } @empty {
+        <div class="vacio sin-resultados">
+          <strong>Ningún partido con esos filtros</strong>
+          <button type="button" class="btn btn-outline-primary btn-sm" (click)="limpiarFiltros()">Ver todos</button>
+        </div>
+      }
+    </div>
+  }
+</div>

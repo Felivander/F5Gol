@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BotonGoogle } from '../../components/boton-google/boton-google';
+import { Icono } from '../../components/icono/icono';
 import { Auth } from '../../services/auth';
 import { noSoloEspacios } from '../../validadores';
 
@@ -19,7 +20,7 @@ function avisoInicial(ruta: ActivatedRoute): string {
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, BotonGoogle],
+  imports: [ReactiveFormsModule, RouterLink, BotonGoogle, Icono],
   templateUrl: './login.html'
 })
 export class Login {

@@ -1,16 +1,16 @@
-import { Component, input } from '@angular/core';
-import { CommonModule, UpperCasePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { textoTipo } from '../../formato';
 
+// Dibujo plano de una cancha de fútbol 5. Se usa cuando la cancha no tiene fotos.
 @Component({
   selector: 'app-cancha-diagrama',
-  standalone: true,
-  imports: [CommonModule, UpperCasePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './cancha-diagrama.html',
   styleUrl: './cancha-diagrama.css'
 })
 export class CanchaDiagrama {
-  nombre = input<string>('');
   tipo = input<string>('Fútbol 5');
-  mostrarJugadores = input<boolean>(false);
   mini = input<boolean>(false);
+
+  protected textoTipo = computed(() => textoTipo(this.tipo()));
 }

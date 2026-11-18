@@ -1,0 +1,77 @@
+<dialog #dialogo class="hoja" aria-labelledby="modal-sumarse-titulo" (cancel)="$event.preventDefault(); cerrar()" (click)="tocarFondo($event)">
+  @if (partido(); as p) {
+    <div class="modal-caja">
+      <header class="modal-cabeza">
+        <div>
+          <h2 id="modal-sumarse-titulo">{{ p.yaAnotado ? 'Sumar amigos' : 'Sumarte al partido' }}</h2>
+          <p class="modal-sub">{{ p.cuando }}, {{ p.horaInicio }}</p>
+        </div>
+        <button type="button" class="modal-cerrar" aria-label="Cerrar" (click)="cerrar()">×</button>
+      </header>
+
+      <fieldset class="modal-bloque">
+        <legend>Equipo</legend>
+        <div class="modal-equipos">
+          @for (letra of ['A', 'B']; track letra) {
+            @let e = letra === 'A' ? p.equipos.A : p.equipos.B;
+            <button type="button" class="modal-equipo" [class.activo]="equipo() === letra"
+              [attr.aria-pressed]="equipo() === letra" [disabled]="e.faltan === 0" (click)="elegirEquipo($any(letra))">
+              <strong>Equipo {{ letra }}</strong>
+              <span>{{ e.faltan === 0 ? 'completo' : e.faltan === 1 ? 'queda 1 lugar' : 'quedan ' + e.faltan + ' lugares' }}</span>
+            </button>
+          }
+        </div>
+      </fieldset>
+
+      <div class="modal-bloque">
+        <span class="etiqueta" id="modal-cantidad-etiqueta">{{ p.yaAnotado ? '¿Cuántos amigos?' : '¿Cuántos van? (vos incluido)' }}</span>
+        <div class="modal-contador" role="group" aria-labelledby="modal-cantidad-etiqueta">
+          <button type="button" class="modal-paso" aria-label="Uno menos" [disabled]="cantidad() <= 1" (click)="cambiarCantidad(-1)">−</button>
+          <output class="modal-cantidad num" aria-live="polite">{{ cantidad() }}</output>
+          <button type="button" class="modal-paso" aria-label="Uno más" [disabled]="cantidad() >= libres()" (click)="cambiarCantidad(1)">+</button>
+        </div>
+        <p class="ayuda">
+          @if (p.yaAnotado) {
+            Los lugares quedan a tu nombre: avisales a tus amigos el día y la hora.
+          } @else {
+            Si venís con amigos, sus lugares quedan a tu nombre.
+          }
+        </p>
+      </div>
+
+      <div class="modal-total">
+        <span>{{ cantidad() }} × {{ precio() }}</span>
+        <strong class="num">{{ total() }}</strong>
+      </div>
+
+      @if (error()) {
+        <p class="alerta alerta-error" role="alert">{{ error() }}</p>
+      }
+
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-primary" [disabled]="enviando() || libres() === 0" (click)="confirmar()">
+          @if (enviando()) {
+            Reservando…
+          } @else if (p.yaAnotado) {
+            Sumar {{ cantidad() === 1 ? '1 amigo' : cantidad() + ' amigos' }} al Equipo {{ equipo() }}
+          } @else if (cantidad() === 1) {
+            Sumarme al Equipo {{ equipo() }}
+          } @else {
+            Sumarnos al Equipo {{ equipo() }} ({{ cantidad() }} lugares)
+          }
+        </button>
+        <button type="button" class="btn btn-fantasma" (click)="cerrar()">Cancelar</button>
+      </div>
+
+      @if (p.yaAnotado) {
+        <div class="modal-invitar">
+          <p>¿Prefieren que se anote cada uno? Mandales el link.</p>
+          <button type="button" class="btn btn-outline-primary btn-sm" (click)="copiarLink()">
+            <app-icono nombre="jugadores" [tamano]="16" />
+            {{ copiado() ? 'Link copiado' : 'Copiar link para invitar' }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</dialog>

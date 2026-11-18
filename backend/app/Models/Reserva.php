@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
     'usuario_id',
     'tipo',
     'cantidad_jugadores',
+    'equipo',
     'estado',
     'estado_pago',
 ])]
@@ -20,6 +21,26 @@ class Reserva extends Model
 
     // Un jugador puede cancelar hasta esta cantidad de horas antes del partido
     public const HORAS_MINIMAS_PARA_CANCELAR = 2;
+
+    // Reservas que forman parte de un partido de matchmaking:
+    // un lugar suelto ("individual") o un equipo entero ("equipo")
+    public const TIPOS_PARTIDO = ['individual', 'equipo'];
+
+    protected static function booted(): void
+    {
+        // Una reserva de partido sin equipo (seeders, carga directa) va al que tenga más lugares libres
+        static::creating(function (Reserva $reserva) {
+            if (in_array($reserva->tipo, self::TIPOS_PARTIDO, true) && ! $reserva->equipo) {
+                $reserva->equipo = Turno::find($reserva->turno_id)?->equipoConMasLugares() ?? 'A';
+            }
+        });
+    }
+
+    // Reservas activas del partido (sin las canceladas)
+    public function scopeDelPartido($query)
+    {
+        return $query->whereIn('tipo', self::TIPOS_PARTIDO)->where('estado', '!=', 'cancelada');
+    }
 
     // Una reserva pertenece a un turno
     public function turno()

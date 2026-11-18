@@ -92,7 +92,8 @@ use OpenApi\Attributes as OA;
             properties: [
                 new OA\Property(property: 'turno_id', type: 'integer', example: 1),
                 new OA\Property(property: 'usuario_id', type: 'integer', example: 1),
-                new OA\Property(property: 'tipo', type: 'string', enum: ['completa', 'individual'], example: 'completa'),
+                new OA\Property(property: 'tipo', type: 'string', enum: ['completa', 'individual', 'equipo'], example: 'individual', description: 'completa: la cancha entera · individual: lugares sueltos en un equipo · equipo: un equipo entero (la mitad de la cancha)'),
+                new OA\Property(property: 'equipo', type: 'string', enum: ['A', 'B'], nullable: true, example: 'A', description: 'Para individual y equipo. Si no se manda, se elige el equipo con más lugares libres (o el que está vacío).'),
                 new OA\Property(property: 'cantidad_jugadores', type: 'integer', example: 1),
                 new OA\Property(property: 'estado', type: 'string', example: 'confirmada'),
                 new OA\Property(property: 'estado_pago', type: 'string', example: 'pendiente'),

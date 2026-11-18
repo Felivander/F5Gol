@@ -1,112 +1,166 @@
-<a class="volver-link" [routerLink]="['/clubes', datos.club_id]">← Volver al club</a>
+<div class="pagina pagina-angosta">
+  <a class="volver" [routerLink]="['/clubes', clubId()]">
+    <app-icono nombre="volver" [tamano]="16" />
+    Volver al club
+  </a>
 
-<div class="login-card" style="max-width: 640px;">
-  <h1 style="font-size: 1.6rem;">{{ cancha() ? 'Editar cancha' : 'Nueva cancha' }}</h1>
-
-  <form class="formulario" (ngSubmit)="guardar()">
-    <div class="campo">
-      <label for="nombre">Nombre</label>
-      <input id="nombre" name="nombre" [(ngModel)]="datos.nombre" required maxlength="100">
-      @for (msg of errores()['nombre'] ?? []; track msg) {
-        <small class="error-campo">{{ msg }}</small>
-      }
+  <header class="encabezado">
+    <div class="encabezado-texto">
+      <h1>{{ cancha() ? 'Editar cancha' : 'Nueva cancha' }}</h1>
+      <p class="bajada">Lo que cargues acá es lo que ve el jugador antes de reservar.</p>
     </div>
+  </header>
 
-    <div class="campo">
-      <label for="tipo">Tipo</label>
-      <select id="tipo" name="tipo" [(ngModel)]="datos.tipo">
-        <option value="futbol5">Fútbol 5</option>
-        <option value="futbol7">Fútbol 7</option>
-        <option value="futbol11">Fútbol 11</option>
-      </select>
-    </div>
-
-    <div class="campo">
-      <label for="capacidad">Capacidad de jugadores</label>
-      <input id="capacidad" name="capacidad_jugadores" type="number" min="2" max="22" [(ngModel)]="datos.capacidad_jugadores">
-      @for (msg of errores()['capacidad_jugadores'] ?? []; track msg) {
-        <small class="error-campo">{{ msg }}</small>
-      }
-    </div>
-
-    <div class="campo">
-      <label for="superficie">Superficie</label>
-      <select id="superficie" name="superficie" [(ngModel)]="datos.superficie">
-        <option [ngValue]="null">Sin especificar</option>
-        @for (opcion of superficies; track opcion.valor) {
-          <option [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+  <div class="panel-form">
+    <form class="formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" formControlName="nombre" maxlength="100" placeholder="Cancha 1">
+        @if (errorDe('nombre')) {
+          <small class="error-campo">{{ errorDe('nombre') }}</small>
         }
-      </select>
-      @for (msg of errores()['superficie'] ?? []; track msg) {
-        <small class="error-campo">{{ msg }}</small>
-      }
-    </div>
-
-    <fieldset class="campo">
-      <legend style="font-size: inherit; font-weight: 600; margin-bottom: 0.35rem;">Comodidades</legend>
-      <div class="casillas">
-        <label><input type="checkbox" name="techada" [(ngModel)]="datos.techada"> Techada</label>
-        <label><input type="checkbox" name="iluminacion" [(ngModel)]="datos.iluminacion"> Iluminación</label>
-        <label><input type="checkbox" name="vestuarios" [(ngModel)]="datos.vestuarios"> Vestuarios</label>
       </div>
-    </fieldset>
 
-    <div class="campo">
-      <label for="tarifa">Tarifa por turno ($)</label>
-      <input id="tarifa" name="tarifa" type="number" min="0" step="100" [(ngModel)]="datos.tarifa" required>
-      @for (msg of errores()['tarifa'] ?? []; track msg) {
-        <small class="error-campo">{{ msg }}</small>
+      <div class="fila-campos">
+        <div class="campo">
+          <label for="tipo">Tipo</label>
+          <select id="tipo" formControlName="tipo">
+            <option value="futbol5">Fútbol 5</option>
+            <option value="futbol6">Fútbol 6</option>
+            <option value="futbol7">Fútbol 7</option>
+            <option value="futbol8">Fútbol 8</option>
+            <option value="futbol9">Fútbol 9</option>
+            <option value="futbol11">Fútbol 11</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="capacidad">Jugadores</label>
+          <input id="capacidad" type="number" min="2" max="22" formControlName="capacidad_jugadores" aria-describedby="ayuda-capacidad">
+          <small id="ayuda-capacidad" class="ayuda">Los dos equipos juntos. Se completa según el tipo.</small>
+          @if (errorDe('capacidad_jugadores')) {
+            <small class="error-campo">{{ errorDe('capacidad_jugadores') }}</small>
+          }
+        </div>
+      </div>
+
+      <div class="fila-campos">
+        <div class="campo">
+          <label for="superficie">Superficie</label>
+          <select id="superficie" formControlName="superficie">
+            <option [ngValue]="null">Sin especificar</option>
+            @for (opcion of superficies; track opcion.valor) {
+              <option [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+            }
+          </select>
+          @if (errorDe('superficie')) {
+            <small class="error-campo">{{ errorDe('superficie') }}</small>
+          }
+        </div>
+
+        <div class="campo">
+          <label for="tarifa">Precio del turno ($)</label>
+          <input id="tarifa" type="number" min="0" step="100" formControlName="tarifa">
+          @if (errorDe('tarifa')) {
+            <small class="error-campo">{{ errorDe('tarifa') }}</small>
+          }
+        </div>
+      </div>
+
+      <fieldset class="campo">
+        <legend>Comodidades</legend>
+        <div class="casillas">
+          <label class="casilla"><input type="checkbox" formControlName="techada"><span><app-icono nombre="techo" [tamano]="16" /> Techada</span></label>
+          <label class="casilla"><input type="checkbox" formControlName="iluminacion"><span><app-icono nombre="luz" [tamano]="16" /> Luz</span></label>
+          <label class="casilla"><input type="checkbox" formControlName="vestuarios"><span><app-icono nombre="ducha" [tamano]="16" /> Vestuarios</span></label>
+        </div>
+      </fieldset>
+
+      <div class="campo">
+        <label for="descripcion">Descripción <span class="ayuda">(opcional)</span></label>
+        <textarea id="descripcion" rows="3" maxlength="2000" formControlName="descripcion"
+          placeholder="Red perimetral, césped nuevo, tribuna…"></textarea>
+        @if (errorDe('descripcion')) {
+          <small class="error-campo">{{ errorDe('descripcion') }}</small>
+        }
+      </div>
+
+      <fieldset class="campo">
+        <legend>Visible para los jugadores</legend>
+        <div class="opciones">
+          <label class="opcion">
+            <input type="radio" value="activa" formControlName="estado">
+            <strong>Activa</strong>
+            <span>Aparece en el club y se puede reservar.</span>
+          </label>
+          <label class="opcion">
+            <input type="radio" value="inactiva" formControlName="estado">
+            <strong>Inactiva</strong>
+            <span>No se muestra en las búsquedas.</span>
+          </label>
+        </div>
+      </fieldset>
+
+      @if (error()) {
+        <p class="alerta alerta-error" role="alert">
+          <app-icono nombre="alerta" [tamano]="20" />
+          {{ error() }}
+        </p>
       }
-    </div>
+      @if (aviso()) {
+        <p class="alerta alerta-ok" role="status">
+          <app-icono nombre="ok" [tamano]="20" />
+          {{ aviso() }}
+        </p>
+      }
 
-    <div class="campo">
-      <label for="descripcion">Descripción</label>
-      <textarea id="descripcion" name="descripcion" rows="3" [(ngModel)]="datos.descripcion"
-        placeholder="Ej.: red perimetral, césped de última generación, tribuna"></textarea>
-    </div>
-
-    <div class="campo">
-      <label for="estado">Estado</label>
-      <select id="estado" name="estado" [(ngModel)]="datos.estado">
-        <option value="activa">Activa (visible para los jugadores)</option>
-        <option value="inactiva">Inactiva (no se muestra en las búsquedas)</option>
-      </select>
-    </div>
-
-    @if (error()) {
-      <p class="error">{{ error() }}</p>
-    }
-    @if (aviso()) {
-      <p class="aviso">{{ aviso() }}</p>
-    }
-
-    <button type="submit" [disabled]="guardando()">
-      {{ guardando() ? 'Guardando...' : (cancha() ? 'Guardar cambios' : 'Crear cancha') }}
-    </button>
-  </form>
+      <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : (cancha() ? 'Guardar cambios' : 'Crear cancha') }}
+      </button>
+    </form>
+  </div>
 
   @if (cancha(); as cancha) {
-    <div class="aviso" style="margin-top: 1.25rem;">
-      Para que los jugadores puedan reservar, la cancha necesita horarios.
-      <a [routerLink]="['/canchas', cancha.id, 'horarios']">Cargar horarios →</a>
-    </div>
-    <h2 style="font-size: 1.2rem; margin-top: 2rem;">Fotos</h2>
-    <div class="fotos-cancha">
-      @for (foto of cancha.fotos ?? []; track foto; let i = $index) {
-        <figure>
-          <img [src]="foto" [alt]="'Foto ' + (i + 1) + ' de ' + cancha.nombre">
-          <button type="button" class="btn-secundario" (click)="borrarFoto(i)">Borrar</button>
-        </figure>
-      } @empty {
-        <p style="color: var(--text-muted);">Todavía no tiene fotos.</p>
-      }
-    </div>
-    <label class="campo-foto">
-      <span>Agregar foto (jpg, png o webp, hasta 4 MB)</span>
-      <input type="file" accept="image/jpeg,image/png,image/webp" (change)="subirFoto($event)" [disabled]="subiendoFoto()">
-    </label>
-    @if (subiendoFoto()) {
-      <p style="color: var(--text-muted);">Subiendo foto...</p>
-    }
+    <section class="seccion" aria-labelledby="titulo-fotos">
+      <div class="seccion-titulo">
+        <h2 id="titulo-fotos">Fotos</h2>
+      </div>
+      <div class="panel-form">
+        <div class="fotos-editables">
+          @for (foto of cancha.fotos ?? []; track foto; let i = $index) {
+            <figure>
+              <img class="foto" [src]="foto" [alt]="'Foto ' + (i + 1) + ' de ' + cancha.nombre">
+              <button type="button" class="btn btn-fantasma btn-sm texto-rojo" (click)="borrarFoto(i)">
+                <app-icono nombre="basura" [tamano]="16" />
+                Borrar
+              </button>
+            </figure>
+          } @empty {
+            <p class="ayuda">Sin fotos, se muestra un dibujo de la cancha.</p>
+          }
+        </div>
+        <label class="subir-foto">
+          {{ subiendoFoto() ? 'Subiendo foto…' : 'Agregar una foto' }}
+          <small>JPG, PNG o WEBP, hasta 4 MB.</small>
+          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="subirFoto($event)" [disabled]="subiendoFoto()">
+        </label>
+      </div>
+    </section>
+
+    <section class="seccion" aria-labelledby="titulo-siguiente">
+      <div class="siguiente">
+        <div>
+          <h2 id="titulo-siguiente">Horarios</h2>
+          <p class="bajada">Para que los jugadores puedan reservar, la cancha necesita turnos cargados.</p>
+        </div>
+        <div class="siguiente-acciones">
+          <a class="btn btn-lima" [routerLink]="['/canchas', cancha.id, 'horarios']">
+            <app-icono nombre="calendario" [tamano]="16" />
+            Cargar horarios
+          </a>
+          <a class="btn btn-portada" [routerLink]="['/canchas', cancha.id]">Ver la grilla</a>
+        </div>
+      </div>
+    </section>
   }
 </div>

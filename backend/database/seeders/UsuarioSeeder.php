@@ -13,17 +13,16 @@ class UsuarioSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
+        // firstOrCreate por email: si el seeder se corre de nuevo, no falla ni duplica
+        User::firstOrCreate(['email' => 'admin1@f5gol.com'], [
             'name' => 'Admin Concordia FC',
-            'email' => 'admin1@f5gol.com',
             'password' => Hash::make('password'),
             'rol' => 'administrador',
             'telefono' => '3454000001',
         ]);
 
-        User::create([
+        User::firstOrCreate(['email' => 'admin2@f5gol.com'], [
             'name' => 'Admin Arena Norte',
-            'email' => 'admin2@f5gol.com',
             'password' => Hash::make('password'),
             'rol' => 'administrador',
             'telefono' => '3454000002',
@@ -41,9 +40,8 @@ class UsuarioSeeder extends Seeder
         ];
 
         foreach ($jugadores as $i => $nombre) {
-            User::create([
+            User::firstOrCreate(['email' => 'jugador'.($i + 1).'@f5gol.com'], [
                 'name' => $nombre,
-                'email' => 'jugador'.($i + 1).'@f5gol.com',
                 'password' => Hash::make('password'),
                 'rol' => 'jugador',
                 'telefono' => '345450'.str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT),

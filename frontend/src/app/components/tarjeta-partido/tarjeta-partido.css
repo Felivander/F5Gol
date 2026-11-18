@@ -1,0 +1,156 @@
+.partido {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  height: 100%;
+  padding: 16px;
+  background: var(--superficie);
+  border-radius: var(--r);
+  box-shadow: var(--sombra-1);
+}
+
+/* Un partido en el que ya estoy anotado */
+.partido.mio {
+  box-shadow: 0 0 0 2px var(--cancha), var(--sombra-1);
+}
+
+/* El que está a un jugador de completarse se destaca */
+.partido.casi:not(.mio) {
+  box-shadow: 0 0 0 2px var(--lima), var(--sombra-1);
+}
+
+/* Indicador: anotado o no */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.estado-si {
+  background: var(--cancha);
+  color: #fff;
+}
+
+.estado-no {
+  background: var(--papel);
+  color: var(--tinta-3);
+  box-shadow: inset 0 0 0 1px var(--linea-fuerte);
+}
+
+.partido-cabeza {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+}
+
+.partido-fecha {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  width: 56px;
+  padding: 6px 0 8px;
+  border-radius: var(--r-chico);
+  background: var(--tinta);
+  color: #fff;
+  line-height: 1;
+}
+
+.partido-semana,
+.partido-mes {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b9bcc2;
+}
+
+.partido-dia {
+  margin: 4px 0 2px;
+  font-size: 1.75rem;
+  font-weight: 800;
+  font-stretch: 75%;
+}
+
+.partido-info {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.partido-club {
+  color: var(--tinta-3);
+  font-size: 0.82rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.partido-cupo {
+  display: grid;
+  justify-items: end;
+  align-content: start;
+  gap: 4px;
+  text-align: right;
+}
+
+.partido-faltan {
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-stretch: 75%;
+  line-height: 0.9;
+}
+
+.partido.casi .partido-faltan {
+  color: var(--cancha);
+}
+
+.partido-faltan-texto {
+  color: var(--tinta-2);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.partido-ayuda {
+  margin-top: -4px;
+}
+
+.partido .alerta {
+  margin: 0;
+}
+
+.partido-pie {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--linea-fuerte);
+}
+
+.partido-pie .precio {
+  font-size: 1.25rem;
+  margin-right: auto;
+}
+
+@media (max-width: 400px) {
+  .partido-cabeza {
+    grid-template-columns: auto 1fr;
+  }
+
+  .partido-cupo {
+    grid-column: 1 / -1;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    justify-items: start;
+    gap: 8px;
+    text-align: left;
+  }
+}

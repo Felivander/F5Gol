@@ -18,6 +18,9 @@ rem 2. Back: Laravel en http://127.0.0.1:8000
 echo Iniciando el back (Laravel)...
 start "F5Gol Back" cmd /k "cd /d %~dp0backend && php artisan serve"
 
+rem Programador de Laravel: cada 5 minutos avisa los partidos de matchmaking que empezaron sin completarse
+start "F5Gol Programador" /min cmd /k "cd /d %~dp0backend && php artisan schedule:work"
+
 rem 3. n8n en http://localhost:5678 (mail de bienvenida). Solo si esta instalado y no esta corriendo
 where n8n >nul 2>nul
 if errorlevel 1 (

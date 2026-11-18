@@ -30,7 +30,21 @@ class PartidoCompleto extends Notification
         return (new MailMessage)
             ->subject('¡Se completó tu partido en '.$cancha?->nombre.'!')
             ->greeting('¡Hola '.$notifiable->name.'!')
-            ->line("El partido del {$fecha} de {$horario} en {$cancha?->nombre} ya tiene los {$this->turno->cupo_maximo} jugadores.")
+            ->line("El partido del {$fecha} de {$horario} en {$cancha?->nombre} ya tiene los {$this->turno->cupo_maximo} jugadores: los dos equipos están completos.")
+            ->line($this->textoEquipo($notifiable))
             ->line('El turno quedó confirmado: nos vemos en la cancha.');
+    }
+
+    // "Jugás en el Equipo B." o "Reservaste el Equipo A entero."
+    private function textoEquipo(object $notifiable): string
+    {
+        $reserva = $this->turno->reservas()->delPartido()->where('usuario_id', $notifiable->id)->first();
+        if (! $reserva) {
+            return '';
+        }
+
+        return $reserva->tipo === 'equipo'
+            ? "Reservaste el Equipo {$reserva->equipo} entero."
+            : "Jugás en el Equipo {$reserva->equipo}.";
     }
 }

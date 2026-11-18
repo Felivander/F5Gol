@@ -1,54 +1,72 @@
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
-  <div>
-    <h1 style="margin-bottom: 0.25rem;">Mis clubes</h1>
-    <p style="color: var(--text-muted); margin: 0;">Cargá tu complejo, sus fotos y sus canchas.</p>
-  </div>
-  <a class="btn btn-primary" routerLink="/clubes/nuevo">+ Nuevo club</a>
+<div class="pagina">
+  <header class="encabezado">
+    <div class="encabezado-texto">
+      <p class="antetitulo">Administración</p>
+      <h1>Mis clubes</h1>
+      <p class="bajada">Cargá tu complejo con sus fotos, después sus canchas y los horarios que ofrecés.</p>
+    </div>
+    <a class="btn btn-primary" routerLink="/clubes/nuevo">
+      <app-icono nombre="mas" [tamano]="16" />
+      Nuevo club
+    </a>
+  </header>
+
+  @if (mensaje()) {
+    <p class="alerta alerta-ok" role="status">
+      <app-icono nombre="ok" [tamano]="20" />
+      {{ mensaje() }}
+      <button type="button" class="cerrar" aria-label="Cerrar aviso" (click)="mensaje.set('')">×</button>
+    </p>
+  }
+  @if (error()) {
+    <p class="alerta alerta-error" role="alert">
+      <app-icono nombre="alerta" [tamano]="20" />
+      {{ error() }}
+    </p>
+  }
+
+  @if (cargando()) {
+    <p class="cargando">Cargando tus clubes…</p>
+  } @else {
+    <ul class="mis-clubes">
+      @for (club of clubes(); track club.id) {
+        <li class="tarjeta mi-club">
+          @if (club.fotos?.length) {
+            <img class="mi-club-foto foto" [src]="club.fotos![0]" [alt]="'Foto de ' + club.nombre">
+          } @else {
+            <span class="mi-club-foto mi-club-sin-foto" aria-hidden="true">{{ club.nombre.charAt(0) }}</span>
+          }
+
+          <div class="mi-club-datos">
+            <h2>{{ club.nombre }}</h2>
+            <div class="meta">
+              <span><app-icono nombre="ubicacion" [tamano]="16" /> {{ club.direccion || 'Sin dirección cargada' }}</span>
+            </div>
+            <div class="chips">
+              <span class="chip">{{ club.canchas_count ?? 0 }} {{ club.canchas_count === 1 ? 'cancha' : 'canchas' }}</span>
+              <span class="chip">{{ club.fotos?.length ?? 0 }} {{ club.fotos?.length === 1 ? 'foto' : 'fotos' }}</span>
+            </div>
+          </div>
+
+          <div class="mi-club-acciones">
+            <a class="btn btn-primary btn-sm" [routerLink]="['/clubes', club.id]">Canchas y turnos</a>
+            <a class="btn btn-outline-primary btn-sm" [routerLink]="['/clubes', club.id, 'editar']">
+              <app-icono nombre="editar" [tamano]="16" />
+              Editar
+            </a>
+            <button type="button" class="btn btn-fantasma btn-sm texto-rojo" (click)="eliminar(club)">
+              <app-icono nombre="basura" [tamano]="16" />
+              Eliminar
+            </button>
+          </div>
+        </li>
+      } @empty {
+        <li class="vacio">
+          <strong>Todavía no cargaste ningún club</strong>
+          <span>Creá tu complejo para empezar a cargar canchas y recibir reservas.</span>
+          <a class="btn btn-primary btn-sm" routerLink="/clubes/nuevo">Crear mi club</a>
+        </li>
+      }
+    </ul>
+  }
 </div>
-
-@if (mensaje()) {
-  <div class="alert alert-success alert-dismissible" role="alert">
-    {{ mensaje() }}
-    <button type="button" class="btn-close" aria-label="Cerrar" (click)="mensaje.set('')"></button>
-  </div>
-}
-@if (error()) {
-  <p class="error">{{ error() }}</p>
-}
-
-@if (cargando()) {
-  <p style="color: var(--text-muted);">Cargando tus clubes...</p>
-} @else {
-  <ul class="mis-clubes">
-    @for (club of clubes(); track club.id) {
-      <li>
-        @if (club.fotos?.length) {
-          <img class="mis-clubes-foto" [src]="club.fotos![0]" [alt]="'Foto de ' + club.nombre">
-        } @else {
-          <span class="mis-clubes-foto mis-clubes-sin-foto" aria-hidden="true">🏟️</span>
-        }
-
-        <div class="mis-clubes-datos">
-          <h3>{{ club.nombre }}</h3>
-          <p class="tarjeta-meta">📍 {{ club.direccion || 'Sin dirección cargada' }}</p>
-          <p class="tarjeta-meta">
-            ⚽ {{ club.canchas_count ?? 0 }} {{ club.canchas_count === 1 ? 'cancha' : 'canchas' }}
-            · 📷 {{ club.fotos?.length ?? 0 }} {{ club.fotos?.length === 1 ? 'foto' : 'fotos' }}
-          </p>
-        </div>
-
-        <div class="mis-clubes-acciones">
-          <a class="btn btn-primary btn-sm" [routerLink]="['/clubes', club.id]">Gestionar canchas</a>
-          <a class="btn btn-outline-primary btn-sm" [routerLink]="['/clubes', club.id, 'editar']">Editar datos y fotos</a>
-          <button type="button" class="btn btn-outline-danger btn-sm" (click)="eliminar(club)">Eliminar</button>
-        </div>
-      </li>
-    } @empty {
-      <li class="mis-clubes-vacio">
-        <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Todavía no tenés ningún club.</p>
-        <p style="color: var(--text-muted);">Creá tu complejo para empezar a cargar canchas y recibir reservas.</p>
-        <a class="btn btn-primary" routerLink="/clubes/nuevo">Crear mi club</a>
-      </li>
-    }
-  </ul>
-}

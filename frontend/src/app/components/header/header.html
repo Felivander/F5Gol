@@ -1,25 +1,35 @@
-<header>
-  <div class="header-container">
-    <a class="marca" routerLink="/clubes">
-      <span class="icono-pelota">⚽</span>
-      <span class="texto-marca">F5<span class="marca-destacada">GOL</span></span>
+<header class="barra">
+  <div class="barra-interior">
+    <a class="marca" routerLink="/clubes" aria-label="F5GOL, ir al inicio">
+      <span class="marca-sello" aria-hidden="true">F5</span>
+      <span class="marca-nombre">F5GOL</span>
     </a>
-    <nav>
-      <a class="nav-link" routerLink="/clubes" routerLinkActive="activo">Clubes</a>
+
+    <nav class="navegacion" aria-label="Principal">
+      <a routerLink="/clubes" routerLinkActive="activo">Canchas</a>
+      <a routerLink="/partidos" routerLinkActive="activo" class="nav-partidos">Partidos abiertos</a>
       @if (auth.logueado()) {
-        <a class="nav-link" routerLink="/mis-reservas" routerLinkActive="activo">Mis reservas</a>
+        <a routerLink="/mis-reservas" routerLinkActive="activo">Mis reservas</a>
         @if (auth.usuario()?.rol === 'administrador') {
-          <a class="nav-link" routerLink="/mis-clubes" routerLinkActive="activo">Mis clubes</a>
-          <a class="nav-link" routerLink="/panel" routerLinkActive="activo">Panel</a>
+          <a routerLink="/mis-clubes" routerLinkActive="activo">Mis clubes</a>
+          <a routerLink="/panel" routerLinkActive="activo">Panel</a>
         }
-        <div class="usuario-badge">
-          <span class="usuario-avatar">{{ auth.usuario()?.name?.charAt(0) || 'U' }}</span>
-          <span class="usuario-nombre">{{ auth.usuario()?.name }}</span>
-        </div>
-        <button class="btn-salir" (click)="salir()">Salir</button>
-      } @else {
-        <a class="btn-login-nav" routerLink="/login" routerLinkActive="activo">Ingresar</a>
       }
     </nav>
+
+    <div class="sesion">
+      @if (auth.logueado()) {
+        <span class="usuario" [attr.title]="auth.usuario()?.name">
+          <span class="usuario-inicial" aria-hidden="true">{{ inicial() }}</span>
+          <span class="usuario-nombre">{{ primerNombre() }}</span>
+        </span>
+        <button type="button" class="boton-salir" (click)="salir()">
+          <app-icono nombre="salir" [tamano]="16" />
+          <span>Salir</span>
+        </button>
+      } @else {
+        <a class="boton-ingresar" routerLink="/login">Ingresar</a>
+      }
+    </div>
   </div>
 </header>

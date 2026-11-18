@@ -8,13 +8,15 @@ import { Auth } from '../../services/auth';
   selector: 'app-auth-google',
   imports: [RouterLink],
   template: `
-    <div class="login-card" style="text-align: center;">
-      @if (error()) {
-        <p class="error">{{ error() }}</p>
-        <a routerLink="/login">Volver a iniciar sesión</a>
-      } @else {
-        <p>Ingresando con Google...</p>
-      }
+    <div class="acceso">
+      <div class="acceso-tarjeta">
+        @if (error()) {
+          <p class="alerta alerta-error" role="alert">{{ error() }}</p>
+          <a class="btn btn-primary btn-block" routerLink="/login">Volver a ingresar</a>
+        } @else {
+          <p class="cargando" role="status">Ingresando con Google…</p>
+        }
+      </div>
     </div>
   `
 })

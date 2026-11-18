@@ -52,8 +52,8 @@ class GenerarTurnosTest extends TestCase
         $this->assertSame('18:00', substr($turno->hora_inicio, 0, 5));
         $this->assertSame('19:00', substr($turno->hora_fin, 0, 5));
         $this->assertSame('disponible', $turno->estado);
-        // La mitad de la capacidad de la cancha (10 jugadores)
-        $this->assertSame(5, $turno->cupo_maximo);
+        // El partido completo: los dos equipos juntos, la capacidad de la cancha (10 jugadores)
+        $this->assertSame(10, $turno->cupo_maximo);
     }
 
     public function test_respeta_los_dias_elegidos_y_la_duracion(): void

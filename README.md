@@ -1,76 +1,109 @@
-# F5Gol
+# F5GOL
 
-Sistema de reservas de canchas de fútbol 5: clubes, canchas, turnos, reservas y jugadores anotados.
-Proyecto de Programación 4 (UTN Facultad Regional Concordia).
+Plataforma web de turnos y matchmaking para canchas de fútbol. Los dueños de complejos cargan sus clubes, canchas y horarios; los jugadores reservan la cancha entera o se suman a un partido (solos, con amigos o con un equipo completo) hasta que se completen los dos equipos.
 
-La idea completa del proyecto está en [idea_de_proyecto_F5GOL.md](idea_de_proyecto_F5GOL.md).
+Trabajo final de **Programación IV** — UTN Facultad Regional Concordia, 2026.
+**Grupo 4:** Patricio Sandri, Felipe van der Donckt, Lautaro Meza y Julián Dufey.
+
+- Idea y requerimientos: [idea_de_proyecto_F5GOL.md](idea_de_proyecto_F5GOL.md)
+- Reglas del proyecto y estado actual: [constitution.md](constitution.md)
 
 ## Estructura
 
 | Carpeta | Qué es | Puerto |
 |---|---|---|
-| [`backend/`](backend) | API REST en Laravel 13 + Sanctum, documentada con Swagger | 8000 |
+| [`backend/`](backend) | API REST en Laravel 13 + Sanctum + Socialite (Google), documentada con Swagger | 8000 |
 | [`frontend/`](frontend) | Aplicación Angular 22 que consume la API | 4200 |
+| [`docs/n8n/`](docs/n8n) | Flujos de n8n para los mails (bienvenida, partido completo y partido incompleto) | 5678 |
+| [`docs/powerbi/`](docs/powerbi) | Tablero de Power BI sobre la base MySQL | — |
 
-En desarrollo, el front redirige todo lo que va a `/api` hacia el back (ver `frontend/proxy.conf.json`), así que no hace falta configurar CORS.
+En desarrollo, el front redirige todo lo que va a `/api` hacia el back (`frontend/proxy.conf.json`), así que no hace falta configurar CORS.
 
 ## Requisitos
 
-- XAMPP con MySQL
-- PHP 8.3 y Composer
-- Node.js **22.22.3 o más nuevo** (lo pide Angular 22; probado con Node 24) y Angular CLI 22 (`npm install -g @angular/cli@22`). Con una versión anterior, `ng serve` falla al arrancar: revisar con `node -v`.
+| Herramienta | Versión | Para qué |
+|---|---|---|
+| [XAMPP](https://www.apachefriends.org/) | con MySQL/MariaDB | Base de datos (y el PHP que trae) |
+| PHP | 8.3 o más nuevo, con la extensión **GD** | Laravel. GD hace falta para las fotos: en `C:\xampp\php\php.ini` descomentar `extension=gd` |
+| [Composer](https://getcomposer.org/) | 2.x | Dependencias del back |
+| [Node.js](https://nodejs.org/) | **22.22.3 o más nuevo** (probado con 24) | Angular 22. Con una versión anterior `ng serve` no arranca: revisar con `node -v` |
+| Angular CLI | 22 | `npm install -g @angular/cli@22` (el instalador lo hace solo) |
+| [n8n](https://n8n.io/) | opcional | Los mails. Sin n8n la app funciona igual |
+| Power BI Desktop | opcional | Solo para abrir el tablero |
 
-## Primera vez (después de clonar)
+## Instalación desde cero
 
-Antes, crear la base `f5gol` en phpMyAdmin con MySQL de XAMPP andando.
+1. Clonar el repo dentro de `C:\xampp\htdocs\`:
 
-Doble clic en **`instalar-dependencias.bat`**: corre `composer install` en el back, crea `backend/.env` si no existe, crea el enlace `public/storage` (para las fotos de las canchas), corre `php artisan migrate --seed`, hace `npm install` en el front e instala Angular CLI 22 si falta. Si la base no existe todavía, avisa al final y se puede volver a ejecutar.
+   ```bash
+   git clone https://github.com/Felivander/F5Gol.git
+   ```
 
-O a mano. Back:
+2. Abrir el panel de XAMPP, arrancar **MySQL** y crear la base **`f5gol`** en phpMyAdmin (http://localhost/phpmyadmin), con cotejamiento `utf8mb4_unicode_ci`.
+
+3. Doble clic en **`instalar-dependencias.bat`**. Hace todo esto:
+   - `composer install` en `backend/`.
+   - Crea `backend/.env` a partir de `.env.example` (ya viene con la base `f5gol`, usuario `root` sin contraseña) y genera la `APP_KEY`.
+   - Crea el enlace `public/storage` para que se vean las fotos.
+   - `php artisan migrate --seed`: crea las tablas y carga los datos de prueba.
+   - `npm install` en `frontend/` e instala Angular CLI 22 si falta.
+
+   Si la base todavía no existía, avisa al final: creala y volvé a ejecutarlo.
+
+<details>
+<summary>O a mano, paso por paso</summary>
 
 ```bash
 cd backend
 composer install
 copy .env.example .env
 php artisan key:generate
-```
-
-En `backend/.env` configurar la base de datos (`DB_DATABASE=f5gol`, usuario `root` sin contraseña en XAMPP), crear la base `f5gol` en phpMyAdmin y después:
-
-```bash
-php artisan migrate --seed
 php artisan storage:link
+php artisan migrate --seed
 ```
-
-Front:
 
 ```bash
 cd frontend
 npm install
+npm install -g @angular/cli@22
 ```
+
+</details>
 
 ### Login con Google (una vez por máquina)
 
-1. En [Google Cloud Console](https://console.cloud.google.com/apis/credentials) crear un proyecto y una credencial **ID de cliente de OAuth** de tipo **Aplicación web** (antes hay que configurar la pantalla de consentimiento en modo *Prueba* y agregar como usuarios de prueba los mails del grupo).
-2. En **URI de redireccionamiento autorizados** poner exactamente `http://localhost:8000/api/auth/google/callback`.
+1. En [Google Cloud Console](https://console.cloud.google.com/apis/credentials) crear un proyecto. Configurar la **pantalla de consentimiento** en modo *Prueba* y agregar como **usuarios de prueba** los mails que van a entrar (los del grupo y el del docente, si lo prueba).
+2. Crear una credencial **ID de cliente de OAuth**, tipo **Aplicación web**, con este **URI de redireccionamiento autorizado**: `http://localhost:8000/api/auth/google/callback`.
 3. Copiar el ID y el secreto en `backend/.env`:
 
+   ```env
+   GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=xxxxxxxx
+   ```
+
+4. Correr `php artisan config:clear` en `backend/`.
+
+Quien entra con Google por primera vez queda registrado como **jugador**. Si ya tenía cuenta con ese mail, se vincula a esa cuenta y conserva su rol.
+
+> El secreto nunca se sube al repo: `backend/.env` y `client_secret_*.json` están en `.gitignore`.
+
+### Mails con n8n (opcional)
+
+La app avisa a n8n en tres momentos: cuando se crea una cuenta (mail de bienvenida), cuando se completa un partido y cuando un partido llega a su hora sin completarse. Para cada uno hay un flujo en `docs/n8n/` que se importa en n8n con una credencial SMTP (por ejemplo, Gmail con contraseña de aplicación). El paso a paso está en [docs/n8n/README.md](docs/n8n/README.md).
+
+En `backend/.env` van las URLs de los webhooks (ya vienen en `.env.example`) y un secreto compartido con n8n:
+
 ```env
-GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=xxxxxxxx
-GOOGLE_REDIRECT_URI="${APP_URL}/api/auth/google/callback"
-FRONTEND_URL=http://localhost:4200
+N8N_WEBHOOK_SECRETO=el-mismo-que-en-n8n
 ```
 
-4. `php artisan config:clear` y `php artisan migrate` (agrega la columna `google_id`).
-
-Quien entra con Google por primera vez queda registrado como **jugador**. Si ya tenía cuenta con ese mail (por ejemplo un administrador), se vincula a esa cuenta y conserva su rol.
+Si n8n no está levantado, el registro funciona igual (sin mail de bienvenida) y los avisos de partido salen por el mail de Laravel (`MAIL_MAILER`; con `log` quedan en `backend/storage/logs/laravel.log`).
 
 ## Levantar todo
 
-Doble clic en **`iniciar-f5gol.bat`**: arranca MySQL (si no está corriendo), el back y el front, y abre el navegador.
+Doble clic en **`iniciar-f5gol.bat`**. Arranca MySQL (si no está corriendo), el back, el programador de Laravel, n8n (si está instalado) y el front, y abre el navegador.
 
-O a mano, en dos terminales:
+O a mano, cada uno en su terminal:
 
 ```bash
 cd backend
@@ -78,72 +111,133 @@ php artisan serve
 ```
 
 ```bash
+cd backend
+php artisan schedule:work
+```
+
+```bash
 cd frontend
 ng serve
 ```
 
-## Automatización y reportes
-
-- **n8n** (mail de bienvenida al crear una cuenta): ver [docs/n8n/README.md](docs/n8n/README.md).
-- **Power BI** (dashboard de ocupación, reservas e ingresos): ver [docs/powerbi/README.md](docs/powerbi/README.md).
+`schedule:work` es el programador de Laravel: cada 5 minutos avisa a los jugadores de los partidos que llegaron a su hora sin completarse. Si no está corriendo, ese aviso no sale (lo demás funciona).
 
 ## Direcciones
 
-- Front: http://localhost:4200
-- API: http://127.0.0.1:8000/api
-- Swagger: http://127.0.0.1:8000/api/documentation
+| Qué | Dirección |
+|---|---|
+| Front | http://localhost:4200 |
+| API | http://127.0.0.1:8000/api |
+| Swagger | http://127.0.0.1:8000/api/documentation |
+| n8n | http://localhost:5678 |
 
-Usuarios de prueba (seeders): `admin1@f5gol.com` / `password` (administrador) y `jugador1@f5gol.com` / `password` (jugador).
+## Usuarios de prueba
+
+Los carga `php artisan migrate --seed`. Todos tienen la contraseña **`password`**.
+
+| Usuario | Rol |
+|---|---|
+| `admin1@f5gol.com` | Administrador, dueño de Complejo Concordia FC |
+| `admin2@f5gol.com` | Administrador, dueño de Arena Norte |
+| `jugador1@f5gol.com` … `jugador8@f5gol.com` | Jugadores |
+| `demo1@f5gol.com` … | Jugadores extra para armar partidos |
+
+## Preparar la demo
+
+Antes de presentar, dejar la base limpia y con turnos para hoy y mañana:
+
+```bash
+cd backend
+php artisan migrate:fresh --seed
+php artisan db:seed --class=TurnoSeeder
+```
+
+`migrate:fresh` **borra todos los datos** de la base `f5gol` y la vuelve a crear. `HistorialDemoSeeder` carga 8 semanas de reservas para que el tablero de Power BI tenga datos (tarda unos 40 segundos).
+
+Recorrido sugerido: registrarse (o entrar con Google) → crear un club en **Mis clubes** → agregar una cancha → cargar sus horarios → reservar la cancha entera con un jugador → sumar jugadores a un partido desde **Partidos abiertos** hasta completar los dos equipos (llega el mail) → ver las reservas en el **Panel** y marcar la seña → cancelar una reserva desde **Mis reservas**.
+
+## Cómo funciona el matchmaking
+
+- Cada turno tiene un cupo igual a la capacidad de la cancha, repartido en dos equipos: **Equipo A** y **Equipo B** (en F5, 5 y 5; si el cupo es impar, el lugar extra es del A).
+- Se entra de tres formas: **un lugar** (solo o con amigos, en el equipo que elijas), **un equipo completo** (solo si ese equipo está vacío) o **la cancha entera** (solo si no hay nadie anotado).
+- Mientras falten jugadores, el turno se sigue mostrando **disponible**. Cuando se llenan los dos equipos pasa a **ocupado** y les llega un mail a todos.
+- El cupo se actualiza solo cada 15 segundos. No hay doble reserva: se controla en la base con una transacción y bloqueo del turno.
+- Cada jugador puede cancelar hasta **2 horas antes**. El administrador del club puede hacerlo siempre.
 
 ## Pantallas del front
 
 | Ruta | Quién | Qué hace |
 |---|---|---|
-| `/clubes`, `/clubes/:id` | Todos | Listado de clubes y sus canchas activas |
-| `/canchas/:id` | Todos | Grilla de turnos: **Reservar cancha** (completa) o **Sumarme al partido** (matchmaking) |
-| `/login`, `/registro` | Todos | Ingreso y registro eligiendo rol (jugador o administrador), o con Google |
-| `/auth/google` | Todos | Pantalla de vuelta de Google: guarda el token y redirige según el rol |
-| `/mis-reservas` | Logueado | Historial de reservas propias, con cancelación hasta 2 horas antes |
-| `/panel` | Administrador | Reservas del día por cancha de sus clubes |
-| `/mis-clubes` | Administrador | Sus clubes con cantidad de canchas y fotos: crear, editar, eliminar |
-| `/clubes/nuevo`, `/clubes/:id/editar` | Administrador dueño | Nombre, dirección, teléfono, descripción y fotos del club |
-| `/canchas/:id/horarios` | Administrador dueño | Carga en lote de turnos: período, días de la semana, franja horaria, duración y cupo |
+| `/clubes`, `/clubes/:id` | Todos | Buscador de clubes y detalle del club con sus fotos y canchas |
+| `/canchas/:id` | Todos | Grilla de turnos por día: reservar la cancha entera, un equipo o sumarse a un partido |
+| `/partidos` | Todos | Partidos que se están armando, con los lugares libres de cada equipo. Tocando un lugar libre te sumás |
+| `/partidos/:id` | Anotados y dueño del club | Sala del partido: los dos equipos en la cancha, tu lugar, hasta cuándo te podés bajar y link para invitar |
+| `/login`, `/registro` | Todos | Ingreso y registro (jugador o administrador), o con Google |
+| `/auth/google` | Todos | Vuelta de Google: guarda el token y redirige según el rol |
+| `/mis-reservas` | Logueado | Historial de reservas, cambiar de turno y cancelar |
+| `/panel` | Administrador | Reservas del día y de la semana de sus canchas, con el estado de pago |
+| `/mis-clubes` | Administrador | Sus clubes: crear, editar y eliminar |
+| `/clubes/nuevo`, `/clubes/:id/editar` | Administrador dueño | Datos y fotos del club |
+| `/canchas/nueva`, `/canchas/:id/editar` | Administrador dueño | Datos, comodidades y fotos de la cancha |
+| `/canchas/:id/horarios` | Administrador dueño | Carga en lote de turnos: período, días, franja horaria y duración |
+
+Las pantallas privadas están protegidas con guards. Si el token vence, el front cierra la sesión y manda al login.
 
 ## Endpoints principales
 
-Todos bajo `/api`. Los de escritura piden `Authorization: Bearer <token>`; el detalle completo está en Swagger.
+Todos bajo `/api`. Los privados piden `Authorization: Bearer <token>`. El detalle completo, con parámetros, respuestas y ejemplos, está en Swagger.
 
 | Método y ruta | Notas |
 |---|---|
-| `POST /register`, `POST /login`, `POST /logout`, `GET /user` | Autenticación con Sanctum |
-| `GET /auth/google/redirect`, `GET /auth/google/callback` | Login con Google (Socialite). Se abren desde el navegador; el callback vuelve al front con el token en `#token=` |
-| `GET /clubs?buscar=&mios=1`, `GET /clubs/{id}` | `mios=1` con token devuelve los clubes del administrador. Cada club trae `canchas_count`. El detalle muestra solo canchas activas (el dueño ve todas) |
-| `POST/PUT/DELETE /clubs`, `POST /clubs/{id}/fotos`, `DELETE /clubs/{id}/fotos/{indice}` | Solo el dueño (403). El dueño lo pone el servidor. 409 al borrar un club con canchas activas |
-| `GET /canchas?club_id=&incluir_inactivas=1` | `incluir_inactivas` solo funciona con token de administrador |
-| `PUT /canchas/{id}` | 409 si se desactiva una cancha con reservas futuras |
-| `POST /canchas/{id}/fotos`, `DELETE /canchas/{id}/fotos/{indice}` | Fotos de la cancha (solo el dueño del club) |
-| `GET /turnos?cancha_id=&fecha=` | Grilla de disponibilidad con `cupo_actual` |
-| `POST /turnos/generar` | Crea en lote los turnos de una cancha (hasta 90 días). No duplica ni superpone. Devuelve `creados` y `omitidos`. Solo el dueño (403) |
-| `DELETE /turnos/{id}` | Solo el dueño y sin reservas activas (409) |
-| `GET /reservas?usuario_id=&cancha_id=&fecha=&desde=&hasta=&mis_clubes=1&por_pagina=` | `mis_clubes` filtra por los clubes del administrador logueado; `por_pagina` hasta 100 |
-| `POST /reservas` | `tipo` completa o individual. 409 si el turno está ocupado, bloqueado, ya pasó, tiene jugadores anotados (para completa) o no tiene cupo. 422 si el turno no existe |
-| `PUT /reservas/{id}` | Cambiar de turno libera el anterior y ocupa el nuevo. Solo el administrador cambia `estado_pago` (403) |
-| `DELETE /reservas/{id}` | Cancela (queda en el historial). El jugador puede hasta 2 horas antes |
+| `POST /register`, `POST /login`, `POST /logout`, `GET /user` | Autenticación con Sanctum. Login y registro aceptan 10 intentos por minuto |
+| `GET /auth/google/redirect`, `GET /auth/google/callback` | Login con Google. Se abren desde el navegador; el callback vuelve al front con el token |
+| `GET /clubs?buscar=&mios=1`, `GET /clubs/{id}` | Búsqueda por nombre o dirección; `mios=1` devuelve los clubes del administrador |
+| `POST/PUT/DELETE /clubs`, `POST/DELETE /clubs/{id}/fotos` | Solo el dueño (403). El dueño lo asigna el servidor |
+| `GET /canchas`, `POST/PUT/DELETE /canchas`, `PUT /canchas/{id}/restore`, `GET /canchas/eliminadas` | Borrado con soft delete y restauración. Solo el dueño |
+| `GET /turnos?cancha_id=&fecha=` | Grilla con el cupo de cada equipo |
+| `POST /turnos/generar`, `PATCH /turnos/{id}/bloqueo` | Carga en lote y bloqueo por mantenimiento. Solo el dueño |
+| `GET /partidos-abiertos` | Partidos que se están armando. Con token dice si estás anotado y en qué equipo |
+| `GET /partidos/{id}` | Sala del partido (solo anotados y dueño del club) |
+| `GET /reservas`, `POST /reservas`, `PUT /reservas/{id}`, `DELETE /reservas/{id}` | `tipo`: `completa`, `equipo` o `individual`, con `equipo` A o B. 409 si el turno no está disponible. Solo el administrador cambia el estado de pago |
 
 ## Tests
 
-Back (PHPUnit, usa SQLite en memoria, no toca la base de XAMPP):
+Back (PHPUnit, usa SQLite en memoria: no toca la base de XAMPP). Los de fotos necesitan **GD**:
 
 ```bash
 cd backend
 php artisan test
 ```
 
-Los tests de fotos (`FotosCanchaTest`) necesitan la extensión **GD** de PHP: en XAMPP, descomentar `extension=gd` en `C:\xampp\php\php.ini`.
-
-Front (compila todo el proyecto y detecta errores de tipos o de templates):
+Front:
 
 ```bash
 cd frontend
 ng build
+ng test --watch=false
 ```
+
+Si se cambia la API, regenerar la documentación y commitear `backend/storage/api-docs/api-docs.json`:
+
+```bash
+cd backend
+php artisan l5-swagger:generate
+```
+
+## Problemas frecuentes
+
+| Qué pasa | Qué hacer |
+|---|---|
+| `SQLSTATE[HY000] [1049] Unknown database 'f5gol'` | Crear la base `f5gol` en phpMyAdmin y correr `php artisan migrate --seed` |
+| `ng serve` no arranca o se queja de la versión de Node | Instalar Node 22.22.3 o más nuevo (o 24) y volver a abrir la terminal |
+| No se ven las fotos | Falta el enlace: `php artisan storage:link` en `backend/` |
+| Fallan los tests de fotos con "GD extension is not installed" | Descomentar `extension=gd` en `C:\xampp\php\php.ini` |
+| Google dice "Error 400: redirect_uri_mismatch" | El URI de redireccionamiento en Google Cloud tiene que ser exactamente `http://localhost:8000/api/auth/google/callback` |
+| Google dice "Acceso bloqueado" | El mail no está como usuario de prueba en la pantalla de consentimiento |
+| `ng serve` muestra una versión vieja | Cortarlo (Ctrl+C) y volver a levantarlo |
+| No llegan los mails | Ver la tabla de problemas de [docs/n8n/README.md](docs/n8n/README.md) |
+
+## Automatización y reportes
+
+- **n8n**: [docs/n8n/README.md](docs/n8n/README.md).
+- **Power BI** (ocupación, reservas, ingresos y jugadores): [docs/powerbi/README.md](docs/powerbi/README.md).

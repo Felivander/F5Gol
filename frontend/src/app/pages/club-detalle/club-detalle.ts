@@ -1,16 +1,18 @@
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Cancha, Club, textoSuperficie } from '../../models';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 
 import { CanchaDiagrama } from '../../components/cancha-diagrama/cancha-diagrama';
+import { Icono } from '../../components/icono/icono';
+import { pesos, textoTipo } from '../../formato';
 
 @Component({
   selector: 'app-club-detalle',
-  imports: [RouterLink, CurrencyPipe, CanchaDiagrama],
-  templateUrl: './club-detalle.html'
+  imports: [RouterLink, CanchaDiagrama, Icono],
+  templateUrl: './club-detalle.html',
+  styleUrl: './club-detalle.css'
 })
 export class ClubDetalle implements OnInit {
   private api = inject(Api);
@@ -34,6 +36,8 @@ export class ClubDetalle implements OnInit {
   mensaje = signal('');
 
   protected textoSuperficie = textoSuperficie;
+  protected pesos = pesos;
+  protected textoTipo = textoTipo;
 
   // Canchas eliminadas (soft delete) que el dueño puede restaurar
   canchasEliminadas = signal<Cancha[]>([]);
@@ -77,7 +81,6 @@ export class ClubDetalle implements OnInit {
         this.cargarCanchasEliminadas();
       },
       error: err => {
-        console.error('Error al eliminar cancha:', err);
         this.error.set(err.error?.message ?? 'No se pudo eliminar la cancha.');
       }
     });
@@ -96,7 +99,6 @@ export class ClubDetalle implements OnInit {
         this.cargarCanchasEliminadas();
       },
       error: err => {
-        console.error('Error al restaurar cancha:', err);
         this.error.set(err.error?.message ?? 'No se pudo restaurar la cancha.');
       }
     });

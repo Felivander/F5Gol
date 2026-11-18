@@ -1,13 +1,15 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Icono } from '../../components/icono/icono';
 import { Club } from '../../models';
 import { Api } from '../../services/api';
 
 // Clubes del administrador logueado: crear, editar, entrar a gestionar canchas y eliminar
 @Component({
   selector: 'app-mis-clubes',
-  imports: [RouterLink],
-  templateUrl: './mis-clubes.html'
+  imports: [RouterLink, Icono],
+  templateUrl: './mis-clubes.html',
+  styleUrl: './mis-clubes.css'
 })
 export class MisClubes implements OnInit {
   private api = inject(Api);

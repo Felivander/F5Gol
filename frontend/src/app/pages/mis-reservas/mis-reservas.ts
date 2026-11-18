@@ -1,13 +1,16 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { Icono } from '../../components/icono/icono';
+import { partesFecha } from '../../formato';
 import { Reserva } from '../../models';
 import { Api } from '../../services/api';
 import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-mis-reservas',
-  imports: [RouterLink],
-  templateUrl: './mis-reservas.html'
+  imports: [RouterLink, Icono],
+  templateUrl: './mis-reservas.html',
+  styleUrl: './mis-reservas.css'
 })
 export class MisReservas implements OnInit {
   private api = inject(Api);
@@ -50,6 +53,8 @@ export class MisReservas implements OnInit {
       }
     });
   }
+
+  protected partesFecha = partesFecha;
 
   // Solo se ofrece cancelar lo que todavía no se jugó
   sePuedeCancelar(reserva: Reserva) {

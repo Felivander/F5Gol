@@ -1,0 +1,140 @@
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* Selector Día / Semana */
+.segmentos {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: var(--r);
+  background: var(--papel-hundido);
+}
+
+.segmento {
+  min-height: 38px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: calc(var(--r) - 3px);
+  background: transparent;
+  color: var(--tinta-2);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition-property: background-color, color, box-shadow;
+  transition-duration: 150ms;
+}
+
+.segmento.activo {
+  background: var(--superficie);
+  color: var(--tinta);
+  box-shadow: var(--sombra-1);
+}
+
+.segmento:focus-visible {
+  outline: 2px solid var(--cancha);
+  outline-offset: 2px;
+}
+
+.control-fecha {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.control-fecha app-icono {
+  position: absolute;
+  left: 12px;
+  color: var(--tinta-3);
+  pointer-events: none;
+}
+
+.control-fecha .control {
+  width: auto;
+  padding-left: 38px;
+}
+
+/* Resumen en números */
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 0 0 8px;
+}
+
+@media (min-width: 768px) {
+  .numeros {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.numero {
+  padding: 14px 16px;
+  border-radius: var(--r);
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+}
+
+.numero dt {
+  color: var(--tinta-3);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.numero dd {
+  margin: 4px 0 0;
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-stretch: 75%;
+  line-height: 1;
+}
+
+.alerta-numero dd {
+  color: var(--ambar);
+}
+
+.grupo {
+  margin-top: 28px;
+}
+
+.grupo h2 {
+  font-size: 1.35rem;
+}
+
+.grupo h2 a {
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.grupo h2 a:hover {
+  color: var(--cancha);
+}
+
+.hora-celda,
+.dia-celda {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.correo {
+  display: block;
+  color: var(--tinta-3);
+}
+
+.pago {
+  width: auto;
+  min-height: 36px;
+  padding: 4px 10px;
+  font-size: 0.9rem;
+}
+
+.pago.pagado {
+  border-color: var(--cancha);
+  background: var(--cancha-suave);
+  color: var(--cancha-oscura);
+}

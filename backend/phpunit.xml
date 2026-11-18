@@ -30,6 +30,8 @@
         <env name="MAIL_MAILER" value="array"/>
         <!-- Los tests nunca llaman al n8n real (los que lo prueban usan Http::fake) -->
         <env name="N8N_WEBHOOK_USUARIO_CREADO" value=""/>
+        <env name="N8N_WEBHOOK_PARTIDO_COMPLETO" value=""/>
+        <env name="N8N_WEBHOOK_PARTIDO_INCOMPLETO" value=""/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>

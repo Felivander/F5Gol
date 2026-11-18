@@ -1,151 +1,271 @@
-@if (cancha(); as cancha) {
-  <a class="volver-link" [routerLink]="['/clubes', cancha.club_id]">← Volver a {{ cancha.club?.nombre }}</a>
-  <div class="club-hero" style="margin-bottom: 2rem;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 1.75rem; align-items: center;">
-      <div>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
-          <span class="badge badge-tipo">⚽ {{ cancha.tipo }}</span>
-          <span class="badge badge-jugadores">👥 {{ cancha.capacidad_jugadores }} jugadores</span>
-          <span class="estado" [class]="cancha.estado">{{ cancha.estado }}</span>
+<div class="pagina">
+  @if (cancha(); as cancha) {
+    <a class="volver" [routerLink]="['/clubes', cancha.club_id]" [queryParams]="mover() ? { mover: mover() } : {}">
+      <app-icono nombre="volver" [tamano]="16" />
+      {{ cancha.club?.nombre || 'Volver al club' }}
+    </a>
+
+    <header class="ficha">
+      <div class="ficha-texto">
+        <div class="chips">
+          <span class="chip chip-verde">{{ textoTipo(cancha.tipo) }}</span>
+          <span class="chip">{{ cancha.capacidad_jugadores }} jugadores</span>
+          @if (cancha.estado !== 'activa') {
+            <span class="chip chip-ambar">{{ cancha.estado }}</span>
+          }
         </div>
-        <h1 style="margin-bottom: 0.5rem;">{{ cancha.nombre }}</h1>
+        <h1>{{ cancha.nombre }}</h1>
+        <div class="meta">
+          @if (cancha.superficie) {
+            <span><app-icono nombre="cesped" [tamano]="16" /> {{ textoSuperficie(cancha.superficie) }}</span>
+          }
+          <span><app-icono nombre="techo" [tamano]="16" /> {{ cancha.techada ? 'Techada' : 'Al aire libre' }}</span>
+          @if (cancha.iluminacion) {
+            <span><app-icono nombre="luz" [tamano]="16" /> Luz</span>
+          }
+          @if (cancha.vestuarios) {
+            <span><app-icono nombre="ducha" [tamano]="16" /> Vestuarios</span>
+          }
+        </div>
         @if (cancha.descripcion) {
-          <p style="color: var(--text-muted); margin-bottom: 1rem;">{{ cancha.descripcion }}</p>
+          <p class="bajada">{{ cancha.descripcion }}</p>
         }
-        <div style="background: #f8fafc; border-radius: 8px; padding: 0.75rem 1rem; border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 0.5rem;">
-          <span>🏟️</span>
-          <div>
-            <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Formato del partido</span>
-            <strong style="font-size: 0.92rem; color: var(--dark-navy);">Cancha reglamentaria Fútbol 5 (5 vs 5)</strong>
+        <p class="precio">{{ pesos(cancha.tarifa) }} <small>el turno completo</small></p>
+
+        @if (esDueno()) {
+          <div class="ficha-dueno">
+            <a class="btn btn-primary btn-sm" [routerLink]="['/canchas', cancha.id, 'horarios']">
+              <app-icono nombre="mas" [tamano]="16" />
+              Cargar horarios
+            </a>
+            <a class="btn btn-outline-primary btn-sm" [routerLink]="['/canchas', cancha.id, 'editar']">
+              <app-icono nombre="editar" [tamano]="16" />
+              Editar cancha
+            </a>
           </div>
-        </div>
+        }
       </div>
 
-      <div>
-        <app-cancha-diagrama [tipo]="cancha.tipo" [mostrarJugadores]="true"></app-cancha-diagrama>
+      <div class="ficha-imagen">
+        @if (cancha.fotos?.length) {
+          <img class="foto" [src]="cancha.fotos![0]" [alt]="'Foto de ' + cancha.nombre">
+        } @else {
+          <app-cancha-diagrama [tipo]="cancha.tipo" />
+        }
       </div>
-    </div>
-  </div>
-}
-
-@if (mover()) {
-  <p class="aviso">
-    Elegí el turno nuevo para tu reserva.
-    @if (cancha(); as cancha) {
-      <a [routerLink]="['/clubes', cancha.club_id]" [queryParams]="{ mover: mover() }">Ver otra cancha del club</a>
-    }
-    <a routerLink="/mis-reservas">Cancelar el cambio</a>
-  </p>
-}
-
-@if (error()) {
-  <p class="error">{{ error() }}</p>
-}
-@if (aviso()) {
-  <p class="aviso">{{ aviso() }} <a routerLink="/mis-reservas">Ver mis reservas</a></p>
-}
-
-@if (esDueno() && cancha(); as cancha) {
-  <div class="acciones-dueno">
-    <a class="btn btn-primary" [routerLink]="['/canchas', cancha.id, 'horarios']">+ Cargar horarios</a>
-    <a class="btn btn-outline-primary" [routerLink]="['/canchas', cancha.id, 'editar']">Editar cancha y fotos</a>
-  </div>
-}
-
-<section class="filtro-turnos">
-  <label for="fecha">📅 Filtrar por fecha:</label>
-  <input id="fecha" type="date" [(ngModel)]="fecha" (change)="buscarTurnos()">
-  @if (fecha) {
-    <button class="btn-reset" (click)="fecha = ''; buscarTurnos()">Ver todas las fechas</button>
+    </header>
   }
-  <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: auto;">El cupo se actualiza solo cada 15 segundos</span>
-</section>
 
-<div class="tabla-contenedor">
-  <table>
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Horario</th>
-        <th>Estado</th>
-        <th>Cupo de jugadores</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @if (cargando()) {
-        <tr>
-          <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
-            ⚽ Buscando turnos disponibles...
-          </td>
-        </tr>
-      } @else {
+  @if (mover()) {
+    <p class="alerta alerta-info">
+      <app-icono nombre="calendario" [tamano]="20" />
+      <span>
+        Elegí el turno nuevo para tu reserva.
+        <a routerLink="/mis-reservas">Cancelar el cambio</a>
+      </span>
+    </p>
+  }
+
+  @if (error()) {
+    <p class="alerta alerta-error" role="alert">
+      <app-icono nombre="alerta" [tamano]="20" />
+      {{ error() }}
+    </p>
+  }
+  @if (aviso()) {
+    <p class="alerta alerta-ok" role="status">
+      <app-icono nombre="ok" [tamano]="20" />
+      <span>
+        {{ aviso() }}
+        @if (salaTurno()) {
+          <a [routerLink]="['/partidos', salaTurno()]">Abrir la sala del partido</a>
+        } @else {
+          <a routerLink="/mis-reservas">Ver mis reservas</a>
+        }
+      </span>
+    </p>
+  }
+
+  <section class="seccion turnos-seccion" aria-labelledby="titulo-turnos">
+    <div class="seccion-titulo">
+      <h2 id="titulo-turnos">Turnos</h2>
+      <p class="refresco">El cupo se actualiza solo</p>
+    </div>
+
+    <div class="dias" role="group" aria-label="Elegir día">
+      @for (d of dias; track d.valor) {
+        <button type="button" class="dia" [class.activo]="fecha === d.valor" [attr.aria-pressed]="fecha === d.valor" (click)="elegirDia(d.valor)">
+          <span class="dia-semana">{{ d.titulo || d.semana }}</span>
+          <span class="dia-numero num">{{ d.dia }}</span>
+          <span class="dia-mes">{{ d.mes }}</span>
+        </button>
+      }
+      <label class="dia dia-otro" [class.activo]="fecha && !esDiaDeLaTira()">
+        <span class="dia-semana">Otro día</span>
+        <app-icono nombre="calendario" [tamano]="20" />
+        <input type="date" class="dia-input" [(ngModel)]="fecha" (change)="buscarTurnos()" aria-label="Elegir otra fecha">
+      </label>
+    </div>
+
+    @if (fecha && !esDiaDeLaTira()) {
+      <p class="fecha-elegida">
+        Turnos del {{ fechaRelativa(fecha) }}
+        <button type="button" class="btn btn-fantasma btn-sm" (click)="elegirDia('')">Ver todas las fechas</button>
+      </p>
+    } @else if (!fecha) {
+      <p class="fecha-elegida">Todas las fechas</p>
+    }
+
+    @if (cargando()) {
+      <p class="cargando">Buscando turnos…</p>
+    } @else {
+      <ol class="turnos">
         @for (turno of turnos(); track turno.id) {
-          <tr>
-            <td style="font-weight: 600;">{{ turno.fecha }}</td>
-            <td>
-              <span style="font-weight: 700; color: var(--dark-navy);">
-                ⏰ {{ turno.hora_inicio.slice(0, 5) }} – {{ turno.hora_fin.slice(0, 5) }}
-              </span>
-            </td>
-            <td>
-              <span class="estado" [class]="turno.estado">{{ turno.estado }}</span>
-            </td>
-            <td>
-              <span class="cupo-badge">
-                👥 {{ turno.cupo_actual }} / {{ turno.cupo_maximo }}
-              </span>
-            </td>
-            <td class="acciones-turno">
+          <li class="turno" [class.pasado]="yaPaso(turno)" [class.no-disponible]="turno.estado !== 'disponible'">
+            <div class="turno-hora">
+              <span class="turno-inicio num">{{ turno.hora_inicio.slice(0, 5) }}</span>
+              <span class="turno-fin num">a {{ turno.hora_fin.slice(0, 5) }}</span>
+              @if (!fecha) {
+                <span class="turno-fecha">{{ fechaRelativa(turno.fecha) }}</span>
+              }
+            </div>
+
+            <div class="turno-estado">
+              @if (yaPaso(turno)) {
+                <span class="chip">Ya pasó</span>
+              } @else if (turno.estado === 'bloqueado') {
+                <span class="chip chip-ambar">En mantenimiento</span>
+              } @else if (turno.estado === 'ocupado') {
+                <span class="chip chip-rojo">Ocupado</span>
+              } @else if (turno.cupo_actual === 0) {
+                <span class="chip chip-verde">Libre</span>
+              } @else {
+                <span class="chip chip-lima">Partido armándose</span>
+              }
+
+              @if (turno.estado !== 'bloqueado' && turno.cupo_actual > 0) {
+                @let e = equipos(turno);
+                <span class="turno-equipos">
+                  @for (letra of ['A', 'B']; track letra) {
+                    @let cupo = letra === 'A' ? e.A : e.B;
+                    <span class="turno-equipo" [class.lleno]="cupo.faltan === 0">
+                      <span class="turno-equipo-letra">{{ letra }}</span>
+                      <span class="pips" role="img" [attr.aria-label]="'Equipo ' + letra + ': ' + cupo.anotados + ' de ' + cupo.cupo">
+                        @for (lleno of puntos(cupo); track $index) {
+                          <span class="pip" [class.lleno]="lleno"></span>
+                        }
+                      </span>
+                      <span class="turno-equipo-texto">{{ cupo.faltan === 0 ? 'completo' : 'faltan ' + cupo.faltan }}</span>
+                    </span>
+                  }
+                </span>
+              }
+            </div>
+
+            <div class="turno-acciones">
               @if (mover()) {
                 @if (turno.estado === 'disponible' && !yaPaso(turno)) {
-                  <button (click)="moverAca(turno)" [disabled]="reservando() !== null">Mover mi reserva acá</button>
+                  <button type="button" class="btn btn-primary btn-sm" (click)="moverAca(turno)" [disabled]="reservando() !== null">Mover acá</button>
                 }
-              } @else {
-              @if (esDueno() && !yaPaso(turno) && (turno.estado === 'bloqueado' || puedeReservar(turno))) {
-                <button class="btn-secundario" (click)="cambiarBloqueo(turno)" [disabled]="reservando() === turno.id">
-                  {{ turno.estado === 'bloqueado' ? 'Desbloquear' : 'Bloquear por mantenimiento' }}
+              } @else if (!yaPaso(turno)) {
+                @if (turno.estado === 'disponible') {
+                  <button type="button" class="btn btn-sm" [class.btn-lima]="abierto() !== turno.id" [class.btn-outline-primary]="abierto() === turno.id"
+                    [attr.aria-expanded]="abierto() === turno.id" [attr.aria-controls]="'opciones-' + turno.id" (click)="abrirOpciones(turno)">
+                    {{ abierto() === turno.id ? 'Cerrar' : (turno.cupo_actual > 0 ? 'Sumarme' : 'Reservar') }}
+                  </button>
+                }
+                @if (esDueno() && (turno.estado === 'bloqueado' || puedeReservar(turno))) {
+                  <button type="button" class="btn btn-fantasma btn-sm" (click)="cambiarBloqueo(turno)" [disabled]="reservando() === turno.id">
+                    <app-icono nombre="candado" [tamano]="16" />
+                    {{ turno.estado === 'bloqueado' ? 'Desbloquear' : 'Bloquear' }}
+                  </button>
+                }
+                @if (esDueno() && turno.cupo_actual === 0 && turno.estado !== 'ocupado') {
+                  <button type="button" class="btn btn-fantasma btn-sm texto-rojo" (click)="eliminarTurno(turno)" [disabled]="reservando() === turno.id" [attr.aria-label]="'Eliminar el turno de las ' + turno.hora_inicio.slice(0, 5)">
+                    <app-icono nombre="basura" [tamano]="16" />
+                  </button>
+                }
+              }
+            </div>
+
+            @if (abierto() === turno.id) {
+              <div class="opciones-turno" [id]="'opciones-' + turno.id">
+                <fieldset class="opciones-lista">
+                  <legend>¿Cómo querés jugar?</legend>
+
+                  <label class="opcion-turno" [class.deshabilitada]="!opcionDisponible(turno, 'lugar')">
+                    <input type="radio" [name]="'opcion-' + turno.id" [checked]="opcion() === 'lugar'"
+                      [disabled]="!opcionDisponible(turno, 'lugar')" (change)="elegirOpcion(turno, 'lugar')">
+                    <span class="opcion-titulo">Un lugar</span>
+                    <span class="opcion-texto">Te sumás solo y esperás a que se llene la cancha.</span>
+                    <span class="opcion-precio">{{ precioOpcion(turno, 'lugar') }}</span>
+                  </label>
+
+                  <label class="opcion-turno" [class.deshabilitada]="!opcionDisponible(turno, 'equipo')">
+                    <input type="radio" [name]="'opcion-' + turno.id" [checked]="opcion() === 'equipo'"
+                      [disabled]="!opcionDisponible(turno, 'equipo')" (change)="elegirOpcion(turno, 'equipo')">
+                    <span class="opcion-titulo">Un equipo completo</span>
+                    <span class="opcion-texto">
+                      @if (opcionDisponible(turno, 'equipo')) {
+                        Vos y {{ equipos(turno)[equiposVacios(turno)[0]].cupo - 1 }} amigos. El otro equipo lo completan otros.
+                      } @else {
+                        Los dos equipos ya tienen jugadores.
+                      }
+                    </span>
+                    <span class="opcion-precio">{{ precioOpcion(turno, 'equipo') }}</span>
+                  </label>
+
+                  <label class="opcion-turno" [class.deshabilitada]="!opcionDisponible(turno, 'cancha')">
+                    <input type="radio" [name]="'opcion-' + turno.id" [checked]="opcion() === 'cancha'"
+                      [disabled]="!opcionDisponible(turno, 'cancha')" (change)="elegirOpcion(turno, 'cancha')">
+                    <span class="opcion-titulo">La cancha entera</span>
+                    <span class="opcion-texto">
+                      {{ opcionDisponible(turno, 'cancha') ? 'Los ' + turno.cupo_maximo + ' lugares para tu grupo.' : 'Ya hay jugadores anotados en este turno.' }}
+                    </span>
+                    <span class="opcion-precio">{{ precioOpcion(turno, 'cancha') }}</span>
+                  </label>
+                </fieldset>
+
+                @if (opcion() !== 'cancha') {
+                  <div class="opciones-equipo" role="group" aria-label="Elegir equipo">
+                    <span class="etiqueta">Equipo</span>
+                    @for (letra of ['A', 'B']; track letra) {
+                      @let cupo = letra === 'A' ? equipos(turno).A : equipos(turno).B;
+                      <button type="button" class="equipo-boton" [class.activo]="equipoElegido() === letra"
+                        [attr.aria-pressed]="equipoElegido() === letra"
+                        [disabled]="!equipoDisponible(turno, $any(letra))" (click)="equipoElegido.set($any(letra))">
+                        <strong>Equipo {{ letra }}</strong>
+                        <span>{{ cupo.anotados === 0 ? 'vacío' : cupo.faltan === 0 ? 'completo' : 'faltan ' + cupo.faltan }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+
+                <button type="button" class="btn btn-primary opciones-confirmar" (click)="confirmar(turno)"
+                  [disabled]="reservando() === turno.id || !opcionDisponible(turno, opcion())">
+                  @if (reservando() === turno.id) {
+                    Reservando…
+                  } @else {
+                    @switch (opcion()) {
+                      @case ('lugar') { Sumarme al Equipo {{ equipoElegido() }} }
+                      @case ('equipo') { Reservar el Equipo {{ equipoElegido() }} }
+                      @case ('cancha') { Reservar la cancha entera }
+                    }
+                  }
                 </button>
-              }
-              @if (esDueno() && !yaPaso(turno) && turno.cupo_actual === 0 && turno.estado !== 'ocupado') {
-                <button class="btn-secundario btn-eliminar-turno" (click)="eliminarTurno(turno)" [disabled]="reservando() === turno.id">
-                  Eliminar turno
-                </button>
-              }
-              @if (puedeReservar(turno)) {
-                <button (click)="reservar(turno)" [disabled]="reservando() === turno.id">
-                  {{ reservando() === turno.id ? 'Reservando...' : 'Reservar cancha' }}
-                </button>
-              }
-              @if (yaPaso(turno)) {
-                <span style="color: var(--text-muted); font-size: 0.85rem;">Ya pasó</span>
-              } @else if (turno.estado === 'disponible' && lugaresLibres(turno) > 0) {
-                <input
-                  class="cantidad-jugadores"
-                  type="number"
-                  min="1"
-                  [max]="lugaresLibres(turno)"
-                  [ngModel]="cantidad(turno)"
-                  (ngModelChange)="cambiarCantidad(turno, $event)"
-                  [attr.aria-label]="'Cantidad de jugadores para el turno de las ' + turno.hora_inicio.slice(0, 5)">
-                <button class="btn-secundario" (click)="anotarme(turno)" [disabled]="reservando() === turno.id">
-                  Sumarme al partido
-                </button>
-              }
-              }
-            </td>
-          </tr>
+              </div>
+            }
+          </li>
         } @empty {
-          <tr>
-            <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
-              No hay turnos disponibles para la fecha seleccionada.
-              @if (esDueno() && cancha(); as cancha) {
-                <br><a [routerLink]="['/canchas', cancha.id, 'horarios']">Cargar horarios para esta cancha</a>
-              }
-            </td>
-          </tr>
+          <li class="vacio">
+            <strong>No hay turnos para {{ fecha ? fechaRelativa(fecha).toLowerCase() : 'esta cancha' }}</strong>
+            <span>Probá con otro día.</span>
+            @if (esDueno() && cancha(); as cancha) {
+              <a [routerLink]="['/canchas', cancha.id, 'horarios']">Cargar horarios para esta cancha</a>
+            }
+          </li>
         }
-      }
-    </tbody>
-  </table>
+      </ol>
+    }
+  </section>
 </div>

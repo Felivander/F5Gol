@@ -100,6 +100,16 @@ export interface CanchaInput {
   estado: 'activa' | 'inactiva';
 }
 
+// Lugares de un equipo del partido
+export interface CupoEquipo {
+  cupo: number;
+  anotados: number;
+  faltan: number;
+}
+
+export type Equipo = 'A' | 'B';
+export type Equipos = Record<Equipo, CupoEquipo>;
+
 export interface Turno {
   id: number;
   cancha_id: number;
@@ -109,14 +119,17 @@ export interface Turno {
   estado: 'disponible' | 'ocupado' | 'bloqueado';
   cupo_maximo: number;
   cupo_actual: number;
+  // Lugares de cada equipo (viene en la grilla)
+  equipos?: Equipos;
 }
 
 export interface Reserva {
   id: number;
   turno_id: number;
   usuario_id: number;
-  tipo: 'completa' | 'individual';
+  tipo: 'completa' | 'individual' | 'equipo';
   cantidad_jugadores: number;
+  equipo?: Equipo | null;
   estado: 'pendiente' | 'confirmada' | 'cancelada';
   estado_pago: 'pendiente' | 'sena' | 'pagado';
   created_at: string;
@@ -127,8 +140,10 @@ export interface Reserva {
 export interface NuevaReserva {
   turno_id: number;
   usuario_id: number;
-  tipo: 'completa' | 'individual';
+  // completa: la cancha entera · individual: un lugar · equipo: un equipo entero
+  tipo: 'completa' | 'individual' | 'equipo';
   cantidad_jugadores?: number;
+  equipo?: Equipo;
 }
 
 // Respuesta de paginate() de Laravel
@@ -172,4 +187,48 @@ export interface RespuestaGenerarTurnos {
   message: string;
   creados: number;
   omitidos: number;
+}
+
+// Partido de matchmaking que se está armando (GET /api/partidos-abiertos)
+export interface PartidoAbierto {
+  turno_id: number;
+  fecha: string;
+  hora_inicio: string;
+  hora_fin: string;
+  cupo_maximo: number;
+  anotados: number;
+  faltan: number;
+  precio_por_jugador: number;
+  equipos: Equipos;
+  // Solo si hay sesión: el usuario ya está anotado en este partido
+  estoy_anotado: boolean;
+  // Equipo donde está anotado (solo si hay sesión)
+  mi_equipo?: Equipo | null;
+  cancha: { id: number; nombre: string; tipo: string; superficie: Superficie | null };
+  club: { id: number; nombre: string; direccion: string | null } | null;
+}
+
+// Sala de un partido de matchmaking (GET /api/partidos/{id}); solo para los anotados y el dueño del club
+export interface SalaPartido {
+  turno_id: number;
+  fecha: string;
+  hora_inicio: string;
+  hora_fin: string;
+  estado: 'armandose' | 'completo' | 'ya_empezo';
+  cupo_maximo: number;
+  anotados: number;
+  faltan: number;
+  precio_por_jugador: number;
+  cancha: { id: number; nombre: string; tipo: string; superficie: Superficie | null; techada: boolean; iluminacion: boolean; vestuarios: boolean };
+  club: { id: number; nombre: string; direccion: string | null; telefono: string | null } | null;
+  equipos: Equipos;
+  jugadores: { nombre: string; cantidad: number; equipo: Equipo; tipo: 'individual' | 'equipo'; soy_yo: boolean }[];
+  mi_reserva: {
+    id: number;
+    cantidad_jugadores: number;
+    equipo: Equipo;
+    tipo: 'individual' | 'equipo';
+    puede_cancelar: boolean;
+    cancelar_hasta: string;
+  } | null;
 }

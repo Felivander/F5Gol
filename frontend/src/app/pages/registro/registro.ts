@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { BotonGoogle } from '../../components/boton-google/boton-google';
+import { Icono } from '../../components/icono/icono';
 import { NuevoUsuario } from '../../models';
 import { Auth } from '../../services/auth';
 import { PATRON_TELEFONO, camposIguales, noSoloEspacios } from '../../validadores';
@@ -10,7 +11,7 @@ type Campo = 'rol' | 'name' | 'email' | 'telefono' | 'password' | 'password_conf
 
 @Component({
   selector: 'app-registro',
-  imports: [ReactiveFormsModule, RouterLink, BotonGoogle],
+  imports: [ReactiveFormsModule, RouterLink, BotonGoogle, Icono],
   templateUrl: './registro.html'
 })
 export class Registro {

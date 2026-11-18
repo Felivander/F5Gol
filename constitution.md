@@ -23,7 +23,7 @@ La app tiene que tener, como mínimo:
 | 7 | **Git** para control de versiones | este repo |
 | 8 | **Angular consume la API** de Laravel | `frontend/src/app/services/` |
 | 9 | Automatización con **n8n**: flujo completo y funcional de **al menos 10 nodos**. Lo pedido en clase (semana 13): mandar un **mail de bienvenida al crear un usuario** | Flujo de 12 nodos en `docs/n8n/` + aviso desde Laravel (`AvisarUsuarioCreado`). Probado de punta a punta en n8n 2.48 (registro → webhook → mail según el rol, y las respuestas 401, 422 y 502) con un SMTP local, y después con Gmail real (el mail llega). En cada máquina hay que importar el flujo y cargar la credencial SMTP (`docs/n8n/README.md`) |
-| 10 | **Dashboard en Power BI** con indicadores (KPIs) del sistema, sacados de MySQL (extracción, modelado básico, KPIs, diseño del tablero) | Datos listos: vistas `bi_*` en MySQL, historial de demo, medidas DAX, tema y guía en `docs/powerbi/`. Falta armar el `.pbix` en Power BI Desktop |
+| 10 | **Dashboard en Power BI** con indicadores (KPIs) del sistema, sacados de MySQL (extracción, modelado básico, KPIs, diseño del tablero) | Proyecto armado en `docs/powerbi/F5GOL.pbip` (modelo + 2 páginas de informe) sobre las vistas `bi_*` de MySQL, con historial de demo, medidas DAX, tema y guía. Abre y actualiza en Power BI Desktop; guardado también como `F5GOL.pbix`, con capturas de las dos páginas |
 | 11 | **Presentación técnica y funcional** del proyecto | semana 16 |
 
 Laravel **y** Angular son obligatorios, sin excepción. No se reemplaza el frontend por Blade/Livewire ni el backend por otra cosa, aunque la propuesta original los mencione.
@@ -86,7 +86,7 @@ F5GOL es una app web de gestión de turnos y matchmaking para canchas de fútbol
 - Registro y login con rol (jugador / administrador).
 - Grilla de disponibilidad por cancha, fecha y horario.
 - Reserva de cancha completa.
-- Matchmaking: inscripción individual hasta completar el cupo de 5, con confirmación y aviso automático al completarse.
+- Matchmaking con dos equipos (A y B, cada uno con la mitad de la capacidad de la cancha: 5 en F5, 6 en F6, 7 en F7, 9 en F9). Se entra de tres formas: **un lugar** (te sumás solo a un equipo y esperás a que se llene), **un equipo completo** (lo reservás para vos y tus amigos) o **la cancha entera**. Aviso automático al completarse.
 - "Mis reservas": historial, edición y cancelación dentro del plazo permitido.
 - Estado de pago manual: pendiente / seña / pagado.
 - Panel del administrador: reservas del día y de la semana por cancha.
@@ -104,7 +104,7 @@ F5GOL es una app web de gestión de turnos y matchmaking para canchas de fútbol
 
 1. **No hay doble reserva:** un turno reservado no puede tomarlo otro usuario. Se controla en la base de datos (transacción / bloqueo), no solo en el front.
 2. Un turno con matchmaking **incompleto nunca se muestra como "Ocupado"**.
-3. Al llegar a 5 jugadores, el turno pasa a "Ocupado" y se notifica a los 5.
+3. Cuando los dos equipos están completos (en F5, 10 jugadores), el turno pasa a "Ocupado" y se notifica a todos. Un equipo entero solo se reserva si ese equipo está vacío; la cancha entera, solo si no hay nadie anotado.
 4. El cupo de anotados **se actualiza sin recargar la página**.
 5. Una cancelación dentro de la ventana permitida **libera el turno automáticamente**.
 6. **Cada administrador solo gestiona sus propios clubes y canchas.**
@@ -228,7 +228,7 @@ Extensiones de PHP necesarias: BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Toke
 
 ---
 
-## 8. Estado actual y pendientes (revisado el 15/11/2026)
+## 8. Estado actual y pendientes (revisado el 18/11/2026)
 
 Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, rúbrica, propuesta, backlog, nota de n8n y las guías de las semanas 1 a 13) contra el código. Esta sección se actualiza cada vez que se cierra algo. Cuando la lista de pendientes quede vacía, el proyecto está listo para presentar.
 
@@ -242,30 +242,37 @@ Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, 
 - Permisos de reservas e inscripciones: nadie reserva a nombre de otro (salvo el administrador del club), nadie cancela ni edita reservas ajenas, el plazo de 2 horas solo lo saltea el administrador **de ese club**, y las inscripciones de jugadores solo las tocan el jugador, el dueño de la reserva o el administrador del club (`MensajesApiTest`, `CancelarReservaTest`).
 - Privacidad: `GET /api/reservas` y `/api/jugador-anotados` eran públicos y exponían nombres y mails de todos los usuarios. Ahora piden sesión; el jugador ve solo lo suyo y el administrador, además, lo de sus clubes (`ReservasPrivadasTest`).
 - Seguridad de clubes: el dueño lo asigna el servidor (no se acepta `administrador_id` del cliente) y solo el dueño edita, borra o sube fotos (403).
-- Tests: 154 tests; pasan 145. Los 8 de `FotosCanchaTest` fallan y 1 de `GestionClubesTest` se saltea solo porque falta la extensión **GD** en el PHP local (no es un bug del código). `ng build` compila.
+- Lobby de matchmaking: `GET /api/partidos-abiertos` (público, sin datos de los jugadores) y pantalla `/partidos` con los partidos que se están armando, cuántos lugares faltan, filtros por día y club y refresco cada 15 s. El inicio muestra los tres más cerca de completarse.
+- Sala de cada partido: `GET /api/partidos/{id}` y pantalla `/partidos/:id`, solo para los anotados y el dueño del club (403 para el resto). Muestra los lugares ocupados y libres con el nombre y la inicial del apellido de cada jugador (sin mails), tu reserva, hasta cuándo te podés bajar y un link para invitar. Se abre desde Mis reservas y después de sumarse en la grilla. No tiene chat: queda fuera del alcance (2.2) (`SalaPartidoTest`).
+- Dos equipos por partido: columna `reservas.equipo` (A/B) y tipo de reserva `equipo` (un equipo entero). El cupo del turno es el de los dos equipos (la capacidad de la cancha). La grilla ofrece las tres formas de entrar como opciones (un lugar, un equipo completo, la cancha entera) con su precio y la elección de equipo; la sala dibuja la cancha horizontal con cada equipo en su mitad y dice si está completo; el lobby marca en cada partido si estás anotado (y en qué equipo) y muestra una cancha chica donde tocar un lugar libre te suma ahí (o suma a un amigo si ya estás); la sala usa dos columnas en pantallas anchas y también deja sumar amigos tocando un lugar libre. Sumarse o sumar amigos se hace en un modal (`components/modal-sumarse`, con <dialog> nativo): equipo, cantidad, total a pagar y link para invitar (`EquiposPartidoTest`). Tipos de cancha: F5, F6, F7, F8, F9 y F11.
+- Aviso de partido incompleto: el comando `partidos:avisar-incompletos` corre cada 5 minutos con el programador de Laravel (`schedule:work`, lo levanta `iniciar-f5gol.bat`); cuando un partido llega a su hora sin completarse, avisa una sola vez a los anotados por n8n (`docs/n8n/partido-incompleto.json`) o, si n8n no responde, por el mail de Laravel (`LobbyMatchmakingTest`).
+- Zona horaria: Laravel corre en `America/Argentina/Buenos_Aires` (`APP_TIMEZONE`). Antes estaba en UTC y tomaba como empezados turnos a los que les faltaban 3 horas (lobby, plazo de cancelación y aviso de incompleto).
+- Interfaz rediseñada: sistema visual propio en `styles.css` (tipografía Archivo, verde cancha y lima, sin emojis), íconos SVG (`components/icono`), tarjeta de partido reutilizable, grilla de turnos con tira de días y pantallas pensadas primero para el celular. Revisado a 375 px sin desbordes.
+- Seeders idempotentes: `db:seed` se puede correr varias veces sin duplicar clubes, usuarios, reservas ni inscripciones (`SeedersTest`).
+- Tests: 183 tests del backend y 6 del frontend (`formato.spec.ts`), pasan todos (con la extensión **GD** de PHP activa; sin GD fallan los de fotos). `ng build` compila sin advertencias.
 
 ### 8.2 Pendiente — requisitos obligatorios de la cátedra
 
 1. ~~Login con Google (Socialite).~~ Hecho y probado con una cuenta real (app de Google Cloud en modo *Testing*: los mails que entren tienen que estar como test users, incluido el del docente si lo prueba).
 2. **Flujo n8n de al menos 10 nodos.** Hecho: `docs/n8n/bienvenida-usuario.json` (12 nodos: webhook, validación con secreto, mail distinto por rol, SMTP, respuestas 200/401/422/502) y `AvisarUsuarioCreado` en Laravel, que avisa después de responder y nunca hace fallar el registro (7 tests en `AvisoN8nTest`). **Falta:** en cada máquina, importar el flujo, crear la credencial SMTP y activar (ver `docs/n8n/README.md`).
-3. **Dashboard de Power BI.** Hecho del lado de los datos: vistas `bi_turnos`, `bi_reservas` y `bi_usuarios` (sin datos personales), `HistorialDemoSeeder` con 8 semanas de historial, medidas DAX, tema y diseño de páginas en `docs/powerbi/`. **Falta:** instalar MySQL Connector/NET, armar el tablero en Power BI Desktop siguiendo `docs/powerbi/README.md` y guardar el `.pbix` y las capturas.
+3. ~~Dashboard de Power BI.~~ Hecho: vistas `bi_turnos`, `bi_reservas` y `bi_usuarios` (sin datos personales), `HistorialDemoSeeder` con 8 semanas de historial y el proyecto `docs/powerbi/F5GOL.pbip` (modelo, medidas DAX, tema y dos páginas: resumen y jugadores), probado en Power BI Desktop con MySQL Connector/NET 8.0.32. También guardado como `F5GOL.pbix`, con capturas de las dos páginas (`captura-resumen.png`, `captura-jugadores.png`). ✅
 4. **Guards en Angular** (semana 14): hechos en `guards/auth.guard.ts` (`sesionGuard` en `/mis-reservas`, `administradorGuard` en `/panel`, `/mis-clubes`, `/clubes/nuevo`, `/clubes/:id/editar`, `/canchas/nueva` y `/canchas/:id/editar`). El interceptor, además, cierra la sesión y manda a `/login?sesion=vencida` si la API responde `401` a un pedido con token. ✅
-5. **Formularios reactivos** (semana 13 del plan anual): hechos en login, registro, club y carga de horarios, con validadores propios en `validadores.ts` (`noSoloEspacios`, `camposIguales`) y los errores `422` de Laravel por campo. Queda con `ngModel` el formulario de cancha (opcional pasarlo).
-5b. **Registro con rol administrador abierto.** La guía de Swagger (punto 27) recomienda que el registro público **no** deje que el cliente elija ser administrador: el rol inicial lo asigna el servidor y la creación de administradores queda restringida. Hoy `POST /register` acepta `rol: administrador` de cualquiera, lo que además contradice la regla 2.3.8. La historia del backlog pide "registro eligiendo rol", así que hay que decidir: (a) dejarlo y poder justificarlo en la presentación, o (b) registrar siempre como jugador y que un administrador existente (o un super administrador) habilite nuevos administradores.
+5. ~~Formularios reactivos.~~ Hechos en todos los formularios (login, registro, club, cancha y horarios), con validadores propios en `validadores.ts` y los errores `422` de Laravel por campo.
+5b. ~~Registro con rol administrador abierto.~~ **Decidido: se deja así.** "Administrador" significa dueño de club y el servidor solo le deja manejar lo suyo, así que registrarse como administrador no da acceso a nada ajeno. Respuesta para la presentación: "administrador acá significa dueño de club: solo puede crear y manejar sus propias canchas". Antecedente: La guía de Swagger (punto 27) recomienda que el registro público **no** deje que el cliente elija ser administrador: el rol inicial lo asigna el servidor y la creación de administradores queda restringida. Hoy `POST /register` acepta `rol: administrador` de cualquiera, lo que además contradice la regla 2.3.8. La historia del backlog pide "registro eligiendo rol", así que hay que decidir: (a) dejarlo y poder justificarlo en la presentación, o (b) registrar siempre como jugador y que un administrador existente (o un super administrador) habilite nuevos administradores.
 
 ### 8.3 Pendiente — para que ningún módulo quede "a medias"
 
 6. ~~Alta y edición de clubes desde el front.~~ Hecho: pantalla **Mis clubes** (`/mis-clubes`), formulario reactivo del club con fotos y descripción, y detalles de cancha (superficie y comodidades).
 7. ~~Alta de turnos desde el front.~~ Hecho: `POST /api/turnos/generar` crea en lote los turnos de un rango de fechas (hasta 90 días), días de la semana y franja horaria, sin duplicar ni superponer; pantalla `/canchas/:id/horarios` con vista previa; el dueño puede eliminar turnos libres desde la grilla. Además, crear, editar y borrar turnos ahora exige ser dueño de la cancha (403). Queda pendiente la tarifa diferencial por horario pico (opcional).
-8. **Mails reales en la demo.** La bienvenida ya sale por n8n. La confirmación de partido completo (`PartidoCompleto`) sigue usando `MAIL_MAILER=log` y solo queda en el log: configurar el SMTP de Laravel (Gmail con contraseña de aplicación) o mandarla también por n8n.
-9. **Probar la demo de punta a punta** con la base recién creada (`migrate:fresh --seed`): registro → (Google) → crear club → crear cancha y turnos → reservar → matchmaking hasta 5 → mail → panel → cambiar pago → cancelar. Instalar GD en el PHP de la máquina de la presentación.
+8. ~~Mails reales en la demo.~~ Hecho: la bienvenida y los avisos de partido completo e incompleto salen por n8n (`docs/n8n/partido-completo.json`, `docs/n8n/partido-incompleto.json`), probados con Gmail. Si n8n no responde, los avisos de partido salen por el mail de Laravel.
+9. ~~Probar la demo de punta a punta.~~ Hecho el 18/11 con la base recién creada (`migrate:fresh --seed` + `TurnoSeeder`), por la API y en las pantallas: registro de un administrador, club, cancha, carga de turnos, reserva de la cancha entera, doble reserva rechazada (409), matchmaking hasta 10 (sigue "disponible" con 9/10, pasa a "ocupado" con 10 y no entra el 11), mail a los 10 jugadores, panel, seña, el jugador no cambia el pago (403), otro administrador no edita la cancha (403) y cancelación que libera el turno. Los mails se probaron contra el log (n8n con Gmail ya se había probado antes). Lo que queda para la máquina de la presentación: probar la demo con la base (`migrate:fresh --seed`): registro → (Google) → crear club → crear cancha y turnos → reservar → matchmaking hasta 5 → mail → panel → cambiar pago → cancelar. Instalar GD en el PHP de la máquina de la presentación (en la de Felipe ya está: `extension=gd` en `C:\xampp\php\php.ini`). Antes de presentar, correr `php artisan db:seed --class=TurnoSeeder` para tener turnos de hoy y mañana. El programador (`php artisan schedule:work`) tiene que estar corriendo para que salga el aviso de partido incompleto; en n8n hay que importar y activar también el flujo de partido incompleto.
 
 ### 8.4 Limpieza antes de entregar
 
 9b. Factories: solo existe `UserFactory`. La guía de Seeders muestra seeder + factory; agregar factories de `Club`, `Cancha`, `Turno` y `Reserva` simplificaría los tests y los seeders (opcional, suma en "calidad del código").
 10. ~~Sacar la página de práctica y los `ExampleTest`.~~ Hecho.
-11. Revisar el aviso de `ng build` por el bundle inicial (710 kB contra 500 kB de presupuesto): cargar las páginas con `loadComponent` (lazy loading) o subir el presupuesto en `angular.json` con una justificación.
-12. Unificar el número de grupo (`idea_de_proyecto_F5GOL.md` dice "Grupo 4", la propuesta entregada es `Grupo5.docx`) y actualizar el README con Google, n8n y Power BI.
+11. ~~Aviso de `ng build` por el bundle.~~ Hecho: páginas con `loadComponent` (lazy loading) y sin el JavaScript de Bootstrap, que no se usaba. El inicial bajó de 760 kB a 534 kB (104 kB comprimido). El presupuesto quedó en 600 kB porque lo que resta es el CSS de Bootstrap, que sí se usa.
+12. ~~Unificar el número de grupo y actualizar el README.~~ Hecho: es el **Grupo 4** (`Grupo5.docx` es solo el nombre del archivo de la propuesta, fuera del repo). El README explica la instalación desde cero, Google, n8n, el programador, la preparación de la demo, el matchmaking y los problemas frecuentes. `.env.example` traía `DB_DATABASE=backend`: ahora dice `f5gol`, que es la base que usa el instalador.
 13. Revisar que el reparto de commits sea parejo entre los cuatro integrantes (`git shortlog -sn --all`) y que cada uno pueda explicar su parte.
 
 ### 8.5 Opcional (está en la propuesta, no lo exige la cátedra)

@@ -1,13 +1,16 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Club } from '../../models';
+import { Icono } from '../../components/icono/icono';
+import { TarjetaPartido } from '../../components/tarjeta-partido/tarjeta-partido';
+import { Club, PartidoAbierto } from '../../models';
 import { Api } from '../../services/api';
 
 @Component({
   selector: 'app-clubes',
-  imports: [RouterLink],
-  templateUrl: './clubes.html'
+  imports: [RouterLink, Icono, TarjetaPartido],
+  templateUrl: './clubes.html',
+  styleUrl: './clubes.css'
 })
 export class Clubes implements OnInit, OnDestroy {
   private api = inject(Api);
@@ -19,6 +22,9 @@ export class Clubes implements OnInit, OnDestroy {
   cargando = signal(true);
   error = signal('');
 
+  // Los partidos que más cerca están de completarse, para invitar a sumarse desde el inicio
+  partidos = signal<PartidoAbierto[]>([]);
+
   // Texto del buscador; se manda a la API un rato después de que el usuario deja de escribir
   busqueda = signal('');
   // Búsqueda de los resultados que se ven en pantalla (puede ir atrasada mientras carga la nueva)
@@ -28,6 +34,10 @@ export class Clubes implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.cargar(1);
+    this.api.getPartidosAbiertos({}).subscribe({
+      next: partidos => this.partidos.set(partidos.slice(0, 3)),
+      error: () => this.partidos.set([])
+    });
   }
 
   ngOnDestroy() {
@@ -39,6 +49,11 @@ export class Clubes implements OnInit, OnDestroy {
     this.busqueda.set(texto);
     clearTimeout(this.esperaBusqueda);
     this.esperaBusqueda = setTimeout(() => this.cargar(1), 300);
+  }
+
+  irAClubes() {
+    document.getElementById('clubes')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('buscar-club')?.focus({ preventScroll: true });
   }
 
   limpiarBusqueda() {

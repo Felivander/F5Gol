@@ -1,123 +1,144 @@
-@if (cancha(); as cancha) {
-  <a class="volver-link" [routerLink]="['/canchas', cancha.id]">← Volver a la grilla de {{ cancha.nombre }}</a>
-}
-
-<div class="login-card" style="max-width: 680px;">
-  <h1 style="font-size: 1.6rem; margin-bottom: 0.25rem;">Cargar horarios</h1>
+<div class="pagina pagina-angosta">
   @if (cancha(); as cancha) {
-    <p style="color: var(--text-muted);">{{ cancha.nombre }} · {{ cancha.club?.nombre }}</p>
+    <a class="volver" [routerLink]="['/canchas', cancha.id]">
+      <app-icono nombre="volver" [tamano]="16" />
+      Grilla de {{ cancha.nombre }}
+    </a>
   }
-  <p style="color: var(--text-muted);">
-    Elegí el período, los días y la franja horaria. Se crean todos los turnos libres de una vez;
-    los que ya existen o se superponen con otros se saltean.
-  </p>
 
-  <form class="formulario" [formGroup]="form" (ngSubmit)="generar()" novalidate>
-    <fieldset class="horarios-fila">
-      <legend>Período</legend>
-      <div class="campo">
-        <label for="desde">Desde</label>
-        <input id="desde" type="date" formControlName="desde" [min]="hoy">
-        @if (errorDe('desde')) {
-          <small class="error-campo">{{ errorDe('desde') }}</small>
-        }
-      </div>
-      <div class="campo">
-        <label for="hasta">Hasta</label>
-        <input id="hasta" type="date" formControlName="hasta" [min]="form.value.desde || hoy">
-        @if (errorDe('hasta')) {
-          <small class="error-campo">{{ errorDe('hasta') }}</small>
-        }
-      </div>
-    </fieldset>
-
-    <fieldset class="campo" formGroupName="dias">
-      <legend>Días de la semana</legend>
-      <div class="dias-semana">
-        @for (dia of dias; track dia.numero) {
-          <label class="dia-chip">
-            <input type="checkbox" [formControlName]="'' + dia.numero" [attr.aria-label]="dia.largo">
-            <span>{{ dia.corto }}</span>
-          </label>
-        }
-      </div>
-      <div class="dias-atajos">
-        <button type="button" class="btn-link" (click)="elegirDias([0, 1, 2, 3, 4, 5, 6])">Todos</button>
-        <button type="button" class="btn-link" (click)="elegirDias([1, 2, 3, 4, 5])">Lunes a viernes</button>
-        <button type="button" class="btn-link" (click)="elegirDias([6, 0])">Fin de semana</button>
-      </div>
-      @if (errorDe('dias')) {
-        <small class="error-campo">{{ errorDe('dias') }}</small>
+  <header class="encabezado">
+    <div class="encabezado-texto">
+      @if (cancha(); as cancha) {
+        <p class="antetitulo">{{ cancha.nombre }} · {{ cancha.club?.nombre }}</p>
       }
-    </fieldset>
-
-    <fieldset class="horarios-fila">
-      <legend>Franja horaria</legend>
-      <div class="campo">
-        <label for="hora_desde">Primer turno a las</label>
-        <input id="hora_desde" type="time" step="1800" formControlName="hora_desde">
-      </div>
-      <div class="campo">
-        <label for="hora_hasta">Último turno termina a las</label>
-        <input id="hora_hasta" type="time" step="1800" formControlName="hora_hasta">
-        @if (errorDe('hora_hasta')) {
-          <small class="error-campo">{{ errorDe('hora_hasta') }}</small>
-        }
-      </div>
-    </fieldset>
-
-    <div class="horarios-fila">
-      <div class="campo">
-        <label for="duracion">Duración de cada turno</label>
-        <select id="duracion" formControlName="duracion">
-          <option [ngValue]="60">1 hora</option>
-          <option [ngValue]="90">1 hora y media</option>
-          <option [ngValue]="120">2 horas</option>
-          <option [ngValue]="30">30 minutos</option>
-        </select>
-      </div>
-      <div class="campo">
-        <label for="cupo">Cupo para jugadores sueltos</label>
-        <input id="cupo" type="number" min="1" max="11" formControlName="cupo_maximo">
-        <small style="color: var(--text-muted);">Cuántos se pueden anotar por matchmaking.</small>
-        @if (errorDe('cupo_maximo')) {
-          <small class="error-campo">{{ errorDe('cupo_maximo') }}</small>
-        }
-      </div>
+      <h1>Cargar horarios</h1>
+      <p class="bajada">
+        Elegí el período, los días y la franja. Se crean todos los turnos de una vez;
+        los que ya existen o se superponen se saltean.
+      </p>
     </div>
+  </header>
 
-    <div class="horarios-resumen" aria-live="polite">
-      @if (horariosDelDia().length === 0) {
-        <p style="margin: 0;">Con esa franja no entra ningún turno: ampliá el horario o achicá la duración.</p>
-      } @else {
-        <p style="margin: 0 0 0.35rem;">
-          Se van a crear hasta <strong>{{ totalEstimado() }} turnos</strong>
-          ({{ horariosDelDia().length }} por día en {{ diasDelRango() }} {{ diasDelRango() === 1 ? 'día' : 'días' }}).
-        </p>
-        <p style="margin: 0; color: var(--text-muted); font-size: 0.88rem;">
-          Horarios: {{ horariosDelDia().join(', ') }}
+  <div class="panel-form">
+    <form class="formulario" [formGroup]="form" (ngSubmit)="generar()" novalidate>
+      <fieldset class="campo">
+        <legend>Período</legend>
+        <div class="fila-campos">
+          <div class="campo">
+            <label for="desde" class="ayuda">Desde</label>
+            <input id="desde" type="date" formControlName="desde" [min]="hoy">
+            @if (errorDe('desde')) {
+              <small class="error-campo">{{ errorDe('desde') }}</small>
+            }
+          </div>
+          <div class="campo">
+            <label for="hasta" class="ayuda">Hasta</label>
+            <input id="hasta" type="date" formControlName="hasta" [min]="form.value.desde || hoy">
+            @if (errorDe('hasta')) {
+              <small class="error-campo">{{ errorDe('hasta') }}</small>
+            }
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="campo" formGroupName="dias">
+        <legend>Días de la semana</legend>
+        <div class="casillas">
+          @for (dia of dias; track dia.numero) {
+            <label class="casilla">
+              <input type="checkbox" [formControlName]="'' + dia.numero" [attr.aria-label]="dia.largo">
+              <span>{{ dia.corto }}</span>
+            </label>
+          }
+        </div>
+        <div class="atajos">
+          <button type="button" class="btn btn-fantasma btn-sm" (click)="elegirDias([0, 1, 2, 3, 4, 5, 6])">Todos</button>
+          <button type="button" class="btn btn-fantasma btn-sm" (click)="elegirDias([1, 2, 3, 4, 5])">Lunes a viernes</button>
+          <button type="button" class="btn btn-fantasma btn-sm" (click)="elegirDias([6, 0])">Fin de semana</button>
+        </div>
+        @if (errorDe('dias')) {
+          <small class="error-campo">{{ errorDe('dias') }}</small>
+        }
+      </fieldset>
+
+      <fieldset class="campo">
+        <legend>Franja horaria</legend>
+        <div class="fila-campos">
+          <div class="campo">
+            <label for="hora_desde" class="ayuda">Primer turno a las</label>
+            <input id="hora_desde" type="time" step="1800" formControlName="hora_desde">
+          </div>
+          <div class="campo">
+            <label for="hora_hasta" class="ayuda">El último termina a las</label>
+            <input id="hora_hasta" type="time" step="1800" formControlName="hora_hasta">
+            @if (errorDe('hora_hasta')) {
+              <small class="error-campo">{{ errorDe('hora_hasta') }}</small>
+            }
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="fila-campos">
+        <div class="campo">
+          <label for="duracion">Duración del turno</label>
+          <select id="duracion" formControlName="duracion">
+            <option [ngValue]="60">1 hora</option>
+            <option [ngValue]="90">1 hora y media</option>
+            <option [ngValue]="120">2 horas</option>
+            <option [ngValue]="30">30 minutos</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="cupo">Cupo de matchmaking</label>
+          <input id="cupo" type="number" min="2" max="22" formControlName="cupo_maximo" aria-describedby="ayuda-cupo">
+          <small id="ayuda-cupo" class="ayuda">Los dos equipos juntos (en fútbol 5, 10).</small>
+          @if (errorDe('cupo_maximo')) {
+            <small class="error-campo">{{ errorDe('cupo_maximo') }}</small>
+          }
+        </div>
+      </div>
+
+      <div class="resumen" aria-live="polite">
+        @if (horariosDelDia().length === 0) {
+          <p>Con esa franja no entra ningún turno: ampliá el horario o achicá la duración.</p>
+        } @else {
+          <p class="resumen-total">
+            <span class="num">{{ totalEstimado() }}</span>
+            <span>turnos como máximo · {{ horariosDelDia().length }} por día en {{ diasDelRango() }} {{ diasDelRango() === 1 ? 'día' : 'días' }}</span>
+          </p>
+          <ul class="resumen-horas" aria-label="Horarios de cada día">
+            @for (hora of horariosDelDia(); track hora) {
+              <li class="num">{{ hora }}</li>
+            }
+          </ul>
+        }
+      </div>
+
+      @if (error()) {
+        <p class="alerta alerta-error" role="alert">
+          <app-icono nombre="alerta" [tamano]="20" />
+          {{ error() }}
         </p>
       }
-    </div>
 
-    @if (error()) {
-      <p class="error">{{ error() }}</p>
-    }
+      @if (resultado(); as r) {
+        <p class="alerta alerta-ok" role="status">
+          <app-icono nombre="ok" [tamano]="20" />
+          <span>
+            <strong>{{ r.message }}</strong>
+            @if (r.omitidos > 0) {
+              {{ r.omitidos }} {{ r.omitidos === 1 ? 'se salteó' : 'se saltearon' }} porque ya existían, se superponían o ya pasaron.
+            }
+            @if (cancha(); as cancha) {
+              <a [routerLink]="['/canchas', cancha.id]">Ver la grilla</a>
+            }
+          </span>
+        </p>
+      }
 
-    @if (resultado(); as r) {
-      <div class="aviso">
-        <strong>{{ r.message }}</strong>
-        @if (r.omitidos > 0) {
-          {{ r.omitidos }} {{ r.omitidos === 1 ? 'se salteó' : 'se saltearon' }} porque ya existían, se superponían con otro turno o ya pasaron.
-        }
-        @if (cancha(); as cancha) {
-          <a [routerLink]="['/canchas', cancha.id]">Ver la grilla</a>
-        }
-      </div>
-    }
-
-    <button type="submit" [disabled]="guardando() || !cancha()">
-      {{ guardando() ? 'Creando turnos...' : 'Crear turnos' }}
-    </button>
-  </form>
+      <button type="submit" class="btn btn-primary" [disabled]="guardando() || !cancha()">
+        {{ guardando() ? 'Creando turnos…' : 'Crear turnos' }}
+      </button>
+    </form>
+  </div>
 </div>

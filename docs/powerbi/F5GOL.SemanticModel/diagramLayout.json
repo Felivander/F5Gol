@@ -1,0 +1,74 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 50,
+            "y": 148.11884566697285
+          },
+          "nodeIndex": "bi_reservas",
+          "nodeLineageTag": "43863286-b893-44e6-9360-cdca9c1d49fa",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 334.20225510460875,
+            "y": 71.886687578654161
+          },
+          "nodeIndex": "bi_turnos",
+          "nodeLineageTag": "06d01180-c419-41a2-a785-28c33e493571",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 902.62216291713662,
+            "y": -50
+          },
+          "nodeIndex": "bi_usuarios",
+          "nodeLineageTag": "83a54701-cd16-4970-a0d0-ea3f54d0ab77",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 618.41040181545554,
+            "y": 20.378697769148857
+          },
+          "nodeIndex": "Calendario",
+          "nodeLineageTag": "fa92e44c-2dc4-4187-a04b-97dae140ae73",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

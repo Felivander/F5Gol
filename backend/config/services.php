@@ -40,6 +40,8 @@ return [
     // El secreto viaja en el encabezado X-F5GOL-Secreto y el flujo lo verifica.
     'n8n' => [
         'webhook_usuario_creado' => env('N8N_WEBHOOK_USUARIO_CREADO'),
+        'webhook_partido_completo' => env('N8N_WEBHOOK_PARTIDO_COMPLETO'),
+        'webhook_partido_incompleto' => env('N8N_WEBHOOK_PARTIDO_INCOMPLETO'),
         'secreto' => env('N8N_WEBHOOK_SECRETO'),
     ],
 

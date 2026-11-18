@@ -1230,6 +1230,310 @@
                 ]
             }
         },
+        "/api/partidos-abiertos": {
+            "get": {
+                "tags": [
+                    "Matchmaking"
+                ],
+                "summary": "Partidos abiertos (lobby de matchmaking)",
+                "description": "Turnos que todavía no empezaron, con al menos un jugador anotado por matchmaking y lugares libres. Ordenados por los que menos les falta, para que se completen primero. No incluye datos de los jugadores. Si se manda el token (opcional), cada partido dice si el usuario ya está anotado.",
+                "operationId": "f4216189684d063b84db3d603222904d",
+                "parameters": [
+                    {
+                        "name": "club_id",
+                        "in": "query",
+                        "description": "Solo los partidos de un club",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "fecha",
+                        "in": "query",
+                        "description": "Solo los partidos de un día (AAAA-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de partidos abiertos.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "turno_id": {
+                                                "type": "integer",
+                                                "example": 42
+                                            },
+                                            "fecha": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2026-11-20"
+                                            },
+                                            "hora_inicio": {
+                                                "type": "string",
+                                                "example": "20:00"
+                                            },
+                                            "hora_fin": {
+                                                "type": "string",
+                                                "example": "21:00"
+                                            },
+                                            "cupo_maximo": {
+                                                "type": "integer",
+                                                "example": 5
+                                            },
+                                            "anotados": {
+                                                "type": "integer",
+                                                "example": 3
+                                            },
+                                            "faltan": {
+                                                "type": "integer",
+                                                "example": 2
+                                            },
+                                            "precio_por_jugador": {
+                                                "type": "number",
+                                                "example": 1700
+                                            },
+                                            "equipos": {
+                                                "type": "object",
+                                                "example": {
+                                                    "A": {
+                                                        "cupo": 5,
+                                                        "anotados": 5,
+                                                        "faltan": 0
+                                                    },
+                                                    "B": {
+                                                        "cupo": 5,
+                                                        "anotados": 1,
+                                                        "faltan": 4
+                                                    }
+                                                }
+                                            },
+                                            "estoy_anotado": {
+                                                "type": "boolean",
+                                                "example": false
+                                            },
+                                            "mi_equipo": {
+                                                "description": "Equipo donde está anotado el usuario (solo con token)",
+                                                "type": "string",
+                                                "example": null,
+                                                "nullable": true,
+                                                "enum": [
+                                                    "A",
+                                                    "B"
+                                                ]
+                                            },
+                                            "cancha": {
+                                                "type": "object",
+                                                "example": {
+                                                    "id": 1,
+                                                    "nombre": "Cancha 1",
+                                                    "tipo": "futbol5",
+                                                    "superficie": "cesped_sintetico"
+                                                }
+                                            },
+                                            "club": {
+                                                "type": "object",
+                                                "example": {
+                                                    "id": 1,
+                                                    "nombre": "Complejo Concordia FC",
+                                                    "direccion": "Av. Costanera 1200"
+                                                }
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "La fecha no tiene el formato AAAA-MM-DD."
+                    }
+                }
+            }
+        },
+        "/api/partidos/{id}": {
+            "get": {
+                "tags": [
+                    "Matchmaking"
+                ],
+                "summary": "Sala de un partido de matchmaking",
+                "description": "Datos del partido, cuántos lugares faltan y quiénes se anotaron (nombre y apellido abreviado, sin mails). Solo la ven los jugadores anotados y el administrador del club. Incluye la reserva propia y si todavía se puede cancelar.",
+                "operationId": "4a850f1b6ea16679f8d88974ba993f74",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id del turno",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sala del partido.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "turno_id": {
+                                            "type": "integer",
+                                            "example": 42
+                                        },
+                                        "fecha": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2026-11-20"
+                                        },
+                                        "hora_inicio": {
+                                            "type": "string",
+                                            "example": "20:00"
+                                        },
+                                        "hora_fin": {
+                                            "type": "string",
+                                            "example": "21:00"
+                                        },
+                                        "estado": {
+                                            "type": "string",
+                                            "example": "armandose",
+                                            "enum": [
+                                                "armandose",
+                                                "completo",
+                                                "ya_empezo"
+                                            ]
+                                        },
+                                        "cupo_maximo": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "anotados": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "faltan": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "precio_por_jugador": {
+                                            "type": "number",
+                                            "example": 3400
+                                        },
+                                        "cancha": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "nombre": "Cancha 1",
+                                                "tipo": "futbol5",
+                                                "superficie": "cesped_sintetico",
+                                                "techada": true,
+                                                "iluminacion": true,
+                                                "vestuarios": false
+                                            }
+                                        },
+                                        "club": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "nombre": "Complejo Concordia FC",
+                                                "direccion": "Av. Costanera 1200",
+                                                "telefono": "3454111111"
+                                            }
+                                        },
+                                        "equipos": {
+                                            "type": "object",
+                                            "example": {
+                                                "A": {
+                                                    "cupo": 5,
+                                                    "anotados": 5,
+                                                    "faltan": 0
+                                                },
+                                                "B": {
+                                                    "cupo": 5,
+                                                    "anotados": 1,
+                                                    "faltan": 4
+                                                }
+                                            }
+                                        },
+                                        "jugadores": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "nombre": {
+                                                        "type": "string",
+                                                        "example": "Lautaro M."
+                                                    },
+                                                    "equipo": {
+                                                        "type": "string",
+                                                        "example": "A",
+                                                        "enum": [
+                                                            "A",
+                                                            "B"
+                                                        ]
+                                                    },
+                                                    "tipo": {
+                                                        "type": "string",
+                                                        "example": "individual",
+                                                        "enum": [
+                                                            "individual",
+                                                            "equipo"
+                                                        ]
+                                                    },
+                                                    "cantidad": {
+                                                        "description": "Lugares que ocupa (él y sus amigos)",
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "soy_yo": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "mi_reserva": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 15,
+                                                "cantidad_jugadores": 1,
+                                                "puede_cancelar": true,
+                                                "cancelar_hasta": "2026-11-20 18:00"
+                                            },
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Falta iniciar sesión."
+                    },
+                    "403": {
+                        "description": "No estás anotado en este partido ni sos el administrador del club."
+                    },
+                    "404": {
+                        "description": "No existe el turno o no tiene un partido de matchmaking."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/reservas": {
             "get": {
                 "tags": [
@@ -1842,9 +2146,9 @@
                                         ]
                                     },
                                     "cupo_maximo": {
-                                        "description": "Jugadores sueltos para el matchmaking. Por defecto, la mitad de la capacidad de la cancha.",
+                                        "description": "Lugares del partido de matchmaking, sumando los dos equipos. Por defecto, la capacidad de la cancha.",
                                         "type": "integer",
-                                        "example": 5,
+                                        "example": 10,
                                         "nullable": true
                                     }
                                 },
@@ -2069,11 +2373,23 @@
                         "example": 1
                     },
                     "tipo": {
+                        "description": "completa: la cancha entera · individual: lugares sueltos en un equipo · equipo: un equipo entero (la mitad de la cancha)",
                         "type": "string",
-                        "example": "completa",
+                        "example": "individual",
                         "enum": [
                             "completa",
-                            "individual"
+                            "individual",
+                            "equipo"
+                        ]
+                    },
+                    "equipo": {
+                        "description": "Para individual y equipo. Si no se manda, se elige el equipo con más lugares libres (o el que está vacío).",
+                        "type": "string",
+                        "example": "A",
+                        "nullable": true,
+                        "enum": [
+                            "A",
+                            "B"
                         ]
                     },
                     "cantidad_jugadores": {
@@ -2198,6 +2514,10 @@
         {
             "name": "Jugadores anotados",
             "description": "Jugadores anotados"
+        },
+        {
+            "name": "Matchmaking",
+            "description": "Matchmaking"
         },
         {
             "name": "Reservas",

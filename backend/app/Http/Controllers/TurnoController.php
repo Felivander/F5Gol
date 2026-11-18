@@ -44,6 +44,12 @@ class TurnoController extends Controller
 
         $turnos = $query->get()->map(function (Turno $turno) {
             $turno->cupo_actual = $turno->cupoActual();
+            // Lugares de cada equipo, para elegir dónde sumarse o reservar un equipo entero
+            $turno->equipos = collect(['A', 'B'])->mapWithKeys(fn ($e) => [$e => [
+                'cupo' => $turno->cupoEquipo($e),
+                'anotados' => $turno->anotadosEquipo($e),
+                'faltan' => $turno->libresEquipo($e),
+            ]]);
 
             return $turno;
         });
@@ -267,7 +273,7 @@ class TurnoController extends Controller
                 new OA\Property(property: 'hora_desde', type: 'string', example: '15:00'),
                 new OA\Property(property: 'hora_hasta', description: 'El último turno termina a esta hora o antes', type: 'string', example: '23:00'),
                 new OA\Property(property: 'duracion', description: 'Minutos de cada turno', type: 'integer', enum: [30, 60, 90, 120], example: 60),
-                new OA\Property(property: 'cupo_maximo', description: 'Jugadores sueltos para el matchmaking. Por defecto, la mitad de la capacidad de la cancha.', type: 'integer', nullable: true, example: 5),
+                new OA\Property(property: 'cupo_maximo', description: 'Lugares del partido de matchmaking, sumando los dos equipos. Por defecto, la capacidad de la cancha.', type: 'integer', nullable: true, example: 10),
             ]
         )),
         responses: [
@@ -290,7 +296,8 @@ class TurnoController extends Controller
         }
 
         $cancha = Cancha::findOrFail($datos['cancha_id']);
-        $cupo = $datos['cupo_maximo'] ?? max(1, intdiv($cancha->capacidad_jugadores, 2));
+        // El cupo del partido es el de los dos equipos juntos: la capacidad de la cancha
+        $cupo = $datos['cupo_maximo'] ?? max(2, $cancha->capacidad_jugadores);
         $dias = isset($datos['dias']) ? array_map('intval', $datos['dias']) : null;
         $duracion = (int) $datos['duracion'];
 

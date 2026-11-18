@@ -1,1094 +1,519 @@
-/* ========================================================
-   F5GOL — Design System & Global Styles
-   Estética deportiva moderna, fluida y responsive
-   ======================================================== */
+/* =====================================================================
+   F5GOL · Sistema visual
+   Idea: planilla de cancha. Papel cálido, tinta casi negra, verde de cancha
+   como color principal y verde lima solo para resaltar lo importante
+   (cupos, lo que está por completarse). Títulos condensados, tipo tablero.
+   Bootstrap sigue cargado (guías de la cátedra) y se tematiza con sus variables.
+   ===================================================================== */
 
 :root {
-  --primary: #059669;
-  --primary-hover: #047857;
-  --primary-light: #ecfdf5;
-  --accent: #10b981;
-  --accent-glow: rgba(16, 185, 129, 0.25);
-  --dark-navy: #0f172a;
-  --dark-surface: #1e293b;
-  --bg-page: #f8fafc;
-  --card-bg: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --border-hover: #10b981;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-pill: 9999px;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 12px 28px -6px rgba(15, 23, 42, 0.12);
-  --shadow-glow: 0 10px 25px -5px rgba(16, 185, 129, 0.22);
-  --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Color */
+  --papel: #f5f2ea;
+  --papel-hundido: #ede9de;
+  --superficie: #ffffff;
+  --tinta: #15171a;
+  --tinta-2: #4a4f57;
+  --tinta-3: #6b7078;
+  --linea: #e3ded2;
+  --linea-fuerte: #cfc8b8;
+  --cancha: #0e5e3a;
+  --cancha-oscura: #0a472c;
+  --cancha-suave: #e4efe6;
+  --lima: #cff04a;
+  --lima-suave: #f2fbcf;
+  --rojo: #b42318;
+  --rojo-suave: #fdecea;
+  --ambar: #a15c07;
+  --ambar-suave: #fdf3e2;
+
+  /* Forma */
+  --r-chico: 6px;
+  --r: 10px;
+  --r-grande: 16px;
+  --sombra-1: 0 1px 2px rgb(21 23 26 / 0.06), 0 0 0 1px rgb(21 23 26 / 0.06);
+  --sombra-2: 0 2px 4px rgb(21 23 26 / 0.05), 0 8px 24px -8px rgb(21 23 26 / 0.18), 0 0 0 1px rgb(21 23 26 / 0.06);
+
+  /* Tipografía */
+  --fuente: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --curva: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Tema de Bootstrap */
+  --bs-body-font-family: var(--fuente);
+  --bs-body-bg: var(--papel);
+  --bs-body-color: var(--tinta);
+  --bs-border-color: var(--linea);
+  --bs-border-radius: var(--r-chico);
+  --bs-border-radius-lg: var(--r);
+  --bs-primary: var(--cancha);
+  --bs-primary-rgb: 14, 94, 58;
+  --bs-link-color: var(--cancha);
+  --bs-link-color-rgb: 14, 94, 58;
+  --bs-link-hover-color: var(--cancha-oscura);
+  --bs-secondary-color: var(--tinta-2);
+  --bs-focus-ring-color: rgb(14 94 58 / 0.25);
 }
 
-*, *::before, *::after {
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  color: var(--text-main);
-  background-color: var(--bg-page);
-  background-image: radial-gradient(#e2e8f0 0.8px, transparent 0.8px);
-  background-size: 24px 24px;
+  min-height: 100vh;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fuente);
+  font-size: 1rem;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Links & Typography */
-a {
-  color: var(--primary);
-  text-decoration: none;
-  transition: var(--transition);
-}
-
-a:hover {
-  color: var(--primary-hover);
-}
-
-h1, h2, h3, h4 {
-  color: var(--dark-navy);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-top: 0;
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 800;
+  font-stretch: 75%;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  text-wrap: balance;
 }
 
 h1 {
-  font-size: 1.85rem;
-  margin-bottom: 0.5rem;
+  font-size: clamp(2rem, 1.4rem + 2.6vw, 3rem);
 }
 
 h2 {
-  font-size: 1.4rem;
-  margin-bottom: 0.75rem;
+  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 1.85rem);
 }
 
-/* Inputs, Buttons & Controls */
-button,
-input {
-  font-family: inherit;
-  font-size: 0.95rem;
-  padding: 0.65rem 1.1rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
-  background: #ffffff;
-  color: var(--text-main);
-  transition: var(--transition);
+h3 {
+  font-size: 1.25rem;
 }
 
-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+p {
+  margin: 0;
+  text-wrap: pretty;
 }
 
-button {
-  cursor: pointer;
+a {
+  color: var(--cancha);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--cancha-oscura);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cancha);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--lima);
+  color: var(--tinta);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Estructura de página ---------- */
+main {
+  flex: 1;
+}
+
+.pagina {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 16px 64px;
+}
+
+@media (min-width: 768px) {
+  .pagina {
+    padding: 40px 24px 80px;
+  }
+}
+
+.pagina-angosta {
+  max-width: 640px;
+}
+
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-bottom: 28px;
+}
+
+.encabezado-texto {
+  display: grid;
+  gap: 8px;
+  max-width: 62ch;
+}
+
+.antetitulo {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cancha);
+}
+
+.bajada {
+  color: var(--tinta-2);
+  font-size: 1.05rem;
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  color: var(--tinta-2);
   font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+
+.volver:hover {
+  color: var(--tinta);
+}
+
+.seccion {
+  margin-top: 40px;
+}
+
+.seccion-titulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* ---------- Botones (tema de Bootstrap + propios) ---------- */
+.btn {
+  --bs-btn-font-weight: 700;
+  --bs-btn-padding-x: 1rem;
+  --bs-btn-padding-y: 0.6rem;
+  --bs-btn-border-radius: var(--r-chico);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  background: var(--primary);
-  color: #ffffff;
-  border: 1px solid transparent;
+  gap: 8px;
+  min-height: 44px;
+  transition-property: background-color, border-color, color, box-shadow, scale;
+  transition-duration: 150ms;
+  transition-timing-function: var(--curva);
 }
 
-button:hover:not(:disabled) {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-glow);
+.btn:active:not(:disabled) {
+  scale: 0.96;
 }
 
-button:active:not(:disabled) {
-  transform: translateY(0);
+.btn-primary {
+  --bs-btn-bg: var(--cancha);
+  --bs-btn-border-color: var(--cancha);
+  --bs-btn-hover-bg: var(--cancha-oscura);
+  --bs-btn-hover-border-color: var(--cancha-oscura);
+  --bs-btn-active-bg: var(--cancha-oscura);
+  --bs-btn-active-border-color: var(--cancha-oscura);
+  --bs-btn-disabled-bg: var(--cancha);
+  --bs-btn-disabled-border-color: var(--cancha);
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
+.btn-lima {
+  --bs-btn-color: var(--tinta);
+  --bs-btn-bg: var(--lima);
+  --bs-btn-border-color: var(--lima);
+  --bs-btn-hover-color: var(--tinta);
+  --bs-btn-hover-bg: #bfe03a;
+  --bs-btn-hover-border-color: #bfe03a;
+  --bs-btn-active-bg: #bfe03a;
 }
 
-/* Error banner */
-.error {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  font-size: 0.92rem;
-  margin: 1rem 0;
+.btn-outline-primary {
+  --bs-btn-color: var(--cancha);
+  --bs-btn-border-color: var(--linea-fuerte);
+  --bs-btn-bg: var(--superficie);
+  --bs-btn-hover-bg: var(--cancha-suave);
+  --bs-btn-hover-color: var(--cancha-oscura);
+  --bs-btn-hover-border-color: var(--cancha);
+  --bs-btn-active-bg: var(--cancha-suave);
+  --bs-btn-active-color: var(--cancha-oscura);
+  --bs-btn-disabled-color: var(--tinta-3);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--linea);
 }
 
-.error::before {
-  content: '⚠️';
-  font-size: 1rem;
+.btn-outline-danger {
+  --bs-btn-color: var(--rojo);
+  --bs-btn-border-color: #ecc4c0;
+  --bs-btn-bg: var(--superficie);
+  --bs-btn-hover-bg: var(--rojo-suave);
+  --bs-btn-hover-color: var(--rojo);
+  --bs-btn-hover-border-color: var(--rojo);
 }
 
-.aviso {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #15803d;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  font-size: 0.92rem;
-  margin: 1rem 0;
+.btn-fantasma {
+  --bs-btn-color: var(--tinta-2);
+  --bs-btn-hover-color: var(--tinta);
+  --bs-btn-hover-bg: var(--papel-hundido);
+  --bs-btn-padding-x: 0.75rem;
 }
 
-.aviso a {
-  margin-left: 0.5rem;
-  font-weight: 700;
+.btn-sm {
+  --bs-btn-padding-y: 0.35rem;
+  --bs-btn-padding-x: 0.75rem;
+  --bs-btn-font-size: 0.875rem;
+  min-height: 36px;
 }
 
-.acciones-turno {
+.btn-block {
+  width: 100%;
+}
+
+/* ---------- Superficies ---------- */
+.tarjeta {
+  background: var(--superficie);
+  border-radius: var(--r);
+  box-shadow: var(--sombra-1);
+  padding: 20px;
+}
+
+.tarjeta-enlace {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition-property: box-shadow, translate;
+  transition-duration: 150ms;
+  transition-timing-function: var(--curva);
+}
+
+.tarjeta-enlace:hover {
+  color: inherit;
+  box-shadow: var(--sombra-2);
+  translate: 0 -2px;
+}
+
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 16px;
+}
+
+/* ---------- Datos sueltos: chips, metadatos, pips ---------- */
+.meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.acciones-turno button {
-  padding: 0.45rem 0.9rem;
-  font-size: 0.85rem;
-}
-
-.acciones-turno .cantidad-jugadores {
-  width: 4rem;
-  padding: 0.4rem 0.5rem;
-}
-
-.btn-secundario {
-  background: #ffffff;
-  color: var(--dark-navy);
-  border: 1px solid var(--border-color);
-}
-
-.btn-secundario:hover {
-  background: #f1f5f9;
-}
-
-/* Panel del administrador */
-.panel-cancha {
-  margin-bottom: 2rem;
-}
-
-.panel-cancha h2 {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-}
-
-.selector-vista {
-  display: inline-flex;
-  gap: 0.25rem;
-}
-
-.selector-vista button {
-  padding: 0.45rem 0.9rem;
-  font-size: 0.85rem;
-}
-
-.btn-link {
-  font-weight: 600;
-  font-size: 0.88rem;
-  margin-right: 0.75rem;
-}
-
-/* Fotos de la cancha */
-.fotos-cancha {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.75rem;
-}
-
-.fotos-cancha figure {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin: 0;
-}
-
-.fotos-cancha img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: var(--radius-sm);
-  outline: 1px solid rgba(0, 0, 0, 0.1);
-  outline-offset: -1px;
-}
-
-.editar-cancha {
-  display: inline-block;
-  padding: 0.5rem 1rem 0.75rem;
-}
-
-.campo-foto {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-top: 1rem;
-  font-weight: 600;
-  font-size: 0.88rem;
-}
-
-/* Registro */
-.selector-rol {
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem 1rem;
-}
-
-.selector-rol legend {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--dark-navy);
-  padding: 0 0.25rem;
-}
-
-.formulario .selector-rol label {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-weight: 400;
-  padding: 0.35rem 0;
-  cursor: pointer;
-}
-
-.error-campo {
-  color: #b91c1c;
-  font-size: 0.82rem;
-}
-
-/* Estados de Reserva */
-.estado-reserva {
-  padding: 0.2rem 0.65rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: capitalize;
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.estado-reserva.confirmada {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.estado-reserva.cancelada {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-/* Back Link (Volver) */
-.volver-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.85rem;
-  background: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-pill);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin-bottom: 1.25rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.volver-link:hover {
-  color: var(--primary);
-  border-color: var(--accent);
-  transform: translateX(-3px);
-  box-shadow: var(--shadow-md);
-}
-
-/* Hero Section */
-.hero-banner {
-  background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
-  color: #ffffff;
-  padding: 2.2rem 1.8rem;
-  border-radius: var(--radius-lg);
-  margin-bottom: 2rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-}
-
-.hero-banner::after {
-  content: '⚽';
-  position: absolute;
-  right: -20px;
-  bottom: -35px;
-  font-size: 11rem;
-  opacity: 0.08;
-  pointer-events: none;
-}
-
-.hero-tag {
-  display: inline-block;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.75rem;
-}
-
-.hero-banner h1 {
-  color: #ffffff;
-  font-size: 2.1rem;
-  font-weight: 800;
-  margin: 0 0 0.5rem 0;
-}
-
-.hero-banner p {
-  color: #d1fae5;
-  font-size: 1.05rem;
-  margin: 0;
-  max-width: 600px;
-}
-
-/* Tarjetas Grid (Clubes & Canchas) */
-.tarjetas {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-  gap: 1.25rem;
-  padding: 0;
-  list-style: none;
-  margin: 1.5rem 0;
-}
-
-.tarjetas li {
-  display: flex;
-}
-
-.tarjetas li a {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 100%;
-  padding: 1.35rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--card-bg);
-  color: inherit;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.tarjetas li a::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: transparent;
-  transition: var(--transition);
-}
-
-.tarjetas li a:hover {
-  border-color: var(--accent);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-glow);
-}
-
-.tarjetas li a:hover::before {
-  background: linear-gradient(90deg, var(--accent), var(--primary));
-}
-
-.tarjetas h2 {
-  font-size: 1.25rem;
-  margin: 0 0 0.5rem 0;
-  color: var(--dark-navy);
-}
-
-.tarjetas h3 {
-  font-size: 1.15rem;
-  margin: 0 0 0.5rem 0;
-  color: var(--dark-navy);
-}
-
-.tarjetas p {
-  margin: 0.35rem 0;
+  gap: 6px 16px;
+  color: var(--tinta-2);
   font-size: 0.92rem;
-  color: var(--text-muted);
 }
 
-.tarjetas .tarjeta-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-muted);
-  font-size: 0.88rem;
-}
-
-.tarjetas .precio {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: var(--primary);
-  margin-top: 0.75rem;
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-}
-
-.tarjetas .precio-sub {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.tarjeta-footer-action {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 1rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border-color);
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--primary);
-}
-
-.tarjeta-footer-action span.flecha {
-  transition: transform 0.2s;
-}
-
-.tarjetas li a:hover .tarjeta-footer-action span.flecha {
-  transform: translateX(4px);
-}
-
-/* Badges / Chips */
-.badge {
+.meta > span {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.65rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  gap: 6px;
 }
 
-.badge-tipo {
-  background: #f1f5f9;
-  color: #334155;
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
-.badge-jugadores {
-  background: #e0f2fe;
-  color: #0369a1;
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--papel);
+  color: var(--tinta-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-/* Paginado */
+.chip-verde {
+  background: var(--cancha-suave);
+  color: var(--cancha-oscura);
+}
+
+.chip-lima {
+  background: var(--lima);
+  color: var(--tinta);
+}
+
+.chip-rojo {
+  background: var(--rojo-suave);
+  color: var(--rojo);
+}
+
+.chip-ambar {
+  background: var(--ambar-suave);
+  color: var(--ambar);
+}
+
+/* Cupo de matchmaking: un punto por jugador */
+.pips {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--papel-hundido);
+  box-shadow: inset 0 0 0 1px var(--linea-fuerte);
+}
+
+.pip.lleno {
+  background: var(--cancha);
+  box-shadow: none;
+}
+
+.precio {
+  font-weight: 800;
+  font-stretch: 75%;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.precio small {
+  font-weight: 500;
+  font-stretch: 100%;
+  font-size: 0.85rem;
+  color: var(--tinta-3);
+}
+
+/* Paginado de listados */
 .paginado {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  margin: 2rem 0;
+  gap: 16px;
+  margin-top: 28px;
+  color: var(--tinta-2);
 }
 
-.paginado button {
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-pill);
-}
-
-.paginado span {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-/* Buscador y lista de clubes */
-.buscador-clubes {
-  position: relative;
+/* ---------- Mensajes ---------- */
+.alerta {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 1rem 0 0.75rem;
-}
-
-.buscador-clubes .buscador-icono {
-  position: absolute;
-  left: 0.9rem;
-  pointer-events: none;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-chico);
   font-size: 0.95rem;
+  margin-bottom: 16px;
 }
 
-.buscador-clubes input {
-  padding: 0.7rem 1rem 0.7rem 2.5rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border-color);
-  font-size: 1rem; /* 16px: evita que iOS haga zoom al enfocar */
-  box-shadow: var(--shadow-sm);
-}
-
-.buscador-clubes input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.buscador-clubes .buscador-limpiar {
+.alerta > app-icono {
   flex-shrink: 0;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--primary);
-  text-decoration: none;
+  margin-top: 2px;
 }
 
-.lista-clubes-resumen {
-  font-size: 0.88rem;
-  color: var(--text-muted);
-  margin: 0 0 0.75rem;
+.alerta-error {
+  background: var(--rojo-suave);
+  color: var(--rojo);
 }
 
-.lista-clubes {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 1.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--card-bg);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  transition: opacity 0.2s;
+.alerta-ok {
+  background: var(--cancha-suave);
+  color: var(--cancha-oscura);
 }
 
-.lista-clubes.cargando {
-  opacity: 0.6;
+.alerta-info {
+  background: var(--lima-suave);
+  color: var(--tinta);
 }
 
-.lista-clubes li + li {
-  border-top: 1px solid var(--border-color);
+.alerta a {
+  font-weight: 700;
 }
 
-.lista-clubes li a {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
+.alerta .cerrar {
+  margin-left: auto;
+  background: none;
+  border: 0;
   color: inherit;
-  text-decoration: none;
-  transition: background-color 0.15s;
+  opacity: 0.7;
+  padding: 0 4px;
+  cursor: pointer;
 }
 
-.lista-clubes li a:hover,
-.lista-clubes li a:focus-visible {
-  background: var(--primary-light);
-}
-
-.lista-clubes li a:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: -2px;
-}
-
-.lista-clubes-icono {
-  flex-shrink: 0;
+.vacio {
   display: grid;
-  place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: var(--radius-sm);
-  background: var(--primary-light);
-  font-size: 1.3rem;
-}
-
-.lista-clubes-datos {
-  flex: 1;
-  min-width: 0;
-}
-
-.lista-clubes-datos h3 {
-  font-size: 1.05rem;
-  margin: 0 0 0.25rem;
-  color: var(--dark-navy);
-}
-
-.lista-clubes-datos .tarjeta-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.88rem;
-}
-
-.lista-clubes-datos .tarjeta-meta span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lista-clubes-accion {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--primary);
-}
-
-.lista-clubes-accion .flecha {
-  transition: transform 0.2s;
-}
-
-.lista-clubes li a:hover .lista-clubes-accion .flecha {
-  transform: translateX(4px);
-}
-
-.lista-clubes-vacia {
-  padding: 2rem 1.25rem;
+  justify-items: center;
+  gap: 10px;
+  padding: 48px 20px;
   text-align: center;
-  color: var(--text-muted);
+  color: var(--tinta-2);
+  background: var(--superficie);
+  border: 1px dashed var(--linea-fuerte);
+  border-radius: var(--r);
 }
 
-@media (max-width: 576px) {
-  .lista-clubes-accion-texto {
-    display: none;
-  }
-
-  .lista-clubes li a {
-    padding: 0.9rem 1rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lista-clubes li a:hover .lista-clubes-accion .flecha {
-    transform: none;
-  }
-}
-
-/* Filtro de Turnos */
-.filtro-turnos {
-  background: #ffffff;
-  padding: 1.25rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
-}
-
-.filtro-turnos label {
-  font-weight: 600;
-  font-size: 0.92rem;
-  color: var(--dark-navy);
-}
-
-.filtro-turnos input[type="date"] {
-  padding: 0.5rem 0.85rem;
-}
-
-.filtro-turnos .btn-reset {
-  background: #f1f5f9;
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-}
-
-.filtro-turnos .btn-reset:hover {
-  background: #e2e8f0;
-  box-shadow: none;
-}
-
-/* Tabla de Turnos */
-.tabla-contenedor {
-  background: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  margin-top: 1rem;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-thead {
-  background: #f8fafc;
-  border-bottom: 2px solid var(--border-color);
-}
-
-th {
-  padding: 0.85rem 1rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-}
-
-td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 0.95rem;
-  vertical-align: middle;
-}
-
-tbody tr:last-child td {
-  border-bottom: none;
-}
-
-tbody tr {
-  transition: background 0.15s ease;
-}
-
-tbody tr:hover {
-  background: #f8fafc;
-}
-
-/* Estados de Turno */
-.estado {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-
-.estado::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.estado.disponible {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.estado.disponible::before {
-  background: #22c55e;
-  box-shadow: 0 0 6px #22c55e;
-}
-
-.estado.ocupado {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.estado.ocupado::before {
-  background: #ef4444;
-}
-
-.estado.bloqueado {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.estado.bloqueado::before {
-  background: #94a3b8;
-}
-
-.cupo-badge {
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--dark-navy);
-  background: #f1f5f9;
-  padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-pill);
-}
-
-/* Login Card & Form */
-.login-card {
-  max-width: 420px;
-  margin: 3rem auto;
-  padding: 2.25rem;
-  background: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  position: relative;
-}
-
-.login-card h1 {
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-.login-subtitulo {
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  margin-bottom: 1.75rem;
-}
-
-.formulario {
-  display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-}
-
-.formulario .campo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.formulario label {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--dark-navy);
-}
-
-.formulario button[type="submit"] {
-  margin-top: 0.5rem;
-  padding: 0.85rem;
-  font-size: 1rem;
-}
-
-/* Club Header Hero */
-.club-hero {
-  background: #ffffff;
-  padding: 1.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 2rem;
-}
-
-.club-hero h1 {
-  margin-bottom: 0.5rem;
-}
-
-.club-hero-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  margin-top: 0.5rem;
-}
-
-.club-hero-info span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-/* ===== Mis clubes ===== */
-.mis-clubes {
-  display: grid;
-  gap: 0.75rem;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-
-.mis-clubes > li {
-  display: grid;
-  grid-template-columns: 4.5rem 1fr;
-  gap: 0.75rem 1rem;
-  align-items: center;
-  padding: 1rem;
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-}
-
-.mis-clubes-foto {
-  width: 4.5rem;
-  height: 4.5rem;
-  border-radius: var(--radius-sm);
-  object-fit: cover;
-  outline: 1px solid rgba(0, 0, 0, 0.1);
-  outline-offset: -1px;
-}
-
-.mis-clubes-sin-foto {
-  display: grid;
-  place-items: center;
-  background: var(--primary-light);
-  font-size: 1.75rem;
-  outline: none;
-}
-
-.mis-clubes-datos h3 {
-  margin: 0 0 0.25rem;
+.vacio strong {
+  color: var(--tinta);
   font-size: 1.1rem;
 }
 
-.mis-clubes-datos .tarjeta-meta {
-  margin: 0;
-}
-
-.mis-clubes-acciones {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.mis-clubes-acciones .btn {
-  min-height: 40px;
-  display: inline-flex;
-  align-items: center;
-}
-
-.mis-clubes > li.mis-clubes-vacio {
-  display: block;
-  padding: 2rem 1rem;
+.cargando {
+  padding: 48px 0;
   text-align: center;
-  border-style: dashed;
+  color: var(--tinta-3);
 }
 
-@media (min-width: 768px) {
-  .mis-clubes > li {
-    grid-template-columns: 5rem 1fr auto;
-  }
-
-  .mis-clubes-foto {
-    width: 5rem;
-    height: 5rem;
-  }
-
-  .mis-clubes-acciones {
-    grid-column: auto;
-    justify-content: flex-end;
-  }
-}
-
-.club-form-siguiente {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border-color);
-}
-
-/* ===== Galería de fotos del club (detalle público) ===== */
-.club-galeria {
+/* ---------- Formularios ---------- */
+.formulario {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(min(220px, 85%), 70%);
-  gap: 0.75rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  margin: 0 0 1.5rem;
-  padding-bottom: 0.25rem;
+  gap: 18px;
 }
 
-.club-galeria img {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  border-radius: var(--radius-md);
-  scroll-snap-align: start;
-  outline: 1px solid rgba(0, 0, 0, 0.1);
-  outline-offset: -1px;
-}
-
-@media (min-width: 768px) {
-  .club-galeria {
-    grid-auto-columns: minmax(260px, 32%);
-  }
-}
-
-.club-descripcion {
-  max-width: 65ch;
-  color: var(--text-muted);
-  margin: 0.75rem 0 0;
-}
-
-/* Comodidades de la cancha (techada, luz, vestuarios) */
-.comodidades {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin: 0 0 0.75rem;
-  padding: 0;
-  list-style: none;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-}
-
-.comodidades li {
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  border: 1px solid var(--border-color);
-}
-
-.lista-clubes-foto {
-  flex-shrink: 0;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: var(--radius-sm);
-  object-fit: cover;
-  outline: 1px solid rgba(0, 0, 0, 0.1);
-  outline-offset: -1px;
-}
-
-.casillas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.25rem;
-}
-
-.casillas label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 40px;
-  font-weight: 500;
-}
-
-.casillas input[type="checkbox"] {
-  width: 1.1rem;
-  height: 1.1rem;
-}
-
-/* ===== Carga de horarios ===== */
-.horarios-fila {
+.campo {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  gap: 0 1rem;
-  border: 0;
-  padding: 0;
-  margin: 0;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
 }
 
-.horarios-fila > legend,
-.formulario fieldset > legend {
-  grid-column: 1 / -1;
-  font-size: inherit;
+.campo > label,
+.campo > legend,
+.etiqueta {
   font-weight: 700;
-  margin-bottom: 0.35rem;
+  font-size: 0.92rem;
 }
 
 .formulario fieldset {
@@ -1098,91 +523,399 @@ tbody tr:hover {
   min-width: 0;
 }
 
-.dias-semana {
+.formulario legend {
+  float: none;
+  padding: 0;
+  margin-bottom: 6px;
+}
+
+.formulario input:not([type='checkbox']):not([type='radio']):not([type='file']),
+.formulario select,
+.formulario textarea,
+.control {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--r-chico);
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  /* 16px como mínimo: iOS no hace zoom al enfocar */
+  font-size: max(16px, 1rem);
+  transition-property: border-color, box-shadow;
+  transition-duration: 150ms;
+}
+
+.formulario textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.formulario input:focus,
+.formulario select:focus,
+.formulario textarea:focus,
+.control:focus {
+  outline: none;
+  border-color: var(--cancha);
+  box-shadow: 0 0 0 3px rgb(14 94 58 / 0.18);
+}
+
+.formulario .ng-invalid.ng-touched:not(form):not(fieldset):not(div) {
+  border-color: var(--rojo);
+}
+
+.ayuda {
+  color: var(--tinta-3);
+  font-size: 0.85rem;
+}
+
+.error-campo {
+  color: var(--rojo);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.fila-campos {
   display: grid;
-  /* En pantallas muy angostas los días pasan a dos filas */
-  grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));
-  gap: 0.35rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 18px;
 }
 
-.dia-chip {
+.casillas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.casilla {
   position: relative;
-  display: block;
+  display: inline-flex;
 }
 
-.dia-chip input {
+.casilla input {
   position: absolute;
-  opacity: 0;
   inset: 0;
+  opacity: 0;
   margin: 0;
   cursor: pointer;
 }
 
-.dia-chip span {
-  display: grid;
-  place-items: center;
-  min-height: 44px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
+.casilla span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--superficie);
+  box-shadow: inset 0 0 0 1px var(--linea-fuerte);
   font-weight: 600;
-  font-size: 0.88rem;
-  background: var(--card-bg);
-  transition: var(--transition);
+  font-size: 0.92rem;
+  transition-property: background-color, color, box-shadow;
+  transition-duration: 150ms;
 }
 
-.dia-chip input:checked + span {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #ffffff;
+.casilla input:checked + span {
+  background: var(--cancha);
+  color: #fff;
+  box-shadow: none;
 }
 
-.dia-chip input:focus-visible + span {
-  outline: 2px solid var(--primary);
+.casilla input:focus-visible + span {
+  outline: 2px solid var(--cancha);
   outline-offset: 2px;
 }
 
-.dias-atajos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
-  margin-top: 0.4rem;
+/* Tarjeta de formulario centrada (login, registro, altas) */
+.panel-form {
+  background: var(--superficie);
+  border-radius: var(--r-grande);
+  box-shadow: var(--sombra-1);
+  padding: 28px 20px;
 }
 
-.dias-atajos button.btn-link {
-  padding: 0.35rem 0;
-  min-height: 36px;
+@media (min-width: 576px) {
+  .panel-form {
+    padding: 36px;
+  }
+}
+
+.separador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--tinta-3);
+  font-size: 0.85rem;
+}
+
+.separador::before,
+.separador::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--linea);
+}
+
+/* ---------- Tablas ---------- */
+.tabla-contenedor {
+  overflow-x: auto;
+  background: var(--superficie);
+  border-radius: var(--r);
+  box-shadow: var(--sombra-1);
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.tabla th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+  border-bottom: 1px solid var(--linea);
+  white-space: nowrap;
+}
+
+.tabla td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--linea);
+  vertical-align: middle;
+}
+
+.tabla tr:last-child td {
+  border-bottom: 0;
+}
+
+.tabla .acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tabla-fila-pasada td {
+  color: var(--tinta-3);
+}
+
+/* ---------- Íconos ---------- */
+.icono {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Fotos ---------- */
+.foto {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: var(--r-chico);
+  outline: 1px solid rgb(0 0 0 / 0.1);
+  outline-offset: -1px;
+  background: var(--papel-hundido);
+}
+
+.fotos-editables {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.fotos-editables > p {
+  grid-column: 1 / -1;
+}
+
+.fotos-editables figure {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.fotos-editables .btn {
+  justify-self: start;
+}
+
+/* Botón para subir fotos: una caja punteada que contiene el input de archivo */
+.subir-foto {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px dashed var(--linea-fuerte);
+  border-radius: var(--r);
+  background: var(--papel);
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition-property: border-color, background-color;
+  transition-duration: 150ms;
+}
+
+.subir-foto:hover,
+.subir-foto:focus-within {
+  border-color: var(--cancha);
+  background: var(--cancha-suave);
+}
+
+.subir-foto small {
+  color: var(--tinta-3);
+  font-weight: 500;
+}
+
+.subir-foto input {
+  margin-top: 6px;
   font-size: 0.88rem;
-  font-weight: 600;
-  background: none;
-  border: 0;
-  color: var(--primary);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  box-shadow: none;
 }
 
-.dias-atajos button.btn-link:hover:not(:disabled) {
-  background: none;
-  color: var(--primary-hover);
-  box-shadow: none;
-  transform: none;
+/* Acción destructiva en un botón fantasma */
+.btn.texto-rojo {
+  --bs-btn-color: var(--rojo);
+  --bs-btn-hover-color: var(--rojo);
+  --bs-btn-hover-bg: var(--rojo-suave);
+  --bs-btn-active-color: var(--rojo);
 }
 
-.horarios-resumen {
-  padding: 0.85rem 1rem;
-  margin-bottom: 1rem;
-  border-radius: var(--radius-sm);
-  background: var(--primary-light);
-  border: 1px solid rgba(5, 150, 105, 0.25);
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+
+  .tarjeta-enlace:hover {
+    translate: none;
+  }
 }
 
-.acciones-dueno {
+/* Bloque oscuro con el paso siguiente (después de crear un club o una cancha) */
+.siguiente {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  border-radius: var(--r-grande);
+  background: var(--cancha-oscura);
+  color: #fff;
+}
+
+.siguiente h2 {
+  color: #fff;
+}
+
+.siguiente .bajada {
+  color: rgb(255 255 255 / 0.75);
+}
+
+.siguiente-acciones {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 8px;
 }
 
-.btn-eliminar-turno {
-  color: #b91c1c;
+.btn-portada {
+  --bs-btn-color: #fff;
+  --bs-btn-border-color: rgb(255 255 255 / 0.35);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: rgb(255 255 255 / 0.1);
+  --bs-btn-hover-border-color: rgb(255 255 255 / 0.6);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: rgb(255 255 255 / 0.16);
+}
+
+/* ---------- Ingreso y registro ---------- */
+.acceso {
+  display: grid;
+  place-items: start center;
+  padding: 32px 16px 64px;
+}
+
+@media (min-width: 768px) {
+  .acceso {
+    padding: 56px 24px 88px;
+  }
+}
+
+.acceso-tarjeta {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  max-width: 440px;
+  padding: 28px 22px;
+  background: var(--superficie);
+  border-radius: var(--r-grande);
+  box-shadow: var(--sombra-2);
+}
+
+@media (min-width: 480px) {
+  .acceso-tarjeta {
+    padding: 36px 32px;
+  }
+}
+
+.acceso-tarjeta h1 {
+  font-size: 2.25rem;
+}
+
+.acceso-pie {
+  color: var(--tinta-2);
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.acceso-tarjeta .separador {
+  margin: 0 0 20px;
+}
+
+/* Opciones grandes (por ejemplo, elegir rol al registrarse) */
+.opciones {
+  display: grid;
+  gap: 8px;
+}
+
+.opcion {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px 12px 44px;
+  border-radius: var(--r-chico);
+  box-shadow: inset 0 0 0 1px var(--linea-fuerte);
+  cursor: pointer;
+  transition-property: background-color, box-shadow;
+  transition-duration: 150ms;
+}
+
+.opcion input {
+  position: absolute;
+  left: 14px;
+  top: 15px;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--cancha);
+}
+
+.opcion strong {
+  font-size: 0.98rem;
+}
+
+.opcion span {
+  color: var(--tinta-2);
+  font-size: 0.88rem;
+}
+
+.opcion:has(input:checked) {
+  background: var(--cancha-suave);
+  box-shadow: inset 0 0 0 2px var(--cancha);
 }

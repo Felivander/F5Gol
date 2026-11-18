@@ -1,0 +1,60 @@
+table bi_usuarios
+	lineageTag: 83a54701-cd16-4970-a0d0-ea3f54d0ab77
+
+	measure 'Usuarios nuevos' = COUNTROWS(bi_usuarios)
+		formatString: #,0
+		lineageTag: 776a4562-c50f-4836-ba5a-042069c544ca
+
+	measure 'Jugadores nuevos' = CALCULATE([Usuarios nuevos], bi_usuarios[rol] = "jugador")
+		formatString: #,0
+		lineageTag: bb0be55e-6c45-44c2-991d-f8f1bc01c8fd
+
+	measure '% Altas con Google' = DIVIDE(CALCULATE([Usuarios nuevos], bi_usuarios[origen] = "Google"), [Usuarios nuevos])
+		formatString: 0.0%
+		lineageTag: e7fa7209-29e2-4f59-b16e-719726c2adca
+
+	column usuario_id
+		dataType: int64
+		formatString: 0
+		lineageTag: d177b944-2dc6-49a8-92f2-98d79c1f1acc
+		summarizeBy: none
+		sourceColumn: usuario_id
+
+	column rol
+		dataType: string
+		lineageTag: 63fdf85c-9002-4125-9bb6-9ad3bd09fea5
+		summarizeBy: none
+		sourceColumn: rol
+
+	column origen
+		dataType: string
+		lineageTag: 939d00e0-7012-4b19-8729-35f6c89a4a21
+		summarizeBy: none
+		sourceColumn: origen
+
+	column creado_en
+		dataType: dateTime
+		formatString: dd/mm/yyyy HH:mm
+		lineageTag: 0aae77b9-b397-4fd1-ac96-dd5020423bc3
+		summarizeBy: none
+		sourceColumn: creado_en
+
+	column 'Fecha de alta' = DATE(YEAR(bi_usuarios[creado_en]), MONTH(bi_usuarios[creado_en]), DAY(bi_usuarios[creado_en]))
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 1a74f956-525a-4ff1-8866-d7924d953aa7
+		summarizeBy: none
+
+	partition bi_usuarios = m
+		mode: import
+		source =
+				let
+				    // Base f5gol del MySQL de XAMPP (usuario root, sin contraseña)
+				    Origen = MySQL.Database("localhost", "f5gol", [ReturnSingleDatabase = true]),
+				    Vista = Origen{[Schema = "f5gol", Item = "bi_usuarios"]}[Data],
+				    Tipos = Table.TransformColumnTypes(Vista, {{"usuario_id", Int64.Type}, {"rol", type text}, {"origen", type text}, {"creado_en", type datetime}})
+				in
+				    Tipos
+
+	annotation PBI_ResultType = Table
+

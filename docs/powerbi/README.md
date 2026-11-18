@@ -2,6 +2,14 @@
 
 Tablero con los indicadores del sistema, armado sobre la base MySQL de F5GOL. Cumple el requisito de la cátedra: **extracción de datos desde MySQL, modelado básico, KPIs y diseño del dashboard**.
 
+## Cómo queda
+
+Datos de la base de demo (`migrate:fresh --seed`, con 8 semanas de historial).
+
+![Página 1: resumen del club](captura-resumen.png)
+
+![Página 2: jugadores y matchmaking](captura-jugadores.png)
+
 ## Qué preguntas responde
 
 | Pregunta del dueño del club | Indicador |
@@ -13,6 +21,18 @@ Tablero con los indicadores del sistema, armado sobre la base MySQL de F5GOL. Cu
 | ¿Cuántos partidos se arman gracias al matchmaking? | **% Partidos por matchmaking** |
 | ¿Se cancela mucho? | **% Cancelación** |
 | ¿Crece la app? | **Usuarios nuevos** por semana y **% Altas con Google** |
+
+## Atajo: abrir el proyecto ya armado
+
+En esta carpeta está **`F5GOL.pbip`**, un proyecto de Power BI con el modelo y las dos páginas ya armados: conexión a las vistas, tabla Calendario, relaciones, todas las medidas y los gráficos. Para usarlo:
+
+1. Hacer el paso 1 de abajo (vistas y datos de demo) e instalar MySQL Connector/NET (paso 2.1).
+2. Abrir `F5GOL.pbip` con doble clic (o en Power BI Desktop: **Archivo > Abrir > Examinar**).
+3. Tocar **Actualizar**. Si pide credenciales: pestaña **Base de datos**, usuario `root` y contraseña vacía. Si pregunta por niveles de privacidad, elegir **Organizativo**.
+4. Revisar las dos páginas. Opcional: en la matriz *Turnos ocupados por hora y día*, **Formato condicional > Color de fondo** para que quede como mapa de calor.
+5. **Archivo > Guardar como > `F5GOL.pbix`** y sacar una captura de cada página.
+
+Si Power BI muestra un error al abrir el proyecto, anotá el mensaje: el modelo también se puede armar a mano con los pasos de abajo.
 
 ## 1. Preparar los datos (una vez)
 
