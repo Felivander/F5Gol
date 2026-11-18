@@ -107,9 +107,9 @@ class EditarReservaTest extends TestCase
         $this->assertSame($anterior->id, $reserva->fresh()->turno_id);
     }
 
-    public function test_el_jugador_no_puede_cambiar_de_turno_fuera_de_plazo(): void
+    public function test_el_jugador_no_puede_cambiar_de_turno_si_ya_empezo(): void
     {
-        $inicio = now()->addHour();
+        $inicio = now()->subMinutes(30);
         $anterior = $this->crearTurno(null, [
             'fecha' => $inicio->toDateString(),
             'hora_inicio' => $inicio->format('H:i'),
@@ -122,7 +122,7 @@ class EditarReservaTest extends TestCase
 
         $this->putJson("/api/reservas/{$reserva->id}", ['turno_id' => $nuevo->id])
             ->assertStatus(409)
-            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Las reservas se pueden cambiar de turno hasta 2 horas antes del partido'));
+            ->assertJsonPath('message', fn ($m) => str_contains($m, 'Las reservas se pueden cambiar de turno hasta que empieza el partido'));
 
         $this->assertSame($anterior->id, $reserva->fresh()->turno_id);
     }

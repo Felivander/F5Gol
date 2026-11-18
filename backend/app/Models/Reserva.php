@@ -19,9 +19,6 @@ class Reserva extends Model
 {
     use HasFactory;
 
-    // Un jugador puede cancelar hasta esta cantidad de horas antes del partido
-    public const HORAS_MINIMAS_PARA_CANCELAR = 2;
-
     // Reservas que forman parte de un partido de matchmaking:
     // un lugar suelto ("individual") o un equipo entero ("equipo")
     public const TIPOS_PARTIDO = ['individual', 'equipo'];

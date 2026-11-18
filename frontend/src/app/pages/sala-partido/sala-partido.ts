@@ -178,7 +178,7 @@ export class SalaPartido implements OnInit {
     this.api.cancelarReserva(reserva.id).subscribe({
       next: res => this.router.navigate(['/mis-reservas'], { state: { aviso: res.message } }),
       error: err => {
-        // 409: ya está fuera del plazo de cancelación
+        // 409: el partido ya empezó
         this.error.set(err.error?.message ?? 'No se pudo cancelar la inscripción.');
         this.cancelando.set(false);
         this.cargar(true);

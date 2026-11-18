@@ -87,7 +87,7 @@ F5GOL es una app web de gestión de turnos y matchmaking para canchas de fútbol
 - Grilla de disponibilidad por cancha, fecha y horario.
 - Reserva de cancha completa.
 - Matchmaking con dos equipos (A y B, cada uno con la mitad de la capacidad de la cancha: 5 en F5, 6 en F6, 7 en F7, 9 en F9). Se entra de tres formas: **un lugar** (te sumás solo a un equipo y esperás a que se llene), **un equipo completo** (lo reservás para vos y tus amigos) o **la cancha entera**. Aviso automático al completarse.
-- "Mis reservas": historial, edición y cancelación dentro del plazo permitido.
+- "Mis reservas": historial, edición y cancelación hasta que empieza el turno.
 - Estado de pago manual: pendiente / seña / pagado.
 - Panel del administrador: reservas del día y de la semana por cancha.
 - Bloqueo manual de turnos por mantenimiento.
@@ -106,7 +106,7 @@ F5GOL es una app web de gestión de turnos y matchmaking para canchas de fútbol
 2. Un turno con matchmaking **incompleto nunca se muestra como "Ocupado"**.
 3. Cuando los dos equipos están completos (en F5, 10 jugadores), el turno pasa a "Ocupado" y se notifica a todos. Un equipo entero solo se reserva si ese equipo está vacío; la cancha entera, solo si no hay nadie anotado.
 4. El cupo de anotados **se actualiza sin recargar la página**.
-5. Una cancelación dentro de la ventana permitida **libera el turno automáticamente**.
+5. Una cancelación (se puede hasta que empieza el turno) **libera el turno automáticamente**.
 6. **Cada administrador solo gestiona sus propios clubes y canchas.**
 7. Un turno bloqueado por mantenimiento no se puede reservar ni tomar por matchmaking.
 8. El rol de un usuario lo decide el servidor: no se confía en lo que mande el cliente para darle permisos.
@@ -237,9 +237,9 @@ Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, 
 - API Laravel 13 + Sanctum: registro, login, logout, `/user`; CRUD de clubes, canchas, turnos, reservas y jugadores anotados; middleware `auth:sanctum` y `administrador`; control de dueño.
 - Swagger: todos los endpoints de `route:list` (incluidos Google y las fotos del club) están documentados en `storage/api-docs/api-docs.json`.
 - Validación con FormRequest y mensajes en español; soft delete y restauración de canchas; fotos de canchas.
-- Reglas de negocio: sin doble reserva, matchmaking con cierre a 5 y mail (`PartidoCompleto`), cupo refrescado cada 15 s, cancelación hasta 2 h antes, bloqueo por mantenimiento, estado de pago solo por el administrador.
+- Reglas de negocio: sin doble reserva, matchmaking con cierre a 5 y mail (`PartidoCompleto`), cupo refrescado cada 15 s, cancelación y cambio de turno hasta que empieza el partido, bloqueo por mantenimiento, estado de pago solo por el administrador.
 - Front Angular 22: clubes (buscador), detalle de club (descripción y galería de fotos), Mis clubes (alta, edición, fotos y baja del club con formulario reactivo), grilla de turnos, reserva completa e individual, Mis reservas (cancelar y cambiar turno), alta/edición/baja/restauración de canchas (con superficie, techada, iluminación y vestuarios), panel del administrador (día y semana, estado de pago), login, registro, interceptor con el token.
-- Permisos de reservas e inscripciones: nadie reserva a nombre de otro (salvo el administrador del club), nadie cancela ni edita reservas ajenas, el plazo de 2 horas solo lo saltea el administrador **de ese club**, y las inscripciones de jugadores solo las tocan el jugador, el dueño de la reserva o el administrador del club (`MensajesApiTest`, `CancelarReservaTest`).
+- Permisos de reservas e inscripciones: nadie reserva a nombre de otro (salvo el administrador del club), nadie cancela ni edita reservas ajenas, cancelar o cambiar un turno que ya empezó solo puede el administrador **de ese club**, y las inscripciones de jugadores solo las tocan el jugador, el dueño de la reserva o el administrador del club (`MensajesApiTest`, `CancelarReservaTest`).
 - Privacidad: `GET /api/reservas` y `/api/jugador-anotados` eran públicos y exponían nombres y mails de todos los usuarios. Ahora piden sesión; el jugador ve solo lo suyo y el administrador, además, lo de sus clubes (`ReservasPrivadasTest`).
 - Seguridad de clubes: el dueño lo asigna el servidor (no se acepta `administrador_id` del cliente) y solo el dueño edita, borra o sube fotos (403).
 - Lobby de matchmaking: `GET /api/partidos-abiertos` (público, sin datos de los jugadores) y pantalla `/partidos` con los partidos que se están armando, cuántos lugares faltan, filtros por día y club y refresco cada 15 s. El inicio muestra los tres más cerca de completarse.
@@ -247,11 +247,12 @@ Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, 
 - Dos equipos por partido: columna `reservas.equipo` (A/B) y tipo de reserva `equipo` (un equipo entero). El cupo del turno es el de los dos equipos (la capacidad de la cancha). La grilla ofrece las tres formas de entrar como opciones (un lugar, un equipo completo, la cancha entera) con su precio y la elección de equipo; la sala dibuja la cancha horizontal con cada equipo en su mitad y dice si está completo; el lobby marca en cada partido si estás anotado (y en qué equipo) y muestra una cancha chica donde tocar un lugar libre te suma ahí (o suma a un amigo si ya estás); la sala usa dos columnas en pantallas anchas y también deja sumar amigos tocando un lugar libre. Sumarse o sumar amigos se hace en un modal (`components/modal-sumarse`, con <dialog> nativo): equipo, cantidad, total a pagar y link para invitar (`EquiposPartidoTest`). Tipos de cancha: F5, F6, F7, F8, F9 y F11.
 - Aviso de partido incompleto: el comando `partidos:avisar-incompletos` corre cada 5 minutos con el programador de Laravel (`schedule:work`, lo levanta `iniciar-f5gol.bat`); cuando un partido llega a su hora sin completarse, avisa una sola vez a los anotados por n8n (`docs/n8n/partido-incompleto.json`) o, si n8n no responde, por el mail de Laravel (`LobbyMatchmakingTest`).
 - Zona horaria: Laravel corre en `America/Argentina/Buenos_Aires` (`APP_TIMEZONE`). Antes estaba en UTC y tomaba como empezados turnos a los que les faltaban 3 horas (lobby, plazo de cancelación y aviso de incompleto).
+- Borrar cuentas para repetir la demo: `php artisan usuarios:borrar` (por mail, o `--registrados` para todas las que no son del seeder). Pide confirmación, borra en cascada clubes, reservas e inscripciones, borra los tokens de Sanctum y vuelve a dejar disponibles los partidos que quedan incompletos (`BorrarUsuariosTest`).
 - Mails con el diseño de la app: los cuatro mails de n8n (bienvenida de jugador y de administrador, partido completo e incompleto) usan papel, tinta, verde cancha y el botón lima, sin emojis, y se ven bien a 375 px. Los avisos de respaldo de Laravel usan el tema `resources/views/mail/f5gol.css` (`config/mail.php`) y salen en español (`lang/es.json`). Para actualizar un flujo en n8n sin perder el secreto ni la credencial: exportarlo, copiarle el asunto y el HTML del repo e importarlo con su mismo id.
 - Interfaz rediseñada: sistema visual propio en `styles.css` (tipografía Archivo, verde cancha y lima, sin emojis), íconos SVG (`components/icono`), tarjeta de partido reutilizable, grilla de turnos con tira de días y pantallas pensadas primero para el celular. Revisado a 375 px sin desbordes.
 - Seeders idempotentes: `db:seed` se puede correr varias veces sin duplicar clubes, usuarios, reservas ni inscripciones (`SeedersTest`).
-- Partidos para la demo: `PartidosCasiLlenosSeeder` (corre con `db:seed`) deja 5 partidos a un jugador de completarse, en canchas y horarios distintos que empiezan dentro de al menos una hora, armados con los jugadores `demoN`. Al sumarse uno, el partido pasa a "ocupado" y se dispara el aviso de partido completo por n8n. Si ya hay 5, no agrega más; si se completó alguno, arma los que falten (`PartidosCasiLlenosTest`).
-- Tests: 190 tests del backend y 6 del frontend (`formato.spec.ts`), pasan todos (con la extensión **GD** de PHP activa; sin GD fallan los de fotos). `ng build` compila sin advertencias.
+- Partidos para la demo: `PartidosDemoSeeder` (corre con `db:seed`) deja un partido en cada estado, en canchas y horarios distintos que empiezan dentro de al menos una hora, armados con los jugadores `demoN`: le falta uno (9/10: al sumarse alguien se completa y se dispara el aviso por n8n), mitad lleno (Equipo A completo y B vacío, para reservar el otro equipo entero) y completo (10/10, ocupado), y además informa un turno vacío. La consola dice dónde quedó cada uno. Solo arma los que no estén, así que se puede correr varias veces (`PartidosDemoTest`).
+- Tests: 197 tests del backend y 6 del frontend (`formato.spec.ts`), pasan todos (con la extensión **GD** de PHP activa; sin GD fallan los de fotos). `ng build` compila sin advertencias.
 
 ### 8.2 Pendiente — requisitos obligatorios de la cátedra
 
@@ -261,6 +262,7 @@ Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, 
 4. **Guards en Angular** (semana 14): hechos en `guards/auth.guard.ts` (`sesionGuard` en `/mis-reservas`, `administradorGuard` en `/panel`, `/mis-clubes`, `/clubes/nuevo`, `/clubes/:id/editar`, `/canchas/nueva` y `/canchas/:id/editar`). El interceptor, además, cierra la sesión y manda a `/login?sesion=vencida` si la API responde `401` a un pedido con token. ✅
 5. ~~Formularios reactivos.~~ Hechos en todos los formularios (login, registro, club, cancha y horarios), con validadores propios en `validadores.ts` y los errores `422` de Laravel por campo.
 5b. ~~Registro con rol administrador abierto.~~ **Decidido: se deja así.** "Administrador" significa dueño de club y el servidor solo le deja manejar lo suyo, así que registrarse como administrador no da acceso a nada ajeno. Respuesta para la presentación: "administrador acá significa dueño de club: solo puede crear y manejar sus propias canchas". Antecedente: La guía de Swagger (punto 27) recomienda que el registro público **no** deje que el cliente elija ser administrador: el rol inicial lo asigna el servidor y la creación de administradores queda restringida. Hoy `POST /register` acepta `rol: administrador` de cualquiera, lo que además contradice la regla 2.3.8. La historia del backlog pide "registro eligiendo rol", así que hay que decidir: (a) dejarlo y poder justificarlo en la presentación, o (b) registrar siempre como jugador y que un administrador existente (o un super administrador) habilite nuevos administradores.
+5c. ~~Plazo de cancelación de 2 horas.~~ **Decidido el 18/11: se saca.** El jugador cancela o cambia de turno hasta que empieza el partido; después solo puede el administrador de ese club (`CancelarReservaTest`, `EditarReservaTest`). Se aparta de la historia del backlog "Cancelar una reserva propia dentro del plazo permitido" y de la ventana mínima de la propuesta: respuesta para la presentación, "el club prefiere que el lugar se libere aunque sea sobre la hora, así otro jugador lo puede tomar".
 
 ### 8.3 Pendiente — para que ningún módulo quede "a medias"
 
@@ -279,6 +281,6 @@ Revisión hecha leyendo todo el material de la cátedra (plan anual, criterios, 
 
 ### 8.5 Opcional (está en la propuesta, no lo exige la cátedra)
 
-- Plazo de cancelación configurable por club (hoy fijo en 2 horas).
+- Plazo mínimo de cancelación configurable por club (hoy se puede cancelar hasta que empieza el turno).
 - Notificaciones dentro de la plataforma (tabla `notificaciones`).
 - Rol Super Administrador para dar de alta clubes.

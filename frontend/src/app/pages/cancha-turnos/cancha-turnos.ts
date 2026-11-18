@@ -254,7 +254,7 @@ export class CanchaTurnos implements OnInit {
     this.api.actualizarReserva(Number(this.mover()), { turno_id: turno.id }).subscribe({
       next: () => this.router.navigate(['/mis-reservas'], { state: { aviso: 'Listo, tu reserva pasó al turno nuevo.' } }),
       error: err => {
-        // 409: el turno nuevo se ocupó, ya pasó o el original está fuera de plazo
+        // 409: el turno nuevo se ocupó o ya pasó, o el original ya empezó
         this.error.set(err.error?.message ?? 'No se pudo cambiar el turno.');
         this.reservando.set(null);
         this.buscarTurnos();

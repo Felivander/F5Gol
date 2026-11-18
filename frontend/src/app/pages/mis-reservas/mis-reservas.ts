@@ -79,7 +79,7 @@ export class MisReservas implements OnInit {
         this.cargar(this.pagina());
       },
       error: err => {
-        // 409: fuera del plazo de cancelación o ya cancelada
+        // 409: el turno ya empezó o la reserva ya estaba cancelada
         this.error.set(err.error?.message ?? 'No se pudo cancelar la reserva.');
         this.cancelando.set(null);
       }
