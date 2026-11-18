@@ -153,18 +153,27 @@ php artisan migrate:fresh --seed
 
 `migrate:fresh` **borra todos los datos** de la base `f5gol` y la vuelve a crear. `HistorialDemoSeeder` carga 8 semanas de reservas para que el tablero de Power BI tenga datos (tarda unos 40 segundos).
 
-El seed deja **5 partidos a los que les falta un solo jugador** (`PartidosCasiLlenosSeeder`), en canchas y horarios distintos que empiezan dentro de al menos una hora. Al sumarse uno, el partido se completa y se dispara el aviso de partido completo de n8n. Los arma con los jugadores `demoN@f5gol.com`, así `jugador1@f5gol.com` … `jugador8@f5gol.com` (o una cuenta de Google) quedan libres para sumarse en vivo.
+El seed deja **un partido en cada estado** (`PartidosDemoSeeder`), en canchas y horarios distintos que empiezan dentro de al menos una hora:
 
-Si la base se recreó otro día, o si en la prueba ya se completaron algunos, se pueden volver a armar sin borrar nada (solo agrega los que falten para llegar a 5):
+| Partido | Cómo queda | Para mostrar |
+|---|---|---|
+| Le falta uno | 9/10 | Al sumarse alguien se completa, pasa a ocupado y se dispara el aviso de partido completo de n8n |
+| Mitad lleno | 5/10: el Equipo A completo y el B vacío | Que se puede reservar el otro equipo entero |
+| Completo | 10/10, ocupado | Que no aparece en el lobby y en la grilla figura ocupado |
+| Vacío | 0/10 | Arrancar un partido desde cero |
+
+Al terminar, la consola dice el club, la cancha, la hora y el número de turno de cada uno. Los arma con los jugadores `demoN@f5gol.com`, así `jugador1@f5gol.com` … `jugador8@f5gol.com` (o una cuenta de Google) quedan libres para sumarse en vivo.
+
+Si la base se recreó otro día, o si en el ensayo se completó el que faltaba uno, se pueden volver a armar sin borrar nada (solo arma los que no estén):
 
 ```bash
 php artisan db:seed --class=TurnoSeeder
-php artisan db:seed --class=PartidosCasiLlenosSeeder
+php artisan db:seed --class=PartidosDemoSeeder
 ```
 
 La lista completa para tildar en la máquina de la presentación está en [docs/pruebas/F5GOL-lista-de-pruebas.docx](docs/pruebas/F5GOL-lista-de-pruebas.docx).
 
-Recorrido sugerido: registrarse (o entrar con Google) → crear un club en **Mis clubes** → agregar una cancha → cargar sus horarios → reservar la cancha entera con un jugador → en **Partidos abiertos**, sumarse a un partido 9/10 (se completa y llega el mail) → ver las reservas en el **Panel** y marcar la seña → cancelar una reserva desde **Mis reservas**.
+Recorrido sugerido: registrarse (o entrar con Google) → crear un club en **Mis clubes** → agregar una cancha → cargar sus horarios → reservar la cancha entera con un jugador → en **Partidos abiertos**, sumarse al partido 9/10 (se completa y llega el mail) → ver las reservas en el **Panel** y marcar la seña → cancelar una reserva desde **Mis reservas**.
 
 ## Cómo funciona el matchmaking
 
