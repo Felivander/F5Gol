@@ -15,6 +15,9 @@ import { Api } from '../../services/api';
 export class Clubes implements OnInit, OnDestroy {
   private api = inject(Api);
 
+  // Las 10 franjas de pasto cortado de la cancha de la portada
+  protected franjas = Array.from({ length: 10 }, (_, i) => i);
+
   clubes = signal<Club[]>([]);
   pagina = signal(1);
   ultimaPagina = signal(1);

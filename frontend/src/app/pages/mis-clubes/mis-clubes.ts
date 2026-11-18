@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { Icono } from '../../components/icono/icono';
 import { Club } from '../../models';
 import { Api } from '../../services/api';
+import { Dialogos } from '../../services/dialogos';
 
 // Clubes del administrador logueado: crear, editar, entrar a gestionar canchas y eliminar
 @Component({
@@ -13,6 +14,7 @@ import { Api } from '../../services/api';
 })
 export class MisClubes implements OnInit {
   private api = inject(Api);
+  private dialogos = inject(Dialogos);
 
   clubes = signal<Club[]>([]);
   cargando = signal(true);
@@ -37,8 +39,13 @@ export class MisClubes implements OnInit {
     });
   }
 
-  eliminar(club: Club): void {
-    if (!confirm(`¿Querés eliminar el club "${club.nombre}"? Esta acción no se puede deshacer.`)) {
+  async eliminar(club: Club): Promise<void> {
+    if (!(await this.dialogos.confirmar({
+      titulo: `¿Eliminar ${club.nombre}?`,
+      mensaje: 'Se borran el club y sus fotos, y no se puede deshacer. Si todavía tiene canchas, primero hay que eliminarlas.',
+      textoConfirmar: 'Eliminar club',
+      peligro: true
+    }))) {
       return;
     }
     this.error.set('');

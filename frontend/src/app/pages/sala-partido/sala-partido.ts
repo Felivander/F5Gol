@@ -6,6 +6,7 @@ import { ModalSumarse, PartidoParaSumarse } from '../../components/modal-sumarse
 import { fechaRelativa, partesFecha, pesos, textoTipo } from '../../formato';
 import { Equipo, SalaPartido as Sala, textoSuperficie } from '../../models';
 import { Api } from '../../services/api';
+import { Dialogos } from '../../services/dialogos';
 import { Auth } from '../../services/auth';
 
 const REFRESCO_MS = 15_000;
@@ -19,6 +20,7 @@ const REFRESCO_MS = 15_000;
 })
 export class SalaPartido implements OnInit {
   private api = inject(Api);
+  private dialogos = inject(Dialogos);
   private router = inject(Router);
   private auth = inject(Auth);
 
@@ -139,7 +141,7 @@ export class SalaPartido implements OnInit {
       this.copiado.set(true);
       setTimeout(() => this.copiado.set(false), 2500);
     } catch {
-      prompt('Copiá este link para invitar:', link);
+      await this.dialogos.mostrarLink('Link para invitar', link, 'Copialo y mandáselo: con este link se anotan en la grilla de ese día.');
     }
   }
 
@@ -168,9 +170,17 @@ export class SalaPartido implements OnInit {
     this.cargar(true);
   }
 
-  salirDelPartido(): void {
+  async salirDelPartido(): Promise<void> {
     const reserva = this.sala()?.mi_reserva;
-    if (!reserva || !confirm('¿Querés bajarte de este partido? Tu lugar queda libre para otro jugador.')) {
+    if (!reserva || !(await this.dialogos.confirmar({
+      titulo: '¿Bajarte de este partido?',
+      mensaje: reserva.cantidad_jugadores > 1
+        ? `Se liberan tus ${reserva.cantidad_jugadores} lugares del Equipo ${reserva.equipo} para otros jugadores.`
+        : `Tu lugar en el Equipo ${reserva.equipo} queda libre para otro jugador.`,
+      textoConfirmar: 'Bajarme',
+      textoVolver: 'No, me quedo',
+      peligro: true
+    }))) {
       return;
     }
     this.cancelando.set(true);

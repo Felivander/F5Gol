@@ -1,0 +1,37 @@
+<dialog #dialogo class="hoja" aria-labelledby="dialogo-titulo" aria-describedby="dialogo-mensaje"
+  (cancel)="$event.preventDefault(); responder(false)" (click)="tocarFondo($event)">
+  @if (dialogos.actual(); as d) {
+    <div class="caja">
+      <div class="cabeza">
+        @if (d.peligro) {
+          <span class="marca marca-peligro" aria-hidden="true"><app-icono nombre="alerta" [tamano]="22" /></span>
+        }
+        <div class="cabeza-texto">
+          <h2 id="dialogo-titulo">{{ d.titulo }}</h2>
+          @if (d.mensaje) {
+            <p id="dialogo-mensaje">{{ d.mensaje }}</p>
+          }
+        </div>
+      </div>
+
+      @if (d.tipo === 'link' && d.link) {
+        <div class="link">
+          <input class="control" type="text" readonly [value]="d.link" aria-label="Link para invitar" (focus)="$any($event.target).select()">
+          <button type="button" class="btn btn-lima" (click)="copiar(d.link)">
+            <app-icono nombre="jugadores" [tamano]="16" />
+            {{ copiado() ? 'Copiado' : 'Copiar' }}
+          </button>
+        </div>
+      }
+
+      <div class="acciones">
+        @if (d.tipo === 'confirmar') {
+          <button #principal type="button" class="btn" [class.btn-primary]="!d.peligro" [class.btn-peligro]="d.peligro" (click)="responder(true)">
+            {{ d.textoConfirmar }}
+          </button>
+        }
+        <button type="button" class="btn btn-fantasma" (click)="responder(false)">{{ d.textoVolver }}</button>
+      </div>
+    </div>
+  }
+</dialog>

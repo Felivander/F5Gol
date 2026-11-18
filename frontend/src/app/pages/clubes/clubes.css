@@ -1,32 +1,80 @@
-/* Portada: verde de cancha con las líneas del área dibujadas */
+/* Portada: una cancha completa en perspectiva, de fondo, del lado derecho */
 .portada {
   position: relative;
   overflow: hidden;
-  background: var(--cancha-oscura);
+  isolation: isolate;
+  background:
+    radial-gradient(120% 90% at 85% 10%, #13774a 0%, transparent 60%),
+    var(--cancha-oscura);
   color: #fff;
 }
 
-.portada::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.035) 0 64px, transparent 64px 128px);
-  pointer-events: none;
-}
-
-/* Medio círculo de la cancha, a la derecha */
+/* Degradé para que el texto de la izquierda se lea sobre la cancha */
 .portada::after {
   content: '';
   position: absolute;
-  right: -140px;
-  top: 50%;
-  width: 360px;
-  height: 360px;
-  border: 2px solid rgb(255 255 255 / 0.14);
-  border-radius: 50%;
-  translate: 0 -50%;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, var(--cancha-oscura) 0%, rgb(11 74 46 / 0.92) 32%, rgb(11 74 46 / 0.35) 62%, transparent 85%);
   pointer-events: none;
+}
+
+.portada-cancha {
+  position: absolute;
+  z-index: -2;
+  top: 50%;
+  right: -38%;
+  width: 150%;
+  max-width: 980px;
+  opacity: 0.55;
+  translate: 0 -50%;
+  transform: perspective(1100px) rotateX(52deg) rotateZ(-10deg);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+}
+
+.portada-cancha svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 40px 50px rgb(0 0 0 / 0.35));
+}
+
+@media (min-width: 768px) {
+  .portada-cancha {
+    right: -6%;
+    width: 72%;
+    opacity: 1;
+  }
+}
+
+.pc-borde {
+  fill: #0a3f27;
+}
+
+.pc-franja-a {
+  fill: #16804f;
+}
+
+.pc-franja-b {
+  fill: #12703f;
+}
+
+.pc-lineas {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.85);
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+
+.pc-puntos {
+  fill: rgb(255 255 255 / 0.9);
+}
+
+.pc-arco {
+  fill: url(#portada-red);
+  stroke: rgb(255 255 255 / 0.9);
+  stroke-width: 4;
 }
 
 .portada-interior {
@@ -39,12 +87,6 @@
 @media (min-width: 768px) {
   .portada-interior {
     padding: 80px 24px 88px;
-  }
-
-  .portada::after {
-    right: 6%;
-    width: 440px;
-    height: 440px;
   }
 }
 

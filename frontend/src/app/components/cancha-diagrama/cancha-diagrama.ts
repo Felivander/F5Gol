@@ -12,5 +12,8 @@ export class CanchaDiagrama {
   tipo = input<string>('Fútbol 5');
   mini = input<boolean>(false);
 
+  // Las 10 franjas de pasto cortado
+  protected franjas = Array.from({ length: 10 }, (_, i) => i);
+
   protected textoTipo = computed(() => textoTipo(this.tipo()));
 }

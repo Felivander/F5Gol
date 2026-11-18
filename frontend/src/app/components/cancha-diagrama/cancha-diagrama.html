@@ -1,18 +1,26 @@
-<svg class="campo" [class.mini]="mini()" viewBox="0 0 400 240" role="img" [attr.aria-label]="'Dibujo de una cancha de ' + textoTipo()">
-  <rect width="400" height="240" class="campo-pasto" />
-  @for (franja of [0, 2, 4, 6, 8]; track franja) {
-    <rect [attr.x]="franja * 40" y="0" width="40" height="240" class="campo-franja" />
+<!-- Cancha vista desde arriba, con las medidas reales en decímetros (105 x 68 m): áreas, medialunas, puntos, arcos y banderines -->
+<svg class="campo" [class.mini]="mini()" viewBox="0 0 1150 780" preserveAspectRatio="xMidYMid meet" role="img" [attr.aria-label]="'Dibujo de una cancha de ' + textoTipo()">
+  <rect width="1150" height="780" class="campo-borde" />
+  @for (franja of franjas; track franja) {
+    <rect [attr.x]="50 + franja * 105" y="50" width="105" height="680" [class]="franja % 2 ? 'campo-franja-b' : 'campo-franja-a'" />
   }
   <g class="campo-lineas">
-    <rect x="20" y="16" width="360" height="208" rx="2" />
-    <line x1="200" y1="16" x2="200" y2="224" />
-    <circle cx="200" cy="120" r="34" />
-    <path d="M20 66h46a10 10 0 0 1 10 10v88a10 10 0 0 1-10 10H20" />
-    <path d="M380 66h-46a10 10 0 0 0-10 10v88a10 10 0 0 0 10 10h46" />
-    <rect x="10" y="98" width="10" height="44" />
-    <rect x="380" y="98" width="10" height="44" />
+    <rect x="50" y="50" width="1050" height="680" />
+    <line x1="575" y1="50" x2="575" y2="730" />
+    <circle cx="575" cy="390" r="91.5" />
+    <rect x="50" y="188.5" width="165" height="403" />
+    <rect x="935" y="188.5" width="165" height="403" />
+    <rect x="50" y="298.5" width="55" height="183" />
+    <rect x="1045" y="298.5" width="55" height="183" />
+    <path d="M215 316.9A91.5 91.5 0 0 1 215 463.1" />
+    <path d="M935 316.9A91.5 91.5 0 0 0 935 463.1" />
+    <path d="M50 64A14 14 0 0 0 64 50M1086 50A14 14 0 0 0 1100 64M1100 716A14 14 0 0 0 1086 730M64 730A14 14 0 0 0 50 716" />
+    <rect x="22" y="353.4" width="28" height="73.2" class="campo-arco" />
+    <rect x="1100" y="353.4" width="28" height="73.2" class="campo-arco" />
   </g>
-  <circle cx="200" cy="120" r="3" class="campo-punto" />
-  <circle cx="58" cy="120" r="2.5" class="campo-punto" />
-  <circle cx="342" cy="120" r="2.5" class="campo-punto" />
+  <g class="campo-puntos">
+    <circle cx="575" cy="390" r="7" />
+    <circle cx="160" cy="390" r="6" />
+    <circle cx="990" cy="390" r="6" />
+  </g>
 </svg>

@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, input, signal } from '@angular/cor
 import { RouterLink } from '@angular/router';
 import { Cancha, Club, textoSuperficie } from '../../models';
 import { Api } from '../../services/api';
+import { Dialogos } from '../../services/dialogos';
 import { Auth } from '../../services/auth';
 
 import { CanchaDiagrama } from '../../components/cancha-diagrama/cancha-diagrama';
@@ -16,6 +17,7 @@ import { pesos, textoTipo } from '../../formato';
 })
 export class ClubDetalle implements OnInit {
   private api = inject(Api);
+  private dialogos = inject(Dialogos);
   private auth = inject(Auth);
 
   // Viene del parámetro de ruta /clubes/:id
@@ -65,8 +67,13 @@ export class ClubDetalle implements OnInit {
     });
   }
 
-  eliminarCancha(cancha: Cancha): void {
-    const confirmar = confirm(`¿Querés eliminar la cancha "${cancha.nombre}"?`);
+  async eliminarCancha(cancha: Cancha): Promise<void> {
+    const confirmar = await this.dialogos.confirmar({
+      titulo: `¿Eliminar ${cancha.nombre}?`,
+      mensaje: 'Deja de verse para los jugadores. Queda en "Canchas eliminadas" y la podés restaurar cuando quieras.',
+      textoConfirmar: 'Eliminar cancha',
+      peligro: true
+    });
     if (!confirmar) {
       return;
     }
@@ -86,8 +93,12 @@ export class ClubDetalle implements OnInit {
     });
   }
 
-  restaurarCancha(cancha: Cancha): void {
-    const confirmar = confirm(`¿Querés restaurar la cancha "${cancha.nombre}"?`);
+  async restaurarCancha(cancha: Cancha): Promise<void> {
+    const confirmar = await this.dialogos.confirmar({
+      titulo: `¿Restaurar ${cancha.nombre}?`,
+      mensaje: 'Vuelve a aparecer en el club con sus turnos, y los jugadores la pueden reservar.',
+      textoConfirmar: 'Restaurar cancha'
+    });
     if (!confirmar) {
       return;
     }
