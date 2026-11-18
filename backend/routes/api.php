@@ -54,6 +54,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Las reservas y los jugadores anotados tienen nombres y mails: solo con sesión,
     // y cada uno ve lo suyo (o lo de sus clubes, si es administrador)
+    // Sala de un partido de matchmaking: solo para los anotados y el dueño del club
+    Route::get('partidos/{id}', [PartidoController::class, 'show'])->whereNumber('id');
+
     Route::apiResource('reservas', ReservaController::class);
     Route::apiResource('jugador-anotados', JugadorAnotadoController::class);
 });

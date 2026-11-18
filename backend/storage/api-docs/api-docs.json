@@ -1331,6 +1331,149 @@
                 }
             }
         },
+        "/api/partidos/{id}": {
+            "get": {
+                "tags": [
+                    "Matchmaking"
+                ],
+                "summary": "Sala de un partido de matchmaking",
+                "description": "Datos del partido, cuántos lugares faltan y quiénes se anotaron (nombre y apellido abreviado, sin mails). Solo la ven los jugadores anotados y el administrador del club. Incluye la reserva propia y si todavía se puede cancelar.",
+                "operationId": "4a850f1b6ea16679f8d88974ba993f74",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id del turno",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sala del partido.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "turno_id": {
+                                            "type": "integer",
+                                            "example": 42
+                                        },
+                                        "fecha": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2026-11-20"
+                                        },
+                                        "hora_inicio": {
+                                            "type": "string",
+                                            "example": "20:00"
+                                        },
+                                        "hora_fin": {
+                                            "type": "string",
+                                            "example": "21:00"
+                                        },
+                                        "estado": {
+                                            "type": "string",
+                                            "example": "armandose",
+                                            "enum": [
+                                                "armandose",
+                                                "completo",
+                                                "ya_empezo"
+                                            ]
+                                        },
+                                        "cupo_maximo": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "anotados": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "faltan": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "precio_por_jugador": {
+                                            "type": "number",
+                                            "example": 3400
+                                        },
+                                        "cancha": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "nombre": "Cancha 1",
+                                                "tipo": "futbol5",
+                                                "superficie": "cesped_sintetico",
+                                                "techada": true,
+                                                "iluminacion": true,
+                                                "vestuarios": false
+                                            }
+                                        },
+                                        "club": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "nombre": "Complejo Concordia FC",
+                                                "direccion": "Av. Costanera 1200",
+                                                "telefono": "3454111111"
+                                            }
+                                        },
+                                        "jugadores": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "nombre": {
+                                                        "type": "string",
+                                                        "example": "Lautaro M."
+                                                    },
+                                                    "cantidad": {
+                                                        "description": "Lugares que ocupa (él y sus amigos)",
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "soy_yo": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "mi_reserva": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 15,
+                                                "cantidad_jugadores": 1,
+                                                "puede_cancelar": true,
+                                                "cancelar_hasta": "2026-11-20 18:00"
+                                            },
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Falta iniciar sesión."
+                    },
+                    "403": {
+                        "description": "No estás anotado en este partido ni sos el administrador del club."
+                    },
+                    "404": {
+                        "description": "No existe el turno o no tiene un partido de matchmaking."
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/reservas": {
             "get": {
                 "tags": [
