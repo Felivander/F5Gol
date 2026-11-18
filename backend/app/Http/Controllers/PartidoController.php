@@ -35,6 +35,7 @@ class PartidoController extends Controller
                 new OA\Property(property: 'precio_por_jugador', type: 'number', example: 1700),
                 new OA\Property(property: 'equipos', type: 'object', example: ['A' => ['cupo' => 5, 'anotados' => 5, 'faltan' => 0], 'B' => ['cupo' => 5, 'anotados' => 1, 'faltan' => 4]]),
                 new OA\Property(property: 'estoy_anotado', type: 'boolean', example: false),
+                new OA\Property(property: 'mi_equipo', type: 'string', enum: ['A', 'B'], nullable: true, example: null, description: 'Equipo donde está anotado el usuario (solo con token)'),
                 new OA\Property(property: 'cancha', type: 'object', example: ['id' => 1, 'nombre' => 'Cancha 1', 'tipo' => 'futbol5', 'superficie' => 'cesped_sintetico']),
                 new OA\Property(property: 'club', type: 'object', example: ['id' => 1, 'nombre' => 'Complejo Concordia FC', 'direccion' => 'Av. Costanera 1200']),
             ]))),
@@ -79,6 +80,7 @@ class PartidoController extends Controller
                 'precio_por_jugador' => round((float) $t->cancha->tarifa / max(1, $t->cupo_maximo), 2),
                 'equipos' => $this->equipos($t),
                 'estoy_anotado' => $usuario !== null && $t->reservas->contains('usuario_id', $usuario->id),
+                'mi_equipo' => $usuario ? $t->reservas->firstWhere('usuario_id', $usuario->id)?->equipo : null,
                 'cancha' => $t->cancha->only('id', 'nombre', 'tipo', 'superficie'),
                 'club' => $t->cancha->club?->only('id', 'nombre', 'direccion'),
             ])

@@ -1320,6 +1320,16 @@
                                                 "type": "boolean",
                                                 "example": false
                                             },
+                                            "mi_equipo": {
+                                                "description": "Equipo donde está anotado el usuario (solo con token)",
+                                                "type": "string",
+                                                "example": null,
+                                                "nullable": true,
+                                                "enum": [
+                                                    "A",
+                                                    "B"
+                                                ]
+                                            },
                                             "cancha": {
                                                 "type": "object",
                                                 "example": {

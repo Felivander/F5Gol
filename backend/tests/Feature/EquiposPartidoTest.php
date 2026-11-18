@@ -116,7 +116,8 @@ class EquiposPartidoTest extends TestCase
         $this->app['auth']->forgetGuards();
         $this->withToken($token)->getJson('/api/partidos-abiertos')
             ->assertOk()
-            ->assertJsonPath('0.estoy_anotado', true);
+            ->assertJsonPath('0.estoy_anotado', true)
+            ->assertJsonPath('0.mi_equipo', 'B');
     }
 
     public function test_un_equipo_entero_se_puede_pasar_a_otro_turno_con_un_equipo_libre(): void
