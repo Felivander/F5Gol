@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <!-- Sello de F5GOL: la pelota grande en la esquina de abajo a la derecha, cortada por el borde
-       del cuadrado, y "F5" arriba a la izquierda, blanco con borde tinta (los mismos colores que la pelota) -->
+       del cuadrado, y "F5" como número de camiseta arriba a la izquierda, blanco con borde tinta (los mismos colores que la pelota) -->
   <defs>
     <clipPath id="cuadrado"><rect width="64" height="64" rx="14"/></clipPath>
     <clipPath id="cuero"><circle r="36"/></clipPath>
   </defs>
   <g clip-path="url(#cuadrado)">
     <rect width="64" height="64" fill="#cff04a"/>
-    <g transform="translate(48 48) scale(0.95)">
+    <g transform="translate(57 60) scale(0.95)">
       <circle r="36" fill="#fff" stroke="#15171a" stroke-width="4"/>
       <g clip-path="url(#cuero)" fill="#15171a">
         <polygon points="0,-12 11.4,-3.7 7.1,9.7 -7.1,9.7 -11.4,-3.7"/>
@@ -26,5 +26,8 @@
       </g>
     </g>
   </g>
-  <text x="22" y="31" text-anchor="middle" font-family="'Arial Narrow', Arial, sans-serif" font-weight="800" font-size="28" letter-spacing="-0.5" fill="#fff" stroke="#15171a" stroke-width="5" stroke-linejoin="round" paint-order="stroke fill">F5</text>
+  <g transform="translate(8 8) scale(0.82)" fill="#fff" stroke="#15171a" stroke-width="6" stroke-linejoin="miter" paint-order="stroke fill">
+    <path d="M2 0H14V7H7V13.5H12.5V20H7V34H0V2Z"/>
+    <path d="M22 0H39V7H29V12H35L39 16V30L35 34H22V27H32V19H22Z"/>
+  </g>
 </svg>
