@@ -43,17 +43,8 @@
 }
 
 .marca-sello {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  background: var(--lima);
-  color: var(--tinta);
-  font-weight: 800;
-  font-stretch: 75%;
-  font-size: 1.05rem;
-  letter-spacing: -0.02em;
+  width: 36px;
+  height: 36px;
 }
 
 .marca-nombre {

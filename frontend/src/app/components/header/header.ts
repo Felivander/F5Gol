@@ -3,10 +3,11 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { Icono } from '../icono/icono';
 import { Logo } from '../logo/logo';
+import { Sello } from '../sello/sello';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink, RouterLinkActive, Icono, Logo],
+  imports: [RouterLink, RouterLinkActive, Icono, Logo, Sello],
   templateUrl: './header.html',
   styleUrl: './header.css'
 })
