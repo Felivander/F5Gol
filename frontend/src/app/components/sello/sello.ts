@@ -4,7 +4,7 @@ let siguiente = 0;
 
 /**
  * Sello cuadrado de F5GOL: fondo lima, la pelota grande en la esquina de abajo a la derecha
- * (cortada por el borde) y "F5" en el medio, blanco con borde tinta como la pelota.
+ * (cortada por el borde) y "F5" arriba a la izquierda, blanco con borde tinta como la pelota.
  * El tamaño sale del ancho que le dé quien lo usa.
  */
 @Component({
