@@ -1,5 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Sello de F5GOL: el cuadrado lima con "F5" -->
+  <!-- Sello de F5GOL: fondo lima, la pelota cruzando en diagonal y "F5" con borde blanco -->
+  <defs><clipPath id="p"><circle r="36"/></clipPath></defs>
   <rect width="64" height="64" rx="14" fill="#cff04a"/>
-  <text x="32" y="45" text-anchor="middle" font-family="'Arial Narrow', 'Archivo', Arial, sans-serif" font-weight="800" font-size="36" letter-spacing="-1" fill="#15171a">F5</text>
+  <line x1="5" y1="59" x2="34" y2="30" stroke="#15171a" stroke-opacity="0.22" stroke-width="2" stroke-dasharray="3 3" stroke-linecap="round"/>
+  <g stroke="#15171a" stroke-opacity="0.3" stroke-width="2" stroke-linecap="round">
+    <line x1="22" y1="26" x2="31" y2="17"/>
+    <line x1="27" y1="35" x2="37" y2="25"/>
+  </g>
+  <g transform="translate(45.5 18.5) scale(0.36)">
+    <circle r="36" fill="#fff" stroke="#15171a" stroke-width="6"/>
+    <g clip-path="url(#p)" fill="#15171a">
+      <polygon points="0,-12 11.4,-3.7 7.1,9.7 -7.1,9.7 -11.4,-3.7"/>
+      <polygon points="0,-40 13,-30 6,-22 -6,-22 -13,-30"/>
+      <polygon points="36,-14 40,4 28,8 24,-4 26,-16"/>
+      <polygon points="24,30 12,40 4,30 12,20 24,22"/>
+      <polygon points="-24,30 -12,40 -4,30 -12,20 -24,22"/>
+      <polygon points="-36,-14 -40,4 -28,8 -24,-4 -26,-16"/>
+    </g>
+    <g stroke="#15171a" stroke-width="3" stroke-linecap="round">
+      <line x1="0" y1="-12" x2="0" y2="-22"/>
+      <line x1="11.4" y1="-3.7" x2="24" y2="-4"/>
+      <line x1="7.1" y1="9.7" x2="12" y2="20"/>
+      <line x1="-7.1" y1="9.7" x2="-12" y2="20"/>
+      <line x1="-11.4" y1="-3.7" x2="-24" y2="-4"/>
+    </g>
+  </g>
+  <text x="27" y="51" text-anchor="middle" font-family="'Arial Narrow', Arial, sans-serif" font-weight="800" font-size="31" letter-spacing="-0.5" fill="#15171a" stroke="#fff" stroke-width="4.5" stroke-linejoin="round" paint-order="stroke fill">F5</text>
 </svg>
