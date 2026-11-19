@@ -32,12 +32,7 @@
 .sello-texto {
   fill: #fff;
   stroke: var(--tinta);
-  stroke-width: 5;
-  stroke-linejoin: round;
+  stroke-width: 4;
+  stroke-linejoin: miter;
   paint-order: stroke fill;
-  font-family: var(--fuente);
-  font-size: 28px;
-  font-weight: 800;
-  font-stretch: 75%;
-  letter-spacing: -0.5px;
 }

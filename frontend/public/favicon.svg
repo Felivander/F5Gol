@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <!-- Sello de F5GOL: la pelota grande en la esquina de abajo a la derecha, cortada por el borde
-       del cuadrado, y "F5" arriba a la izquierda, blanco con borde tinta (los mismos colores que la pelota) -->
+       del cuadrado, y "F5" como número de camiseta arriba a la izquierda, blanco con borde tinta (los mismos colores que la pelota) -->
   <defs>
     <clipPath id="cuadrado"><rect width="64" height="64" rx="14"/></clipPath>
     <clipPath id="cuero"><circle r="36"/></clipPath>
@@ -26,5 +26,8 @@
       </g>
     </g>
   </g>
-  <text x="22" y="31" text-anchor="middle" font-family="'Arial Narrow', Arial, sans-serif" font-weight="800" font-size="28" letter-spacing="-0.5" fill="#fff" stroke="#15171a" stroke-width="5" stroke-linejoin="round" paint-order="stroke fill">F5</text>
+  <g transform="translate(5 5) scale(0.9)" fill="#fff" stroke="#15171a" stroke-width="4" stroke-linejoin="miter" paint-order="stroke fill">
+    <path d="M2 0H14V7H7V13.5H12.5V20H7V34H0V2Z"/>
+    <path d="M20 0H37V7H27V12H33L37 16V30L33 34H20V27H30V19H20Z"/>
+  </g>
 </svg>
