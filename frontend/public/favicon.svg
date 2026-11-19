@@ -7,7 +7,7 @@
   </defs>
   <g clip-path="url(#cuadrado)">
     <rect width="64" height="64" fill="#cff04a"/>
-    <g transform="translate(57 57) scale(0.95)">
+    <g transform="translate(57 60) scale(0.95)">
       <circle r="36" fill="#fff" stroke="#15171a" stroke-width="4"/>
       <g clip-path="url(#cuero)" fill="#15171a">
         <polygon points="0,-12 11.4,-3.7 7.1,9.7 -7.1,9.7 -11.4,-3.7"/>
