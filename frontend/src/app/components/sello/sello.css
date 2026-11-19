@@ -13,26 +13,10 @@
   fill: var(--lima);
 }
 
-.sello-recorrido {
-  stroke: var(--tinta);
-  stroke-opacity: 0.22;
-  stroke-width: 2;
-  stroke-dasharray: 3 3;
-  stroke-linecap: round;
-}
-
-/* Líneas de velocidad, paralelas al recorrido */
-.sello-estela {
-  stroke: var(--tinta);
-  stroke-opacity: 0.3;
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
 .sello-cuero {
   fill: #fff;
   stroke: var(--tinta);
-  stroke-width: 6;
+  stroke-width: 4;
 }
 
 .sello-gajos {
@@ -41,18 +25,18 @@
 
 .sello-costuras {
   stroke: var(--tinta);
-  stroke-width: 3;
+  stroke-width: 2.5;
   stroke-linecap: round;
 }
 
 .sello-texto {
-  fill: var(--tinta);
-  stroke: #fff;
-  stroke-width: 4.5;
+  fill: #fff;
+  stroke: var(--cancha-oscura);
+  stroke-width: 5;
   stroke-linejoin: round;
   paint-order: stroke fill;
   font-family: var(--fuente);
-  font-size: 31px;
+  font-size: 28px;
   font-weight: 800;
   font-stretch: 75%;
   letter-spacing: -0.5px;
