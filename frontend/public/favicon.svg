@@ -26,8 +26,8 @@
       </g>
     </g>
   </g>
-  <g transform="translate(8 8) scale(0.82)" fill="#fff" stroke="#15171a" stroke-width="4" stroke-linejoin="miter" paint-order="stroke fill">
+  <g transform="translate(8 8) scale(0.82)" fill="#fff" stroke="#15171a" stroke-width="6" stroke-linejoin="miter" paint-order="stroke fill">
     <path d="M2 0H14V7H7V13.5H12.5V20H7V34H0V2Z"/>
-    <path d="M20 0H37V7H27V12H33L37 16V30L33 34H20V27H30V19H20Z"/>
+    <path d="M22 0H39V7H29V12H35L39 16V30L35 34H22V27H32V19H22Z"/>
   </g>
 </svg>

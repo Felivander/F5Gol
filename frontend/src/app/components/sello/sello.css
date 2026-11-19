@@ -32,7 +32,7 @@
 .sello-texto {
   fill: #fff;
   stroke: var(--tinta);
-  stroke-width: 4;
+  stroke-width: 6;
   stroke-linejoin: miter;
   paint-order: stroke fill;
 }
